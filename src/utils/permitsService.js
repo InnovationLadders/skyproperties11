@@ -82,6 +82,33 @@ export const getUserPermits = async (userId) => {
     return permits;
   } catch (error) {
     console.error('Error getting user permits:', error);
+
+    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+      console.warn('Index missing, attempting fallback query without orderBy');
+      try {
+        const fallbackQuery = query(
+          collection(db, 'permits'),
+          where('userId', '==', userId)
+        );
+        const querySnapshot = await getDocs(fallbackQuery);
+        const permits = [];
+        querySnapshot.forEach((doc) => {
+          permits.push({ id: doc.id, ...doc.data() });
+        });
+
+        permits.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return bTime - aTime;
+        });
+
+        return permits;
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+        throw fallbackError;
+      }
+    }
+
     throw error;
   }
 };
@@ -121,6 +148,54 @@ export const getAllPermits = async (filters = {}) => {
     return permits;
   } catch (error) {
     console.error('Error getting all permits:', error);
+
+    if (error.code === 'failed-precondition' && error.message.includes('index')) {
+      console.warn('Index missing, attempting fallback query without orderBy');
+      try {
+        const constraints = [];
+
+        if (filters.status) {
+          constraints.push(where('status', '==', filters.status));
+        }
+
+        if (filters.userId) {
+          constraints.push(where('userId', '==', filters.userId));
+        }
+
+        if (filters.propertyId) {
+          constraints.push(where('propertyId', '==', filters.propertyId));
+        }
+
+        if (filters.userRole) {
+          constraints.push(where('userRole', '==', filters.userRole));
+        }
+
+        let fallbackQuery;
+        if (constraints.length > 0) {
+          fallbackQuery = query(collection(db, 'permits'), ...constraints);
+        } else {
+          fallbackQuery = collection(db, 'permits');
+        }
+
+        const querySnapshot = await getDocs(fallbackQuery);
+        const permits = [];
+        querySnapshot.forEach((doc) => {
+          permits.push({ id: doc.id, ...doc.data() });
+        });
+
+        permits.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return bTime - aTime;
+        });
+
+        return permits;
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+        throw fallbackError;
+      }
+    }
+
     throw error;
   }
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Plus, Filter } from 'lucide-react';
+import { FileText, Plus, Filter, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
@@ -17,6 +17,7 @@ const MyPermitsPage = () => {
   const [permits, setPermits] = useState([]);
   const [filteredPermits, setFilteredPermits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -33,10 +34,12 @@ const MyPermitsPage = () => {
   const fetchPermits = async () => {
     try {
       setLoading(true);
+      setError(null);
       const fetchedPermits = await getUserPermits(userProfile.uid);
       setPermits(fetchedPermits);
     } catch (error) {
       console.error('Error fetching permits:', error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -104,8 +107,48 @@ const MyPermitsPage = () => {
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-600">{t('common.loading')}</p>
+          <div className="animate-pulse">
+            <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-600">{t('permit.loadingPermits')}</p>
+          </div>
         </div>
+      ) : error ? (
+        <Card>
+          <div className="p-12 text-center">
+            <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {t('permit.errorLoadingPermits')}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {error.code === 'failed-precondition' && error.message.includes('index')
+                ? t('permit.indexMissingMessage')
+                : t('permit.errorTryAgain')}
+            </p>
+            {error.code === 'failed-precondition' && error.message.includes('index') && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 text-right">
+                <p className="text-sm text-yellow-800 mb-2">
+                  <strong>{t('permit.indexSetupRequired')}</strong>
+                </p>
+                <p className="text-xs text-yellow-700 mb-3">
+                  {t('permit.indexInstructions')}
+                </p>
+                {error.message.match(/https:\/\/[^\s]+/) && (
+                  <a
+                    href={error.message.match(/https:\/\/[^\s]+/)[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {t('permit.createIndexLink')}
+                  </a>
+                )}
+              </div>
+            )}
+            <Button onClick={fetchPermits} variant="outline">
+              {t('common.retry')}
+            </Button>
+          </div>
+        </Card>
       ) : filteredPermits.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPermits.map((permit) => (

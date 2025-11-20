@@ -12,6 +12,7 @@
     "loading": "جارٍ التحميل...",
     "error": "خطأ",
     "success": "نجح",
+    "retry": "إعادة المحاولة",
     "browseAsGuest": "تصفح كزائر",
     "language": "اللغة",
     "darkMode": "الوضع الداكن",
@@ -965,7 +966,14 @@
     "backToPermits": "العودة إلى التصاريح",
     "submitRequest": "تقديم الطلب",
     "fetchPropertiesError": "فشل تحميل العقارات",
-    "fetchUnitsError": "فشل تحميل الوحدات"
+    "fetchUnitsError": "فشل تحميل الوحدات",
+    "loadingPermits": "جارٍ تحميل التصاريح...",
+    "errorLoadingPermits": "خطأ في تحميل التصاريح",
+    "errorTryAgain": "حدث خطأ في تحميل التصاريح. يرجى المحاولة لاحقاً.",
+    "indexMissingMessage": "يتطلب النظام إنشاء فهرس في قاعدة البيانات. يمكنك استخدام النظام الآن لكن الأداء قد يكون أبطأ قليلاً.",
+    "indexSetupRequired": "يتطلب إعداد الفهرس",
+    "indexInstructions": "لتحسين الأداء، يرجى إنشاء فهرس مركب في Firebase Console على مجموعة permits: userId (تصاعدي) و createdAt (تنازلي)",
+    "createIndexLink": "انقر هنا لإنشاء الفهرس"
   },
   "contactRequest": {
     "requestContact": "طلب اتصال",

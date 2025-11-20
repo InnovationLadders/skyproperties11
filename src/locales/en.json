@@ -12,6 +12,7 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "retry": "Retry",
     "browseAsGuest": "Browse as Guest",
     "language": "Language",
     "darkMode": "Dark Mode",
@@ -964,7 +965,14 @@
     "backToPermits": "Back to Permits",
     "submitRequest": "Submit Request",
     "fetchPropertiesError": "Failed to load properties",
-    "fetchUnitsError": "Failed to load units"
+    "fetchUnitsError": "Failed to load units",
+    "loadingPermits": "Loading permits...",
+    "errorLoadingPermits": "Error Loading Permits",
+    "errorTryAgain": "An error occurred while loading permits. Please try again later.",
+    "indexMissingMessage": "The system requires a database index to be created. You can still use the system now, but performance may be slightly slower.",
+    "indexSetupRequired": "Index Setup Required",
+    "indexInstructions": "To improve performance, please create a composite index in Firebase Console on the permits collection: userId (Ascending) and createdAt (Descending)",
+    "createIndexLink": "Click here to create the index"
   },
   "contactRequest": {
     "requestContact": "Request Contact",
