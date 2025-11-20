@@ -271,6 +271,12 @@
     "unknownProperty": "عقار غير معروف",
     "category": "الفئة",
     "created": "تاريخ الإنشاء",
+    "stats": {
+      "total": "إجمالي التذاكر",
+      "open": "تذاكر مفتوحة",
+      "inProgress": "قيد التنفيذ",
+      "completed": "مكتملة"
+    },
     "backToTickets": "العودة إلى التذاكر",
     "createMaintenance": "إنشاء تذكرة صيانة",
     "briefDescription": "وصف مختصر للمشكلة",

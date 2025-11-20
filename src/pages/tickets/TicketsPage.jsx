@@ -10,6 +10,7 @@ import { Input } from '../../components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import { TICKET_STATUS, USER_ROLES } from '../../utils/constants';
+import { TicketStats } from '../../components/tickets/TicketStats';
 
 export const TicketsPage = () => {
   const { t } = useTranslation();
@@ -131,6 +132,8 @@ export const TicketsPage = () => {
             {t('ticket.createTicket')}
           </Button>
         </div>
+
+        {!loading && tickets.length > 0 && <TicketStats tickets={tickets} />}
 
         <div className="mb-6 flex gap-4 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">

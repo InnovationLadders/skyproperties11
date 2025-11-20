@@ -270,6 +270,12 @@
     "unknownProperty": "Unknown Property",
     "category": "Category",
     "created": "Created",
+    "stats": {
+      "total": "Total Tickets",
+      "open": "Open Tickets",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
     "backToTickets": "Back to Tickets",
     "createMaintenance": "Create Maintenance Ticket",
     "briefDescription": "Brief description of the issue",
