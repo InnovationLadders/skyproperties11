@@ -35,6 +35,8 @@ import MyPermitsPage from './pages/permits/MyPermitsPage';
 import RequestPermitPage from './pages/permits/RequestPermitPage';
 import ManagePermitsPage from './pages/permits/ManagePermitsPage';
 import PermitDetailPage from './pages/permits/PermitDetailPage';
+import PublicDirectoryPage from './pages/public/PublicDirectoryPage';
+import PublicUnitDetailPage from './pages/public/PublicUnitDetailPage';
 import './lib/i18n';
 
 function App() {
@@ -48,6 +50,9 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+              <Route path="/public/directory" element={<PublicDirectoryPage />} />
+              <Route path="/public/directory/unit/:unitId" element={<PublicUnitDetailPage />} />
 
               <Route
                 path="/dashboard"

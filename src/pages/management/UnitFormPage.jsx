@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { ArrowLeft, Save, Calculator, Wand2, Images } from 'lucide-react';
-import { UNIT_STATUS, USER_ROLES, UNIT_CATEGORY, FACILITY_TYPES } from '../../utils/constants';
+import { UNIT_STATUS, USER_ROLES, UNIT_CATEGORY, FACILITY_TYPES, BUSINESS_CATEGORIES } from '../../utils/constants';
 import { CoordinatePicker3D } from '../../components/property/CoordinatePicker3D';
 import { coordinateCalculator } from '../../utils/coordinateCalculator';
 import { MediaUploader } from '../../components/property/MediaUploader';
@@ -45,6 +45,13 @@ export const UnitFormPage = () => {
     media: [],
     category: UNIT_CATEGORY.NORMAL,
     facilityType: '',
+    isPublicDirectory: false,
+    businessName: '',
+    businessDescription: '',
+    businessCategory: '',
+    contactPhone: '',
+    contactEmail: '',
+    workingHours: '',
   });
   const [error, setError] = useState('');
   const [coordinatesEnabled, setCoordinatesEnabled] = useState(false);
@@ -735,6 +742,115 @@ export const UnitFormPage = () => {
                   )}
                 </div>
               )}
+
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-semibold">{t('publicDirectory.settings')}</Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t('publicDirectory.settingsDescription')}
+                    </p>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="isPublicDirectory"
+                      checked={formData.isPublicDirectory}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isPublicDirectory: e.target.checked }))}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <span className="text-sm">{t('publicDirectory.enableInDirectory')}</span>
+                  </label>
+                </div>
+
+                {formData.isPublicDirectory && (
+                  <div className="space-y-4 bg-blue-50 p-4 rounded-lg">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessName">{t('publicDirectory.businessName')} *</Label>
+                      <Input
+                        id="businessName"
+                        name="businessName"
+                        value={formData.businessName}
+                        onChange={handleChange}
+                        required={formData.isPublicDirectory}
+                        placeholder={t('publicDirectory.businessNamePlaceholder')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="businessCategory">{t('publicDirectory.businessCategory')} *</Label>
+                      <select
+                        id="businessCategory"
+                        name="businessCategory"
+                        value={formData.businessCategory}
+                        onChange={handleChange}
+                        required={formData.isPublicDirectory}
+                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                      >
+                        <option value="">{t('publicDirectory.selectCategory')}</option>
+                        {Object.values(BUSINESS_CATEGORIES).map(category => (
+                          <option key={category} value={category}>
+                            {t(`businessCategories.${category}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="businessDescription">{t('publicDirectory.businessDescription')}</Label>
+                      <textarea
+                        id="businessDescription"
+                        name="businessDescription"
+                        value={formData.businessDescription}
+                        onChange={handleChange}
+                        className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-sm"
+                        placeholder={t('publicDirectory.businessDescriptionPlaceholder')}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="contactPhone">{t('publicDirectory.contactPhone')}</Label>
+                        <Input
+                          id="contactPhone"
+                          name="contactPhone"
+                          type="tel"
+                          value={formData.contactPhone}
+                          onChange={handleChange}
+                          placeholder="+966XXXXXXXXX"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contactEmail">{t('publicDirectory.contactEmail')}</Label>
+                        <Input
+                          id="contactEmail"
+                          name="contactEmail"
+                          type="email"
+                          value={formData.contactEmail}
+                          onChange={handleChange}
+                          placeholder="contact@business.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="workingHours">{t('publicDirectory.workingHours')}</Label>
+                      <Input
+                        id="workingHours"
+                        name="workingHours"
+                        value={formData.workingHours}
+                        onChange={handleChange}
+                        placeholder={t('publicDirectory.workingHoursPlaceholder')}
+                      />
+                    </div>
+
+                    <div className="p-3 bg-blue-100 rounded-md text-sm text-blue-800">
+                      {t('publicDirectory.previewNote')}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {!isEditMode && (
                 <div className="p-4 bg-blue-50 rounded-md text-sm text-blue-800">

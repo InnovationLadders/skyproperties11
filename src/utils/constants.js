@@ -136,3 +136,21 @@ export const CONTACT_REQUEST_STATUS = {
   RESPONDED: 'responded',
   CLOSED: 'closed',
 };
+
+export const BUSINESS_CATEGORIES = {
+  CLINIC: 'clinic',
+  OFFICE: 'office',
+  RESTAURANT: 'restaurant',
+  CAFE: 'cafe',
+  SHOP: 'shop',
+  GYM: 'gym',
+  SALON: 'salon',
+  PHARMACY: 'pharmacy',
+  BANK: 'bank',
+  EXCHANGE: 'exchange',
+  TRAVEL_AGENCY: 'travelAgency',
+  REAL_ESTATE: 'realEstate',
+  EDUCATION: 'education',
+  ENTERTAINMENT: 'entertainment',
+  OTHER: 'other',
+};

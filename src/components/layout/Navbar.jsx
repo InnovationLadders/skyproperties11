@@ -69,6 +69,9 @@ export const Navbar = () => {
             <Link to="/" className="text-gray-700 hover:text-primary">
               {t('landing.featuredProperties')}
             </Link>
+            <Link to="/public/directory" className="text-gray-700 hover:text-primary">
+              {t('publicDirectory.title')}
+            </Link>
 
             {currentUser ? (
               <>
