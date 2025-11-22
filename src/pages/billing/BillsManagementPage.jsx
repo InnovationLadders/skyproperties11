@@ -11,11 +11,13 @@ import { BillingStats } from '../../components/billing/BillingStats';
 import { useAuth } from '../../contexts/AuthContext';
 import { getAllBills, getBillingStatistics } from '../../utils/billingService';
 import { BILL_STATUS, BILL_TYPES, USER_ROLES } from '../../utils/constants';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export const BillsManagementPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, currentUser } = useAuth();
   const [bills, setBills] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,12 +32,34 @@ export const BillsManagementPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [billsData, statsData] = await Promise.all([
-        getAllBills(),
-        getBillingStatistics(),
-      ]);
-      setBills(billsData);
-      setStats(statsData);
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        const propertiesQuery = query(
+          collection(db, 'properties'),
+          where('managerId', '==', currentUser.uid)
+        );
+        const propertiesSnapshot = await getDocs(propertiesQuery);
+        const managedPropertyIds = propertiesSnapshot.docs.map(doc => doc.id);
+
+        const unitsSnapshot = await getDocs(collection(db, 'units'));
+        const managedUnitIds = unitsSnapshot.docs
+          .filter(doc => managedPropertyIds.includes(doc.data().propertyId))
+          .map(doc => doc.id);
+
+        const allBills = await getAllBills();
+        const filteredBills = allBills.filter(bill => managedUnitIds.includes(bill.unitId));
+
+        const statsData = await getBillingStatistics(null, managedPropertyIds);
+
+        setBills(filteredBills);
+        setStats(statsData);
+      } else {
+        const [billsData, statsData] = await Promise.all([
+          getAllBills(),
+          getBillingStatistics(),
+        ]);
+        setBills(billsData);
+        setStats(statsData);
+      }
     } catch (error) {
       console.error('Error fetching bills:', error);
     } finally {

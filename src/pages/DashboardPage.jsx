@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { BillingStats } from '../components/billing/BillingStats';
 import { USER_ROLES } from '../utils/constants';
 import { getBillingStatistics } from '../utils/billingService';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export const DashboardPage = () => {
   const { userProfile, currentUser } = useAuth();
@@ -24,8 +26,18 @@ export const DashboardPage = () => {
   const fetchBillingStats = async () => {
     try {
       const role = userProfile?.role;
-      if (role === USER_ROLES.ADMIN || role === USER_ROLES.PROPERTY_MANAGER) {
+      if (role === USER_ROLES.ADMIN) {
         const stats = await getBillingStatistics();
+        setBillingStats(stats);
+      } else if (role === USER_ROLES.PROPERTY_MANAGER) {
+        const propertiesQuery = query(
+          collection(db, 'properties'),
+          where('managerId', '==', currentUser.uid)
+        );
+        const propertiesSnapshot = await getDocs(propertiesQuery);
+        const managedPropertyIds = propertiesSnapshot.docs.map(doc => doc.id);
+
+        const stats = await getBillingStatistics(null, managedPropertyIds);
         setBillingStats(stats);
       } else {
         const stats = await getBillingStatistics(currentUser.uid);

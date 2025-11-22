@@ -201,7 +201,7 @@ export const checkOverdueBills = async () => {
   }
 };
 
-export const getBillingStatistics = async (userId = null) => {
+export const getBillingStatistics = async (userId = null, managedPropertyIds = null) => {
   try {
     let billsQuery = collection(db, 'bills');
 
@@ -210,7 +210,16 @@ export const getBillingStatistics = async (userId = null) => {
     }
 
     const billsSnapshot = await getDocs(billsQuery);
-    const bills = billsSnapshot.docs.map((doc) => doc.data());
+    let bills = billsSnapshot.docs.map((doc) => doc.data());
+
+    if (managedPropertyIds && managedPropertyIds.length > 0) {
+      const unitsSnapshot = await getDocs(collection(db, 'units'));
+      const managedUnitIds = unitsSnapshot.docs
+        .filter(doc => managedPropertyIds.includes(doc.data().propertyId))
+        .map(doc => doc.id);
+
+      bills = bills.filter(bill => managedUnitIds.includes(bill.unitId));
+    }
 
     const stats = {
       totalBills: bills.length,

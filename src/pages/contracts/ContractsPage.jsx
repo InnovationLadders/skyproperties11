@@ -28,6 +28,7 @@ export const ContractsPage = () => {
     setLoading(true);
     try {
       let contractsQuery = query(collection(db, 'contracts'), orderBy('createdAt', 'desc'));
+      let propertiesQuery = collection(db, 'properties');
 
       if (userProfile?.role === USER_ROLES.TENANT) {
         contractsQuery = query(
@@ -35,22 +36,37 @@ export const ContractsPage = () => {
           where('tenantId', '==', currentUser.uid),
           orderBy('createdAt', 'desc')
         );
+      } else if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesQuery = query(
+          collection(db, 'properties'),
+          where('managerId', '==', currentUser.uid)
+        );
       }
 
       const [contractsSnapshot, propertiesSnapshot] = await Promise.all([
         getDocs(contractsQuery),
-        getDocs(collection(db, 'properties')),
+        getDocs(propertiesQuery),
       ]);
 
-      const contractsData = contractsSnapshot.docs.map((doc) => ({
+      const propertiesData = {};
+      const managedPropertyIds = [];
+      propertiesSnapshot.docs.forEach((doc) => {
+        propertiesData[doc.id] = doc.data();
+        if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+          managedPropertyIds.push(doc.id);
+        }
+      });
+
+      let contractsData = contractsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      const propertiesData = {};
-      propertiesSnapshot.docs.forEach((doc) => {
-        propertiesData[doc.id] = doc.data();
-      });
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        contractsData = contractsData.filter(contract =>
+          managedPropertyIds.includes(contract.propertyId)
+        );
+      }
 
       setContracts(contractsData);
       setProperties(propertiesData);

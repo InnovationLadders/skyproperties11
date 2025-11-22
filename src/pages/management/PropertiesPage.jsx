@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Plus, Building2, Edit, Trash2, Search, Users } from 'lucide-react';
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -14,7 +14,7 @@ import { USER_ROLES } from '../../utils/constants';
 export const PropertiesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { hasRole, userProfile } = useAuth();
+  const { hasRole, userProfile, currentUser } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,7 +27,14 @@ export const PropertiesPage = () => {
     setLoading(true);
     try {
       const propertiesRef = collection(db, 'properties');
-      const q = query(propertiesRef, orderBy('createdAt', 'desc'));
+      let q;
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        q = query(propertiesRef, where('managerId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+      } else {
+        q = query(propertiesRef, orderBy('createdAt', 'desc'));
+      }
+
       const snapshot = await getDocs(q);
 
       const unitsRef = collection(db, 'units');

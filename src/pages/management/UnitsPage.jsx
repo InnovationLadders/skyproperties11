@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Plus, Building2, Edit, Trash2, Search, Filter, Eye, Image as ImageIcon, Video, Download, Upload, ChevronDown, ChevronRight } from 'lucide-react';
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/Card';
-import { UNIT_STATUS, UNIT_CATEGORY, FACILITY_TYPES } from '../../utils/constants';
+import { UNIT_STATUS, UNIT_CATEGORY, FACILITY_TYPES, USER_ROLES } from '../../utils/constants';
 import { exportUnitsData, importUnitsData, parseImportFile } from '../../utils/unitsImportExport';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const UnitsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { userProfile, currentUser } = useAuth();
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState({});
   const [users, setUsers] = useState({});
@@ -36,22 +38,59 @@ export const UnitsPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [unitsSnapshot, propertiesSnapshot, usersSnapshot] = await Promise.all([
-        getDocs(query(collection(db, 'units'), orderBy('createdAt', 'desc'))),
-        getDocs(collection(db, 'properties')),
-        getDocs(collection(db, 'users')),
-      ]);
+      let propertiesQuery;
+      const propertiesRef = collection(db, 'properties');
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesQuery = query(propertiesRef, where('managerId', '==', currentUser.uid));
+      } else {
+        propertiesQuery = propertiesRef;
+      }
+
+      const propertiesSnapshot = await getDocs(propertiesQuery);
+
+      const propertiesData = {};
+      const managedPropertyIds = [];
+      propertiesSnapshot.docs.forEach((doc) => {
+        propertiesData[doc.id] = doc.data();
+        managedPropertyIds.push(doc.id);
+      });
+
+      let unitsSnapshot;
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER && managedPropertyIds.length > 0) {
+        const unitsQuery = query(
+          collection(db, 'units'),
+          where('propertyId', 'in', managedPropertyIds.slice(0, 10)),
+          orderBy('createdAt', 'desc')
+        );
+        unitsSnapshot = await getDocs(unitsQuery);
+
+        if (managedPropertyIds.length > 10) {
+          for (let i = 10; i < managedPropertyIds.length; i += 10) {
+            const batch = managedPropertyIds.slice(i, i + 10);
+            const batchQuery = query(
+              collection(db, 'units'),
+              where('propertyId', 'in', batch),
+              orderBy('createdAt', 'desc')
+            );
+            const batchSnapshot = await getDocs(batchQuery);
+            unitsSnapshot = {
+              docs: [...unitsSnapshot.docs, ...batchSnapshot.docs]
+            };
+          }
+        }
+      } else if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        unitsSnapshot = { docs: [] };
+      } else {
+        unitsSnapshot = await getDocs(query(collection(db, 'units'), orderBy('createdAt', 'desc')));
+      }
 
       const unitsData = unitsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      const propertiesData = {};
-      propertiesSnapshot.docs.forEach((doc) => {
-        propertiesData[doc.id] = doc.data();
-      });
-
+      const usersSnapshot = await getDocs(collection(db, 'users'));
       const usersData = {};
       usersSnapshot.docs.forEach((doc) => {
         usersData[doc.id] = doc.data();

@@ -33,43 +33,73 @@ export const TicketsPage = () => {
     setLoading(true);
     try {
       let ticketsQuery;
+      let propertiesQuery;
 
-      if (userProfile.role === USER_ROLES.TENANT) {
-        ticketsQuery = query(
+      if (userProfile.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesQuery = query(
+          collection(db, 'properties'),
+          where('managerId', '==', currentUser.uid)
+        );
+        const propertiesSnapshot = await getDocs(propertiesQuery);
+        const managedPropertyIds = propertiesSnapshot.docs.map(doc => doc.id);
+
+        const propertiesData = {};
+        propertiesSnapshot.docs.forEach((doc) => {
+          propertiesData[doc.id] = doc.data();
+        });
+
+        const allTicketsQuery = query(
           collection(db, 'tickets'),
-          where('createdBy', '==', currentUser.uid),
           orderBy('createdAt', 'desc')
         );
-      } else if (userProfile.role === USER_ROLES.SERVICE_PROVIDER) {
-        ticketsQuery = query(
-          collection(db, 'tickets'),
-          where('assignedTo', '==', currentUser.uid),
-          orderBy('createdAt', 'desc')
-        );
+        const ticketsSnapshot = await getDocs(allTicketsQuery);
+        const ticketsData = ticketsSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter(ticket => managedPropertyIds.includes(ticket.propertyId));
+
+        setTickets(ticketsData);
+        setProperties(propertiesData);
       } else {
-        ticketsQuery = query(
-          collection(db, 'tickets'),
-          orderBy('createdAt', 'desc')
-        );
+        if (userProfile.role === USER_ROLES.TENANT) {
+          ticketsQuery = query(
+            collection(db, 'tickets'),
+            where('createdBy', '==', currentUser.uid),
+            orderBy('createdAt', 'desc')
+          );
+        } else if (userProfile.role === USER_ROLES.SERVICE_PROVIDER) {
+          ticketsQuery = query(
+            collection(db, 'tickets'),
+            where('assignedTo', '==', currentUser.uid),
+            orderBy('createdAt', 'desc')
+          );
+        } else {
+          ticketsQuery = query(
+            collection(db, 'tickets'),
+            orderBy('createdAt', 'desc')
+          );
+        }
+
+        const [ticketsSnapshot, propertiesSnapshot] = await Promise.all([
+          getDocs(ticketsQuery),
+          getDocs(collection(db, 'properties')),
+        ]);
+
+        const ticketsData = ticketsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const propertiesData = {};
+        propertiesSnapshot.docs.forEach((doc) => {
+          propertiesData[doc.id] = doc.data();
+        });
+
+        setTickets(ticketsData);
+        setProperties(propertiesData);
       }
-
-      const [ticketsSnapshot, propertiesSnapshot] = await Promise.all([
-        getDocs(ticketsQuery),
-        getDocs(collection(db, 'properties')),
-      ]);
-
-      const ticketsData = ticketsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const propertiesData = {};
-      propertiesSnapshot.docs.forEach((doc) => {
-        propertiesData[doc.id] = doc.data();
-      });
-
-      setTickets(ticketsData);
-      setProperties(propertiesData);
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
