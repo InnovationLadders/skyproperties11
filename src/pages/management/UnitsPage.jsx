@@ -60,8 +60,7 @@ export const UnitsPage = () => {
       if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER && managedPropertyIds.length > 0) {
         const unitsQuery = query(
           collection(db, 'units'),
-          where('propertyId', 'in', managedPropertyIds.slice(0, 10)),
-          orderBy('createdAt', 'desc')
+          where('propertyId', 'in', managedPropertyIds.slice(0, 10))
         );
         unitsSnapshot = await getDocs(unitsQuery);
 
@@ -70,8 +69,7 @@ export const UnitsPage = () => {
             const batch = managedPropertyIds.slice(i, i + 10);
             const batchQuery = query(
               collection(db, 'units'),
-              where('propertyId', 'in', batch),
-              orderBy('createdAt', 'desc')
+              where('propertyId', 'in', batch)
             );
             const batchSnapshot = await getDocs(batchQuery);
             unitsSnapshot = {
@@ -85,10 +83,18 @@ export const UnitsPage = () => {
         unitsSnapshot = await getDocs(query(collection(db, 'units'), orderBy('createdAt', 'desc')));
       }
 
-      const unitsData = unitsSnapshot.docs.map((doc) => ({
+      let unitsData = unitsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        unitsData.sort((a, b) => {
+          const aDate = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const bDate = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return bDate - aDate;
+        });
+      }
 
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const usersData = {};
