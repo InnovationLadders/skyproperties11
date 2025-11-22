@@ -9,11 +9,12 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { USER_ROLES } from '../../utils/constants';
 
 export const PropertiesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { hasRole } = useAuth();
+  const { hasRole, userProfile } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
