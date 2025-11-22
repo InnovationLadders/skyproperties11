@@ -207,10 +207,22 @@ const UsersPage = () => {
               </p>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-600 dark:text-gray-400">{t('user.roles.propertyManager')}</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                {getRoleCount(USER_ROLES.PROPERTY_MANAGER)}
-              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('user.roles.propertyManager')}</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+                    {getRoleCount(USER_ROLES.PROPERTY_MANAGER)}
+                  </p>
+                </div>
+                {userProfile?.role === USER_ROLES.ADMIN && getRoleCount(USER_ROLES.PROPERTY_MANAGER) > 0 && (
+                  <button
+                    onClick={() => navigate('/properties/assign-managers')}
+                    className="text-xs text-blue-600 hover:text-blue-700 underline"
+                  >
+                    Assign
+                  </button>
+                )}
+              </div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-600 dark:text-gray-400">{t('user.roles.unitOwner')}</p>

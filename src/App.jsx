@@ -11,6 +11,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { PropertyHomePage } from './pages/property/PropertyHomePage';
 import { PropertiesPage } from './pages/management/PropertiesPage';
 import { PropertyFormPage } from './pages/management/PropertyFormPage';
+import { PropertyManagerAssignment } from './pages/management/PropertyManagerAssignment';
 import { UnitsPage } from './pages/management/UnitsPage';
 import { UnitFormPage } from './pages/management/UnitFormPage';
 import { CoordinateVisualizerPage } from './pages/management/CoordinateVisualizerPage';
@@ -86,6 +87,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PropertyFormPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/properties/assign-managers"
+                element={
+                  <ProtectedRoute>
+                    <PropertyManagerAssignment />
                   </ProtectedRoute>
                 }
               />

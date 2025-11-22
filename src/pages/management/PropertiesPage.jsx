@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Plus, Building2, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Search, Users } from 'lucide-react';
 import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
@@ -93,10 +93,18 @@ export const PropertiesPage = () => {
               {t('property.manageAll')}
             </p>
           </div>
-          <Button onClick={() => navigate('/properties/create')}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('property.addProperty')}
-          </Button>
+          <div className="flex gap-2">
+            {userProfile?.role === USER_ROLES.ADMIN && (
+              <Button variant="outline" onClick={() => navigate('/properties/assign-managers')}>
+                <Users className="h-4 w-4 mr-2" />
+                Assign Managers
+              </Button>
+            )}
+            <Button onClick={() => navigate('/properties/create')}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t('property.addProperty')}
+            </Button>
+          </div>
         </div>
 
         <div className="mb-6">
