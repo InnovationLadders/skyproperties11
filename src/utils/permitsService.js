@@ -71,44 +71,23 @@ export const getUserPermits = async (userId) => {
   try {
     const q = query(
       collection(db, 'permits'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
     const querySnapshot = await getDocs(q);
     const permits = [];
     querySnapshot.forEach((doc) => {
       permits.push({ id: doc.id, ...doc.data() });
     });
+
+    permits.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
+
     return permits;
   } catch (error) {
     console.error('Error getting user permits:', error);
-
-    if (error.code === 'failed-precondition' && error.message.includes('index')) {
-      console.warn('Index missing, attempting fallback query without orderBy');
-      try {
-        const fallbackQuery = query(
-          collection(db, 'permits'),
-          where('userId', '==', userId)
-        );
-        const querySnapshot = await getDocs(fallbackQuery);
-        const permits = [];
-        querySnapshot.forEach((doc) => {
-          permits.push({ id: doc.id, ...doc.data() });
-        });
-
-        permits.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-          const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-          return bTime - aTime;
-        });
-
-        return permits;
-      } catch (fallbackError) {
-        console.error('Fallback query also failed:', fallbackError);
-        throw fallbackError;
-      }
-    }
-
     throw error;
   }
 };
