@@ -43,7 +43,13 @@ const ManagePermitsPage = () => {
   const fetchPermits = async () => {
     try {
       setLoading(true);
-      const fetchedPermits = await getAllPermits();
+      const filters = {};
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        filters.managerId = userProfile.uid;
+      }
+
+      const fetchedPermits = await getAllPermits(filters);
       setPermits(fetchedPermits);
     } catch (error) {
       console.error('Error fetching permits:', error);
