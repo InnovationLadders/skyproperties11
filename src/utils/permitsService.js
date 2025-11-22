@@ -94,15 +94,19 @@ export const getUserPermits = async (userId) => {
 
 export const getAllPermits = async (filters = {}) => {
   try {
+    console.log('[getAllPermits] Called with filters:', filters);
     let managedPropertyIds = [];
 
     if (filters.managerId) {
+      console.log('[getAllPermits] Fetching properties for managerId:', filters.managerId);
       const propertiesSnapshot = await getDocs(
         query(collection(db, 'properties'), where('managerId', '==', filters.managerId))
       );
       managedPropertyIds = propertiesSnapshot.docs.map((doc) => doc.id);
+      console.log('[getAllPermits] Found managed properties:', managedPropertyIds);
 
       if (managedPropertyIds.length === 0) {
+        console.log('[getAllPermits] No properties found for this manager. Returning empty array.');
         return [];
       }
     }
@@ -110,8 +114,10 @@ export const getAllPermits = async (filters = {}) => {
     let permits = [];
 
     if (filters.managerId && managedPropertyIds.length > 0) {
+      console.log('[getAllPermits] Querying permits for managed properties');
       for (let i = 0; i < managedPropertyIds.length; i += 10) {
         const batch = managedPropertyIds.slice(i, i + 10);
+        console.log('[getAllPermits] Processing batch:', batch);
         const constraints = [where('propertyId', 'in', batch)];
 
         if (filters.status) {
@@ -128,8 +134,16 @@ export const getAllPermits = async (filters = {}) => {
 
         const q = query(collection(db, 'permits'), ...constraints);
         const querySnapshot = await getDocs(q);
+        console.log('[getAllPermits] Batch returned', querySnapshot.size, 'permits');
         querySnapshot.forEach((doc) => {
-          permits.push({ id: doc.id, ...doc.data() });
+          const permitData = { id: doc.id, ...doc.data() };
+          console.log('[getAllPermits] Found permit:', {
+            id: permitData.id,
+            propertyId: permitData.propertyId,
+            status: permitData.status,
+            userName: permitData.userName
+          });
+          permits.push(permitData);
         });
       }
 
@@ -138,7 +152,9 @@ export const getAllPermits = async (filters = {}) => {
         const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
         return bTime - aTime;
       });
+      console.log('[getAllPermits] Total permits found for manager:', permits.length);
     } else {
+      console.log('[getAllPermits] Querying all permits (no manager filter)');
       const constraints = [];
 
       if (filters.status) {
@@ -165,6 +181,7 @@ export const getAllPermits = async (filters = {}) => {
       }
 
       const querySnapshot = await getDocs(q);
+      console.log('[getAllPermits] Query returned', querySnapshot.size, 'permits');
       querySnapshot.forEach((doc) => {
         permits.push({ id: doc.id, ...doc.data() });
       });
@@ -176,9 +193,10 @@ export const getAllPermits = async (filters = {}) => {
       });
     }
 
+    console.log('[getAllPermits] Returning', permits.length, 'permits');
     return permits;
   } catch (error) {
-    console.error('Error getting all permits:', error);
+    console.error('[getAllPermits] Error:', error);
     throw error;
   }
 };
