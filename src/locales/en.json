@@ -51,7 +51,9 @@
     "smartMarketplace": "Smart Marketplace",
     "smartMarketplaceDesc": "Find your perfect property with advanced search and 3D visualization",
     "securePayments": "Secure Payments",
-    "securePaymentsDesc": "Integrated payment system for rent, fees, and property transactions"
+    "securePaymentsDesc": "Integrated payment system for rent, fees, and property transactions",
+    "viewUnitsDirectory": "View Units Directory",
+    "clickToViewUnits": "Click to view units"
   },
   "auth": {
     "email": "Email",

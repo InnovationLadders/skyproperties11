@@ -180,26 +180,34 @@ export const LandingPage = () => {
                         onMouseLeave={() => setHoveredPropertyId(null)}
                       >
                         <Card
-                          className={`overflow-hidden transition-all cursor-pointer ${
+                          className={`overflow-hidden transition-all ${
                             hoveredPropertyId === property.id || selectedPropertyId === property.id
                               ? 'shadow-xl ring-2 ring-primary'
                               : 'hover:shadow-lg'
                           }`}
-                          onClick={() => {
-                            setSelectedPropertyId(property.id);
-                            navigate(`/property/${property.id}`);
-                          }}
                         >
-                          <div className="h-48 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center overflow-hidden">
+                          <div
+                            className="h-48 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center overflow-hidden cursor-pointer group relative"
+                            onClick={() => {
+                              setSelectedPropertyId(property.id);
+                              navigate(`/public/directory?propertyId=${property.id}`);
+                            }}
+                            title={t('landing.viewUnitsDirectory')}
+                          >
                             {property.imageUrl ? (
                               <img
                                 src={property.imageUrl}
                                 alt={property.name}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
-                              <Building2 className="h-24 w-24 text-primary opacity-50" />
+                              <Building2 className="h-24 w-24 text-primary opacity-50 group-hover:opacity-70 transition-opacity" />
                             )}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 px-4 py-2 rounded-lg shadow-lg">
+                                <p className="text-sm font-semibold text-gray-800">{t('landing.clickToViewUnits')}</p>
+                              </div>
+                            </div>
                           </div>
                           <CardHeader className="space-y-3">
                             <CardTitle className="line-clamp-2 min-h-[3.5rem]">{property.name || t('property.unnamed')}</CardTitle>

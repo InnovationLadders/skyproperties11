@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { Building2, Loader2 } from 'lucide-react';
 import { getPublicUnits, getAllPropertiesForFilter, getAvailableFloorsForProperty } from '../../utils/publicDirectoryService';
 import { BusinessUnitCard } from '../../components/directory/BusinessUnitCard';
@@ -21,9 +22,21 @@ export default function PublicDirectoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const propertyIdFromUrl = searchParams.get('propertyId');
+    if (propertyIdFromUrl && properties.length > 0) {
+      setFilters(prev => ({
+        ...prev,
+        propertyId: propertyIdFromUrl
+      }));
+    }
+  }, [searchParams, properties]);
 
   useEffect(() => {
     filterUnits();

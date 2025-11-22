@@ -52,7 +52,9 @@
     "smartMarketplace": "سوق ذكي",
     "smartMarketplaceDesc": "ابحث عن عقارك المثالي مع بحث متقدم وتصور ثلاثي الأبعاد",
     "securePayments": "مدفوعات آمنة",
-    "securePaymentsDesc": "نظام دفع متكامل للإيجارات والرسوم ومعاملات العقارات"
+    "securePaymentsDesc": "نظام دفع متكامل للإيجارات والرسوم ومعاملات العقارات",
+    "viewUnitsDirectory": "عرض دليل الوحدات",
+    "clickToViewUnits": "انقر لعرض الوحدات"
   },
   "auth": {
     "email": "البريد الإلكتروني",
