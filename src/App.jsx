@@ -38,6 +38,7 @@ import ManagePermitsPage from './pages/permits/ManagePermitsPage';
 import PermitDetailPage from './pages/permits/PermitDetailPage';
 import PublicDirectoryPage from './pages/public/PublicDirectoryPage';
 import PublicUnitDetailPage from './pages/public/PublicUnitDetailPage';
+import { FilesManagementPage } from './pages/files/FilesManagementPage';
 import './lib/i18n';
 
 function App() {
@@ -312,6 +313,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PermitDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/files"
+                element={
+                  <ProtectedRoute>
+                    <FilesManagementPage />
                   </ProtectedRoute>
                 }
               />
