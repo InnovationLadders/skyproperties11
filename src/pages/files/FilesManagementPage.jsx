@@ -59,8 +59,13 @@ export const FilesManagementPage = () => {
 
   useEffect(() => {
     fetchProperties();
-    fetchFiles();
   }, []);
+
+  useEffect(() => {
+    if (properties.length > 0 || !isPropertyManager) {
+      fetchFiles();
+    }
+  }, [properties]);
 
   useEffect(() => {
     applyFiltersAndSort();
@@ -94,7 +99,7 @@ export const FilesManagementPage = () => {
     try {
       let propertyIds = null;
 
-      if (isPropertyManager) {
+      if (isPropertyManager && properties.length > 0) {
         const managerProperties = properties.filter(
           (p) => p.managerId === currentUser.uid
         );
@@ -104,17 +109,11 @@ export const FilesManagementPage = () => {
       const filesData = await getFiles(
         null,
         currentUser.uid,
-        isAdmin ? 'admin' : isPropertyManager ? 'propertyManager' : 'user'
+        isAdmin ? 'admin' : isPropertyManager ? 'propertyManager' : 'user',
+        propertyIds
       );
 
-      if (isPropertyManager && propertyIds && propertyIds.length > 0) {
-        const managerFiles = filesData.filter((file) =>
-          propertyIds.includes(file.propertyId)
-        );
-        setFiles(managerFiles);
-      } else {
-        setFiles(filesData);
-      }
+      setFiles(filesData);
     } catch (error) {
       console.error('Error fetching files:', error);
     } finally {

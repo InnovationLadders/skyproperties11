@@ -161,19 +161,56 @@ export const uploadFile = async (file, propertyId, propertyName, category, userI
   }
 };
 
-export const getFiles = async (propertyId = null, userId = null, userRole = null) => {
+export const getFiles = async (propertyId = null, userId = null, userRole = null, propertyIds = null) => {
   try {
     const filesRef = collection(db, FILES_COLLECTION);
     let q;
 
     if (userRole === 'admin') {
       q = query(filesRef, orderBy('uploadedAt', 'desc'));
+    } else if (userRole === 'propertyManager' && propertyIds && propertyIds.length > 0) {
+      if (propertyIds.length === 1) {
+        q = query(
+          filesRef,
+          where('propertyId', '==', propertyIds[0]),
+          orderBy('uploadedAt', 'desc')
+        );
+      } else if (propertyIds.length <= 10) {
+        q = query(
+          filesRef,
+          where('propertyId', 'in', propertyIds),
+          orderBy('uploadedAt', 'desc')
+        );
+      } else {
+        const allFiles = [];
+        for (let i = 0; i < propertyIds.length; i += 10) {
+          const batch = propertyIds.slice(i, i + 10);
+          const batchQuery = query(
+            filesRef,
+            where('propertyId', 'in', batch),
+            orderBy('uploadedAt', 'desc')
+          );
+          const batchSnapshot = await getDocs(batchQuery);
+          const batchFiles = batchSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          allFiles.push(...batchFiles);
+        }
+        return allFiles.sort((a, b) => {
+          const timeA = a.uploadedAt?.toMillis() || 0;
+          const timeB = b.uploadedAt?.toMillis() || 0;
+          return timeB - timeA;
+        });
+      }
     } else if (propertyId) {
       q = query(
         filesRef,
         where('propertyId', '==', propertyId),
         orderBy('uploadedAt', 'desc')
       );
+    } else if (userRole === 'propertyManager') {
+      return [];
     } else {
       q = query(filesRef, orderBy('uploadedAt', 'desc'));
     }
