@@ -167,11 +167,18 @@ export const getPaymentsByBillId = async (billId) => {
   try {
     const q = query(
       collection(db, 'payments'),
-      where('billId', '==', billId),
-      orderBy('paymentDate', 'desc')
+      where('billId', '==', billId)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const payments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    payments.sort((a, b) => {
+      const aDate = a.paymentDate?.toDate?.() || new Date(a.paymentDate);
+      const bDate = b.paymentDate?.toDate?.() || new Date(b.paymentDate);
+      return bDate - aDate;
+    });
+
+    return payments;
   } catch (error) {
     console.error('Error getting payments:', error);
     throw error;
