@@ -11,18 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 import { ArrowLeft, Save, Upload, FileText, X } from 'lucide-react';
 import { CONTRACT_TYPES, CONTRACT_STATUS, USER_ROLES } from '../../utils/constants';
 import { useAuth } from '../../contexts/AuthContext';
+import { getManagedPropertyIds } from '../../utils/permissionsService';
 
 export const ContractFormPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { contractId } = useParams();
-  const { hasRole } = useAuth();
+  const { hasRole, userProfile, currentUser } = useAuth();
   const isEditMode = !!contractId;
 
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
   const [tenants, setTenants] = useState([]);
+  const [managedPropertyIds, setManagedPropertyIds] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);
   const [documentFile, setDocumentFile] = useState(null);
   const [formData, setFormData] = useState({
@@ -49,11 +51,25 @@ export const ContractFormPage = () => {
       navigate('/contracts');
       return;
     }
-    fetchData();
-    if (isEditMode) {
-      fetchContract();
+    initializeForm();
+  }, [contractId, userProfile]);
+
+  const initializeForm = async () => {
+    if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      setManagedPropertyIds(managedIds);
+
+      if (managedIds.length === 0) {
+        setError(t('contract.noManagedProperties') || 'You do not manage any properties');
+        return;
+      }
     }
-  }, [contractId]);
+
+    await fetchData();
+    if (isEditMode) {
+      await fetchContract();
+    }
+  };
 
   useEffect(() => {
     if (formData.propertyId) {
@@ -72,15 +88,20 @@ export const ContractFormPage = () => {
         getDocs(query(collection(db, 'users'), where('role', '==', USER_ROLES.TENANT))),
       ]);
 
-      const propertiesData = propertiesSnapshot.docs.map((doc) => ({
+      let propertiesData = propertiesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      const unitsData = unitsSnapshot.docs.map((doc) => ({
+      let unitsData = unitsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
+        unitsData = unitsData.filter(u => managedPropertyIds.includes(u.propertyId));
+      }
 
       const tenantsData = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -92,7 +113,7 @@ export const ContractFormPage = () => {
       setTenants(tenantsData);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError(t('contract.failedToLoadFormData'));
+      setError(t('contract.failedToLoadFormData') || 'Failed to load form data');
     }
   };
 

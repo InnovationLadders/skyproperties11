@@ -51,7 +51,7 @@ export const DashboardPage = () => {
   const getDashboardCards = () => {
     const role = userProfile?.role;
 
-    if (role === USER_ROLES.ADMIN || role === USER_ROLES.PROPERTY_MANAGER) {
+    if (role === USER_ROLES.ADMIN) {
       return [
         {
           title: t('property.properties'),
@@ -60,6 +60,60 @@ export const DashboardPage = () => {
           link: '/properties',
           color: 'from-primary to-primary-600',
         },
+        {
+          title: t('unit.units'),
+          description: t('dashboard.manageUnits'),
+          icon: Building2,
+          link: '/units',
+          color: 'from-secondary to-secondary-700',
+        },
+        {
+          title: t('ticket.tickets'),
+          description: t('dashboard.maintenanceTickets'),
+          icon: Ticket,
+          link: '/tickets',
+          color: 'from-blue-500 to-blue-600',
+        },
+        {
+          title: t('contract.contracts'),
+          description: t('dashboard.manageContracts'),
+          icon: FileText,
+          link: '/contracts',
+          color: 'from-purple-500 to-purple-600',
+        },
+        {
+          title: t('billing.bills'),
+          description: t('billing.manageBills'),
+          icon: DollarSign,
+          link: '/billing/manage',
+          color: 'from-green-500 to-green-600',
+        },
+        {
+          title: t('user.users'),
+          description: t('user.manageUsers'),
+          icon: Users,
+          link: '/users',
+          color: 'from-indigo-500 to-indigo-600',
+        },
+        {
+          title: t('permit.permits'),
+          description: t('permit.managePermits'),
+          icon: FileText,
+          link: '/permits',
+          color: 'from-orange-500 to-orange-600',
+        },
+        {
+          title: t('files.files'),
+          description: t('files.manageFiles'),
+          icon: FolderOpen,
+          link: '/files',
+          color: 'from-teal-500 to-teal-600',
+        },
+      ];
+    }
+
+    if (role === USER_ROLES.PROPERTY_MANAGER) {
+      return [
         {
           title: t('unit.units'),
           description: t('dashboard.manageUnits'),

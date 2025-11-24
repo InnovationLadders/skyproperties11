@@ -12,15 +12,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import { createBill } from '../../utils/billingService';
 import { sendBillNotification } from '../../utils/notificationService';
 import { BILL_TYPES, USER_ROLES, CURRENCY, NOTIFICATION_TYPES } from '../../utils/constants';
+import { getManagedPropertyIds } from '../../utils/permissionsService';
 
 export const CreateBillPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [recipients, setRecipients] = useState([]);
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
+  const [managedPropertyIds, setManagedPropertyIds] = useState([]);
 
   const [formData, setFormData] = useState({
     recipientType: '',
@@ -37,8 +39,23 @@ export const CreateBillPage = () => {
   });
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    initializeForm();
+  }, [userProfile]);
+
+  const initializeForm = async () => {
+    if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      setManagedPropertyIds(managedIds);
+
+      if (managedIds.length === 0) {
+        alert(t('billing.noManagedProperties') || 'You do not manage any properties');
+        navigate('/billing/manage');
+        return;
+      }
+    }
+
+    await fetchProperties();
+  };
 
   useEffect(() => {
     if (formData.recipientType) {
@@ -55,10 +72,15 @@ export const CreateBillPage = () => {
   const fetchProperties = async () => {
     try {
       const propertiesSnapshot = await getDocs(collection(db, 'properties'));
-      const propertiesData = propertiesSnapshot.docs.map((doc) => ({
+      let propertiesData = propertiesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
+      }
+
       setProperties(propertiesData);
     } catch (error) {
       console.error('Error fetching properties:', error);

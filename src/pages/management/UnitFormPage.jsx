@@ -16,6 +16,7 @@ import { MediaGallery } from '../../components/property/MediaGallery';
 import { MediaViewer } from '../../components/property/MediaViewer';
 import { useAuth } from '../../contexts/AuthContext';
 import { deleteUnitMedia, setPrimaryMedia, updateMediaMetadata } from '../../utils/mediaUpload';
+import { getManagedPropertyIds, canCreateUnit, canEditUnit } from '../../utils/permissionsService';
 
 export const UnitFormPage = () => {
   const { t } = useTranslation();
@@ -59,15 +60,31 @@ export const UnitFormPage = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [showMediaViewer, setShowMediaViewer] = useState(false);
   const [mediaViewerIndex, setMediaViewerIndex] = useState(0);
+  const [managedPropertyIds, setManagedPropertyIds] = useState([]);
 
   useEffect(() => {
-    fetchProperties();
-    fetchUsers();
-    fetchTenants();
-    if (isEditMode) {
-      fetchUnit();
+    initializeForm();
+  }, [unitId, userProfile]);
+
+  const initializeForm = async () => {
+    if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      setManagedPropertyIds(managedIds);
+
+      if (managedIds.length === 0) {
+        setError(t('unit.noManagedProperties') || 'You do not manage any properties. Please contact the administrator.');
+        return;
+      }
     }
-  }, [unitId]);
+
+    await fetchProperties();
+    await fetchUsers();
+    await fetchTenants();
+
+    if (isEditMode) {
+      await fetchUnit();
+    }
+  };
 
   useEffect(() => {
     if (formData.propertyId && properties.length > 0) {
@@ -79,10 +96,15 @@ export const UnitFormPage = () => {
   const fetchProperties = async () => {
     try {
       const snapshot = await getDocs(collection(db, 'properties'));
-      const propertiesData = snapshot.docs.map((doc) => ({
+      let propertiesData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
+      }
+
       setProperties(propertiesData);
     } catch (error) {
       console.error('Error fetching properties:', error);
@@ -128,6 +150,15 @@ export const UnitFormPage = () => {
       const unitDoc = await getDoc(doc(db, 'units', unitId));
       if (unitDoc.exists()) {
         const data = unitDoc.data();
+
+        if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+          if (!managedPropertyIds.includes(data.propertyId)) {
+            setError(t('unit.unauthorizedEdit') || 'You do not have permission to edit this unit');
+            setTimeout(() => navigate('/units'), 2000);
+            return;
+          }
+        }
+
         setFormData(data);
         if (data.coordinates && Array.isArray(data.coordinates)) {
           setCoordinatesEnabled(true);
@@ -135,7 +166,7 @@ export const UnitFormPage = () => {
       }
     } catch (error) {
       console.error('Error fetching unit:', error);
-      setError('Failed to load unit');
+      setError(t('unit.fetchError') || 'Failed to load unit');
     }
   };
 
@@ -199,6 +230,19 @@ export const UnitFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.propertyId) {
+      setError(t('unit.propertyRequired') || 'Please select a property');
+      return;
+    }
+
+    if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+      if (!managedPropertyIds.includes(formData.propertyId)) {
+        setError(t('unit.unauthorizedProperty') || 'You do not have permission to create/edit units for this property');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -220,7 +264,7 @@ export const UnitFormPage = () => {
       navigate('/units');
     } catch (error) {
       console.error('Error saving unit:', error);
-      setError('Failed to save unit');
+      setError(t('unit.saveError') || 'Failed to save unit. Please try again.');
     } finally {
       setLoading(false);
     }
