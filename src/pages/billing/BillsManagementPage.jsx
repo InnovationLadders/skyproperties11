@@ -21,10 +21,13 @@ export const BillsManagementPage = () => {
   const { userProfile, currentUser } = useAuth();
   const [bills, setBills] = useState([]);
   const [stats, setStats] = useState(null);
+  const [properties, setProperties] = useState({});
+  const [units, setUnits] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [propertyFilter, setPropertyFilter] = useState('all');
 
   useEffect(() => {
     fetchData();
@@ -33,10 +36,23 @@ export const BillsManagementPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const propertiesSnapshot = await getDocs(collection(db, 'properties'));
+      const propertiesData = {};
+      propertiesSnapshot.docs.forEach((doc) => {
+        propertiesData[doc.id] = doc.data();
+      });
+      setProperties(propertiesData);
+
+      const unitsSnapshot = await getDocs(collection(db, 'units'));
+      const unitsData = {};
+      unitsSnapshot.docs.forEach((doc) => {
+        unitsData[doc.id] = doc.data();
+      });
+      setUnits(unitsData);
+
       if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
         const managedPropertyIds = await getManagedPropertyIds(currentUser.uid);
 
-        const unitsSnapshot = await getDocs(collection(db, 'units'));
         const managedUnitIds = unitsSnapshot.docs
           .filter(doc => managedPropertyIds.includes(doc.data().propertyId))
           .map(doc => doc.id);
@@ -64,15 +80,20 @@ export const BillsManagementPage = () => {
   };
 
   const filteredBills = bills.filter((bill) => {
+    const unit = units[bill.unitId];
+    const property = unit ? properties[unit.propertyId] : null;
+
     const matchesSearch =
       bill.recipientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bill.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bill.billNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+      bill.billNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || bill.status === statusFilter;
     const matchesType = typeFilter === 'all' || bill.billType === typeFilter;
+    const matchesProperty = propertyFilter === 'all' || (unit && unit.propertyId === propertyFilter);
 
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesProperty;
   });
 
   const handleViewBill = (bill) => {
@@ -136,7 +157,20 @@ export const BillsManagementPage = () => {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={propertyFilter}
+              onChange={(e) => setPropertyFilter(e.target.value)}
+              className="px-4 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary min-w-[180px]"
+            >
+              <option value="all">{t('billing.allProperties')}</option>
+              {Object.entries(properties).map(([id, property]) => (
+                <option key={id} value={id}>
+                  {property.name}
+                </option>
+              ))}
+            </select>
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

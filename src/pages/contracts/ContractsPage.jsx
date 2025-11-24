@@ -20,6 +20,7 @@ export const ContractsPage = () => {
   const [properties, setProperties] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [propertyFilter, setPropertyFilter] = useState('all');
   const [managedPropertyIds, setManagedPropertyIds] = useState([]);
 
   useEffect(() => {
@@ -88,10 +89,13 @@ export const ContractsPage = () => {
     }
   };
 
-  const filteredContracts = contracts.filter((contract) =>
-    contract.tenantName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    properties[contract.propertyId]?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredContracts = contracts.filter((contract) => {
+    const matchesSearch =
+      contract.tenantName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      properties[contract.propertyId]?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProperty = propertyFilter === 'all' || contract.propertyId === propertyFilter;
+    return matchesSearch && matchesProperty;
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -124,8 +128,8 @@ export const ContractsPage = () => {
           )}
         </div>
 
-        <div className="mb-6">
-          <div className="relative max-w-md">
+        <div className="mb-6 flex gap-4 flex-wrap">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <Input
               type="text"
@@ -135,6 +139,18 @@ export const ContractsPage = () => {
               className="pl-10"
             />
           </div>
+          <select
+            value={propertyFilter}
+            onChange={(e) => setPropertyFilter(e.target.value)}
+            className="px-4 py-2 rounded-md border border-input bg-background text-sm min-w-[200px]"
+          >
+            <option value="all">{t('contract.allProperties')}</option>
+            {Object.entries(properties).map(([id, property]) => (
+              <option key={id} value={id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
@@ -179,11 +195,18 @@ export const ContractsPage = () => {
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <CardTitle>{contract.tenantName || t('contract.unnamedContract')}</CardTitle>
-                        <CardDescription className="mt-2">
-                          {properties[contract.propertyId]?.name || t('ticket.unknownProperty')}
-                          {contract.unitNumber && ` - ${t('unit.unitNumber')} ${contract.unitNumber}`}
+                        <CardDescription className="mt-2 flex items-start gap-2">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="font-medium text-primary">
+                              {properties[contract.propertyId]?.name || t('ticket.unknownProperty')}
+                            </span>
+                          </div>
+                          {contract.unitNumber && (
+                            <span className="text-muted-foreground">• {t('unit.unitNumber')} {contract.unitNumber}</span>
+                          )}
                         </CardDescription>
                       </div>
                       <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(contract.status)}`}>

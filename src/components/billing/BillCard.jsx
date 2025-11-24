@@ -1,12 +1,49 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { DollarSign, Calendar, User, FileText, Clock } from 'lucide-react';
+import { DollarSign, Calendar, User, FileText, Clock, Building2, Home } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { BILL_STATUS } from '../../utils/constants';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export const BillCard = ({ bill, onViewClick, onPayClick, showActions = true }) => {
   const { t } = useTranslation();
+  const [propertyName, setPropertyName] = useState('');
+  const [unitNumber, setUnitNumber] = useState('');
+
+  useEffect(() => {
+    const fetchPropertyInfo = async () => {
+      if (bill.unitId) {
+        try {
+          const unitDoc = await getDoc(doc(db, 'units', bill.unitId));
+          if (unitDoc.exists()) {
+            const unitData = unitDoc.data();
+            setUnitNumber(unitData.unitNumber);
+            if (unitData.propertyId) {
+              const propertyDoc = await getDoc(doc(db, 'properties', unitData.propertyId));
+              if (propertyDoc.exists()) {
+                setPropertyName(propertyDoc.data().name);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching property info:', error);
+        }
+      } else if (bill.propertyId) {
+        try {
+          const propertyDoc = await getDoc(doc(db, 'properties', bill.propertyId));
+          if (propertyDoc.exists()) {
+            setPropertyName(propertyDoc.data().name);
+          }
+        } catch (error) {
+          console.error('Error fetching property info:', error);
+        }
+      }
+    };
+    fetchPropertyInfo();
+  }, [bill.unitId, bill.propertyId]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -93,6 +130,23 @@ export const BillCard = ({ bill, onViewClick, onPayClick, showActions = true }) 
                   {t('billing.issueDate')}
                 </div>
                 <span className="font-medium">{formatDate(bill.issueDate)}</span>
+              </div>
+            )}
+
+            {(propertyName || unitNumber) && (
+              <div className="flex flex-col gap-2 pt-2 border-t">
+                {propertyName && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-primary">{propertyName}</span>
+                  </div>
+                )}
+                {unitNumber && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Home className="h-4 w-4" />
+                    <span>{t('unit.unitNumber')}: {unitNumber}</span>
+                  </div>
+                )}
               </div>
             )}
 

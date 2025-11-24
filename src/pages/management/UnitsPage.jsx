@@ -24,6 +24,7 @@ export const UnitsPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [facilityTypeFilter, setFacilityTypeFilter] = useState('all');
+  const [propertyFilter, setPropertyFilter] = useState('all');
   const [expandedFloors, setExpandedFloors] = useState({});
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -133,7 +134,8 @@ export const UnitsPage = () => {
     const matchesStatus = statusFilter === 'all' || unit.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || (unit.category || UNIT_CATEGORY.NORMAL) === categoryFilter;
     const matchesFacilityType = facilityTypeFilter === 'all' || unit.facilityType === facilityTypeFilter;
-    return matchesSearch && matchesStatus && matchesCategory && matchesFacilityType;
+    const matchesProperty = propertyFilter === 'all' || unit.propertyId === propertyFilter;
+    return matchesSearch && matchesStatus && matchesCategory && matchesFacilityType && matchesProperty;
   });
 
   const normalUnits = filteredUnits.filter(unit => (unit.category || UNIT_CATEGORY.NORMAL) === UNIT_CATEGORY.NORMAL);
@@ -278,6 +280,18 @@ export const UnitsPage = () => {
             />
           </div>
           <select
+            value={propertyFilter}
+            onChange={(e) => setPropertyFilter(e.target.value)}
+            className="px-4 py-2 rounded-md border border-input bg-background text-sm min-w-[200px]"
+          >
+            <option value="all">{t('unit.allProperties')}</option>
+            {Object.entries(properties).map(([id, property]) => (
+              <option key={id} value={id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
+          <select
             value={categoryFilter}
             onChange={(e) => {
               setCategoryFilter(e.target.value);
@@ -395,8 +409,11 @@ export const UnitsPage = () => {
                         </span>
                       </div>
                     )}
-                    <CardDescription>
-                      {properties[unit.propertyId]?.name || t('unit.unknownProperty')}
+                    <CardDescription className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-primary">
+                        {properties[unit.propertyId]?.name || t('unit.unknownProperty')}
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -531,8 +548,11 @@ export const UnitsPage = () => {
                                       {t(`unit.${unit.status}`)}
                                     </span>
                                   </div>
-                                  <CardDescription>
-                                    {properties[unit.propertyId]?.name || t('unit.unknownProperty')}
+                                  <CardDescription className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-primary" />
+                                    <span className="font-medium text-primary">
+                                      {properties[unit.propertyId]?.name || t('unit.unknownProperty')}
+                                    </span>
                                   </CardDescription>
                                 </CardHeader>
                                 <CardContent>
