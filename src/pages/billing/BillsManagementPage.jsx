@@ -13,6 +13,7 @@ import { getAllBills, getBillingStatistics } from '../../utils/billingService';
 import { BILL_STATUS, BILL_TYPES, USER_ROLES } from '../../utils/constants';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { getManagedPropertyIds } from '../../utils/permissionsService';
 
 export const BillsManagementPage = () => {
   const { t } = useTranslation();
@@ -33,12 +34,7 @@ export const BillsManagementPage = () => {
     setLoading(true);
     try {
       if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-        const propertiesQuery = query(
-          collection(db, 'properties'),
-          where('managerId', '==', currentUser.uid)
-        );
-        const propertiesSnapshot = await getDocs(propertiesQuery);
-        const managedPropertyIds = propertiesSnapshot.docs.map(doc => doc.id);
+        const managedPropertyIds = await getManagedPropertyIds(currentUser.uid);
 
         const unitsSnapshot = await getDocs(collection(db, 'units'));
         const managedUnitIds = unitsSnapshot.docs

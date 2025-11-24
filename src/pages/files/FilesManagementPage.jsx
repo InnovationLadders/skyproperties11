@@ -22,6 +22,8 @@ import { FileUploadModal } from '../../components/files/FileUploadModal';
 import { FileDetailModal } from '../../components/files/FileDetailModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { USER_ROLES } from '../../utils/constants';
+import { getManagedPropertyIds, canAccessFilesPage } from '../../utils/permissionsService';
+import { useNavigate } from 'react-router-dom';
 import {
   getFiles,
   uploadFile,
@@ -37,6 +39,7 @@ import {
 
 export const FilesManagementPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { currentUser, userProfile } = useAuth();
   const [files, setFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
@@ -58,8 +61,12 @@ export const FilesManagementPage = () => {
   const isPropertyManager = userProfile?.role === USER_ROLES.PROPERTY_MANAGER;
 
   useEffect(() => {
+    if (!canAccessFilesPage(userProfile?.role)) {
+      navigate('/dashboard');
+      return;
+    }
     fetchProperties();
-  }, []);
+  }, [userProfile, navigate]);
 
   useEffect(() => {
     if (properties.length > 0 || !isPropertyManager) {
@@ -73,16 +80,19 @@ export const FilesManagementPage = () => {
 
   const fetchProperties = async () => {
     try {
-      const propertiesRef = collection(db, 'properties');
-      let q;
-
       if (isPropertyManager) {
-        q = query(propertiesRef, where('managerId', '==', currentUser.uid));
-      } else {
-        q = propertiesRef;
+        const managedPropertyIds = await getManagedPropertyIds(currentUser.uid);
+        const propertiesRef = collection(db, 'properties');
+        const snapshot = await getDocs(propertiesRef);
+        const propertiesData = snapshot.docs
+          .filter(doc => managedPropertyIds.includes(doc.id))
+          .map(doc => ({ id: doc.id, ...doc.data() }));
+        setProperties(propertiesData);
+        return;
       }
 
-      const snapshot = await getDocs(q);
+      const propertiesRef = collection(db, 'properties');
+      const snapshot = await getDocs(propertiesRef);
       const propertiesData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

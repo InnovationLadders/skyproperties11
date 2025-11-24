@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { useAuth } from '../../contexts/AuthContext';
 import { TICKET_STATUS, USER_ROLES } from '../../utils/constants';
 import { TicketStats } from '../../components/tickets/TicketStats';
+import { getManagedPropertyIds } from '../../utils/permissionsService';
 
 export const TicketsPage = () => {
   const { t } = useTranslation();
@@ -33,16 +34,11 @@ export const TicketsPage = () => {
     setLoading(true);
     try {
       let ticketsQuery;
-      let propertiesQuery;
 
       if (userProfile.role === USER_ROLES.PROPERTY_MANAGER) {
-        propertiesQuery = query(
-          collection(db, 'properties'),
-          where('managerId', '==', currentUser.uid)
-        );
-        const propertiesSnapshot = await getDocs(propertiesQuery);
-        const managedPropertyIds = propertiesSnapshot.docs.map(doc => doc.id);
+        const managedPropertyIds = await getManagedPropertyIds(currentUser.uid);
 
+        const propertiesSnapshot = await getDocs(collection(db, 'properties'));
         const propertiesData = {};
         propertiesSnapshot.docs.forEach((doc) => {
           propertiesData[doc.id] = doc.data();
@@ -63,7 +59,7 @@ export const TicketsPage = () => {
         setTickets(ticketsData);
         setProperties(propertiesData);
       } else {
-        if (userProfile.role === USER_ROLES.TENANT) {
+        if (userProfile.role === USER_ROLES.TENANT || userProfile.role === USER_ROLES.UNIT_OWNER) {
           ticketsQuery = query(
             collection(db, 'tickets'),
             where('createdBy', '==', currentUser.uid),
