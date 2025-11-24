@@ -43,8 +43,9 @@ export const CreateBillPage = () => {
   }, [userProfile]);
 
   const initializeForm = async () => {
+    let managedIds = [];
     if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      managedIds = await getManagedPropertyIds(currentUser.uid);
       setManagedPropertyIds(managedIds);
 
       if (managedIds.length === 0) {
@@ -54,7 +55,7 @@ export const CreateBillPage = () => {
       }
     }
 
-    await fetchProperties();
+    await fetchProperties(managedIds);
   };
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export const CreateBillPage = () => {
     }
   }, [formData.propertyId]);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (managedIds = []) => {
     try {
       const propertiesSnapshot = await getDocs(collection(db, 'properties'));
       let propertiesData = propertiesSnapshot.docs.map((doc) => ({
@@ -77,8 +78,8 @@ export const CreateBillPage = () => {
         ...doc.data(),
       }));
 
-      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER && managedIds.length > 0) {
+        propertiesData = propertiesData.filter(p => managedIds.includes(p.id));
       }
 
       setProperties(propertiesData);
