@@ -55,8 +55,9 @@ export const ContractFormPage = () => {
   }, [contractId, userProfile]);
 
   const initializeForm = async () => {
+    let managedIds = [];
     if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      managedIds = await getManagedPropertyIds(currentUser.uid);
       setManagedPropertyIds(managedIds);
 
       if (managedIds.length === 0) {
@@ -65,7 +66,7 @@ export const ContractFormPage = () => {
       }
     }
 
-    await fetchData();
+    await fetchData(managedIds);
     if (isEditMode) {
       await fetchContract();
     }
@@ -80,7 +81,7 @@ export const ContractFormPage = () => {
     }
   }, [formData.propertyId, units]);
 
-  const fetchData = async () => {
+  const fetchData = async (managedIds = []) => {
     try {
       const [propertiesSnapshot, unitsSnapshot, usersSnapshot] = await Promise.all([
         getDocs(collection(db, 'properties')),
@@ -98,9 +99,9 @@ export const ContractFormPage = () => {
         ...doc.data(),
       }));
 
-      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
-        unitsData = unitsData.filter(u => managedPropertyIds.includes(u.propertyId));
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER && managedIds.length > 0) {
+        propertiesData = propertiesData.filter(p => managedIds.includes(p.id));
+        unitsData = unitsData.filter(u => managedIds.includes(u.propertyId));
       }
 
       const tenantsData = usersSnapshot.docs.map((doc) => ({
