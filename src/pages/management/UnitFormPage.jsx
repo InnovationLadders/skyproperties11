@@ -67,8 +67,9 @@ export const UnitFormPage = () => {
   }, [unitId, userProfile]);
 
   const initializeForm = async () => {
+    let managedIds = [];
     if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-      const managedIds = await getManagedPropertyIds(currentUser.uid);
+      managedIds = await getManagedPropertyIds(currentUser.uid);
       setManagedPropertyIds(managedIds);
 
       if (managedIds.length === 0) {
@@ -77,7 +78,7 @@ export const UnitFormPage = () => {
       }
     }
 
-    await fetchProperties();
+    await fetchProperties(managedIds);
     await fetchUsers();
     await fetchTenants();
 
@@ -93,7 +94,7 @@ export const UnitFormPage = () => {
     }
   }, [formData.propertyId, properties]);
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (managedIds = []) => {
     try {
       const snapshot = await getDocs(collection(db, 'properties'));
       let propertiesData = snapshot.docs.map((doc) => ({
@@ -101,8 +102,8 @@ export const UnitFormPage = () => {
         ...doc.data(),
       }));
 
-      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-        propertiesData = propertiesData.filter(p => managedPropertyIds.includes(p.id));
+      if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER && managedIds.length > 0) {
+        propertiesData = propertiesData.filter(p => managedIds.includes(p.id));
       }
 
       setProperties(propertiesData);
