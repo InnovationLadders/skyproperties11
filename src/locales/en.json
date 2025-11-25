@@ -36,7 +36,9 @@
     "actions": "Actions",
     "details": "Details",
     "history": "History",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "floor": "Floor",
+    "unit": "Unit"
   },
   "landing": {
     "title": "Welcome to SkyProperties",
@@ -166,6 +168,8 @@
     "deleteUnitFailed": "Failed to delete unit",
     "unknownProperty": "Unknown Property",
     "na": "N/A",
+    "unit": "Unit",
+    "sqm": "sqm",
     "view": "View",
     "editUnit": "Edit Unit",
     "createUnit": "Create New Unit",

@@ -37,7 +37,9 @@
     "actions": "الإجراءات",
     "details": "التفاصيل",
     "history": "السجل",
-    "submitting": "جارٍ الإرسال..."
+    "submitting": "جارٍ الإرسال...",
+    "floor": "الطابق",
+    "unit": "وحدة"
   },
   "landing": {
     "title": "مرحباً بك في SkyProperties",
@@ -167,6 +169,8 @@
     "deleteUnitFailed": "فشل حذف الوحدة",
     "unknownProperty": "عقار غير معروف",
     "na": "غير متاح",
+    "unit": "وحدة",
+    "sqm": "م²",
     "view": "الإطلالة",
     "editUnit": "تعديل الوحدة",
     "createUnit": "إنشاء وحدة جديدة",
