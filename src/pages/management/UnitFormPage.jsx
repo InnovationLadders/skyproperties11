@@ -83,7 +83,7 @@ export const UnitFormPage = () => {
     await fetchTenants();
 
     if (isEditMode) {
-      await fetchUnit();
+      await fetchUnit(managedIds);
     }
   };
 
@@ -146,14 +146,16 @@ export const UnitFormPage = () => {
     }
   };
 
-  const fetchUnit = async () => {
+  const fetchUnit = async (managedIds = []) => {
     try {
       const unitDoc = await getDoc(doc(db, 'units', unitId));
       if (unitDoc.exists()) {
         const data = unitDoc.data();
 
+        // Check permissions using the passed managedIds parameter instead of state
         if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
-          if (!managedPropertyIds.includes(data.propertyId)) {
+          // Use the managedIds parameter which is guaranteed to be loaded
+          if (managedIds.length > 0 && !managedIds.includes(data.propertyId)) {
             setError(t('unit.unauthorizedEdit') || 'You do not have permission to edit this unit');
             setTimeout(() => navigate('/units'), 2000);
             return;
