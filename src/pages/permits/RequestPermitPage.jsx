@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { ArrowLeft, Save, FileText } from 'lucide-react';
+import { ArrowLeft, Save, FileText, Info } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { createPermitRequest } from '../../utils/permitsService';
 import { PERMIT_TYPES } from '../../utils/constants';
@@ -16,9 +16,12 @@ export const RequestPermitPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
+  const [preselectedProperty, setPreselectedProperty] = useState(null);
+  const [preselectedUnit, setPreselectedUnit] = useState(null);
   const [formData, setFormData] = useState({
     propertyId: '',
     propertyName: '',
@@ -41,6 +44,12 @@ export const RequestPermitPage = () => {
   }, []);
 
   useEffect(() => {
+    if (properties.length > 0) {
+      loadPreselectedData();
+    }
+  }, [properties]);
+
+  useEffect(() => {
     if (formData.propertyId) {
       fetchUnits(formData.propertyId);
     } else {
@@ -48,6 +57,42 @@ export const RequestPermitPage = () => {
       setFormData((prev) => ({ ...prev, unitId: '', unitNumber: '' }));
     }
   }, [formData.propertyId]);
+
+  const loadPreselectedData = async () => {
+    const propertyIdParam = searchParams.get('propertyId');
+    const unitIdParam = searchParams.get('unitId');
+
+    if (propertyIdParam) {
+      try {
+        const propertyDoc = await getDoc(doc(db, 'properties', propertyIdParam));
+        if (propertyDoc.exists()) {
+          const property = { id: propertyDoc.id, ...propertyDoc.data() };
+          setPreselectedProperty(property);
+          setFormData((prev) => ({
+            ...prev,
+            propertyId: property.id,
+            propertyName: property.name
+          }));
+
+          if (unitIdParam) {
+            await fetchUnits(propertyIdParam);
+            const unitDoc = await getDoc(doc(db, 'units', unitIdParam));
+            if (unitDoc.exists()) {
+              const unit = { id: unitDoc.id, ...unitDoc.data() };
+              setPreselectedUnit(unit);
+              setFormData((prev) => ({
+                ...prev,
+                unitId: unit.id,
+                unitNumber: unit.unitNumber
+              }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error loading preselected data:', err);
+      }
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -178,9 +223,9 @@ export const RequestPermitPage = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate('/permits')}>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t('permit.backToPermits')}
+            {t('common.back')}
           </Button>
         </div>
 
@@ -193,6 +238,23 @@ export const RequestPermitPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {(preselectedProperty || preselectedUnit) && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 mb-1">
+                        {preselectedUnit ? t('permit.requestingForUnit') : t('permit.requestingForProperty')}
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        {preselectedProperty?.name}
+                        {preselectedUnit && ` - ${t('common.unit')} ${preselectedUnit.unitNumber}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-sm text-red-600">{error}</p>
@@ -215,8 +277,9 @@ export const RequestPermitPage = () => {
                     name="propertyId"
                     value={formData.propertyId}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
                     required
+                    disabled={!!preselectedProperty}
                   >
                     <option value="">{t('permit.form.selectProperty')}</option>
                     {properties.map((property) => (
@@ -236,8 +299,8 @@ export const RequestPermitPage = () => {
                     name="unitId"
                     value={formData.unitId}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={!formData.propertyId}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    disabled={!formData.propertyId || !!preselectedUnit}
                   >
                     <option value="">{t('permit.form.selectUnit')}</option>
                     {units.map((unit) => (

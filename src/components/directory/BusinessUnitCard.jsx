@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Mail, Clock, Building2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Building2, FileText } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -10,6 +10,10 @@ export const BusinessUnitCard = ({ unit }) => {
 
   const handleViewDetails = () => {
     navigate(`/public/directory/unit/${unit.id}`);
+  };
+
+  const handleRequestPermit = () => {
+    navigate(`/permits/request?propertyId=${unit.propertyId}&unitId=${unit.id}`);
   };
 
   const getCategoryLabel = (category) => {
@@ -85,9 +89,15 @@ export const BusinessUnitCard = ({ unit }) => {
           )}
         </div>
 
-        <Button onClick={handleViewDetails} className="w-full">
-          {t('publicDirectory.viewDetails')}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleViewDetails} variant="outline" className="flex-1">
+            {t('publicDirectory.viewDetails')}
+          </Button>
+          <Button onClick={handleRequestPermit} className="flex-1">
+            <FileText className="w-4 h-4 mr-2" />
+            {t('permit.requestPermit')}
+          </Button>
+        </div>
       </div>
     </Card>
   );

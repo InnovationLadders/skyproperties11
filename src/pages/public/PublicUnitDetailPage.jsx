@@ -10,7 +10,8 @@ import {
   Building2,
   Loader2,
   ExternalLink,
-  Share2
+  Share2,
+  FileText
 } from 'lucide-react';
 import { getPublicUnitById } from '../../utils/publicDirectoryService';
 import { Button } from '../../components/ui/Button';
@@ -47,6 +48,18 @@ export default function PublicUnitDetailPage() {
   const handleViewIn3D = () => {
     if (unit?.propertyId) {
       navigate(`/property/${unit.propertyId}?unitId=${unit.id}`);
+    }
+  };
+
+  const handleRequestPermitForProperty = () => {
+    if (unit?.propertyId) {
+      navigate(`/permits/request?propertyId=${unit.propertyId}`);
+    }
+  };
+
+  const handleRequestPermitForUnit = () => {
+    if (unit?.propertyId && unit?.id) {
+      navigate(`/permits/request?propertyId=${unit.propertyId}&unitId=${unit.id}`);
     }
   };
 
@@ -170,10 +183,16 @@ export default function PublicUnitDetailPage() {
                     </p>
                   </div>
                 </div>
-                <Button onClick={handleViewIn3D} className="w-full mt-4">
-                  <ExternalLink className="w-5 h-5 mr-2" />
-                  {t('publicDirectory.viewIn3D')}
-                </Button>
+                <div className="flex gap-2 mt-4">
+                  <Button onClick={handleViewIn3D} variant="outline" className="flex-1">
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                    {t('publicDirectory.viewIn3D')}
+                  </Button>
+                  <Button onClick={handleRequestPermitForProperty} className="flex-1">
+                    <FileText className="w-5 h-5 mr-2" />
+                    {t('permit.requestForProperty')}
+                  </Button>
+                </div>
               </Card>
             )}
           </div>
@@ -232,15 +251,25 @@ export default function PublicUnitDetailPage() {
                 )}
               </div>
 
-              {unit.contactPhone && (
+              <div className="mt-6 space-y-3">
+                {unit.contactPhone && (
+                  <Button
+                    onClick={() => window.location.href = `tel:${unit.contactPhone}`}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Phone className="w-5 h-5 mr-2" />
+                    {t('publicDirectory.callNow')}
+                  </Button>
+                )}
                 <Button
-                  onClick={() => window.location.href = `tel:${unit.contactPhone}`}
-                  className="w-full mt-6"
+                  onClick={handleRequestPermitForUnit}
+                  className="w-full"
                 >
-                  <Phone className="w-5 h-5 mr-2" />
-                  {t('publicDirectory.callNow')}
+                  <FileText className="w-5 h-5 mr-2" />
+                  {t('permit.requestForUnit')}
                 </Button>
-              )}
+              </div>
             </Card>
           </div>
         </div>
