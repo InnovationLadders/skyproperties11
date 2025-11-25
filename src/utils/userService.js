@@ -71,7 +71,7 @@ export const getUserById = async (userId) => {
 
 export const createUser = async (userData) => {
   try {
-    const { email, password, displayName, phoneNumber, role } = userData;
+    const { email, password, displayName, phoneNumber, role, propertyId, unitId, selectedProperties } = userData;
 
     if (!email || !password || !displayName || !role) {
       throw new Error('Missing required fields');
@@ -81,9 +81,11 @@ export const createUser = async (userData) => {
       throw new Error('Invalid role');
     }
 
+    // Create user in Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Prepare user document data
     const userDocData = {
       uid: user.uid,
       email: email,
@@ -95,7 +97,48 @@ export const createUser = async (userData) => {
       updatedAt: Timestamp.now()
     };
 
+    // Add managed properties for property managers and service providers
+    if (role === USER_ROLES.PROPERTY_MANAGER || role === USER_ROLES.SERVICE_PROVIDER) {
+      userDocData.managedProperties = selectedProperties || [];
+    }
+
+    // Create user document in Firestore
     await setDoc(doc(db, USERS_COLLECTION, user.uid), userDocData);
+
+    // Handle property manager assignment
+    if (role === USER_ROLES.PROPERTY_MANAGER && selectedProperties && selectedProperties.length > 0) {
+      const updatePromises = selectedProperties.map(propId =>
+        updateDoc(doc(db, PROPERTIES_COLLECTION, propId), {
+          managerId: user.uid,
+          updatedAt: Timestamp.now()
+        })
+      );
+      await Promise.all(updatePromises);
+    }
+
+    // Handle unit owner assignment
+    if (role === USER_ROLES.UNIT_OWNER && unitId) {
+      await updateDoc(doc(db, UNITS_COLLECTION, unitId), {
+        ownerId: user.uid,
+        updatedAt: Timestamp.now()
+      });
+    }
+
+    // Handle tenant assignment
+    if (role === USER_ROLES.TENANT && unitId) {
+      const unitDoc = await getDoc(doc(db, UNITS_COLLECTION, unitId));
+      if (unitDoc.exists()) {
+        const unitData = unitDoc.data();
+        if (unitData.status === 'sold') {
+          throw new Error('Cannot assign tenant to sold unit');
+        }
+        await updateDoc(doc(db, UNITS_COLLECTION, unitId), {
+          tenantId: user.uid,
+          status: 'rented',
+          updatedAt: Timestamp.now()
+        });
+      }
+    }
 
     return {
       id: user.uid,

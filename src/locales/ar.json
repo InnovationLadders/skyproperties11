@@ -822,7 +822,22 @@
     "unassignTenantConfirm": "هل أنت متأكد من إزالة المستأجر من هذه الوحدة؟",
     "searchUnits": "البحث عن الوحدات بالرقم أو العقار...",
     "noUnitsFound": "لم يتم العثور على وحدات",
-    "memberSince": "عضو منذ"
+    "memberSince": "عضو منذ",
+    "propertyManagerDescription": "سيتم ربط المستخدم بالعقارات المختارة لإدارتها",
+    "unitOwnerDescription": "سيتم ربط المستخدم بالوحدة المختارة كمالك",
+    "tenantDescription": "سيتم ربط المستخدم بالوحدة المختارة كمستأجر",
+    "serviceProviderDescription": "سيتم ربط المستخدم بالعقارات المختارة لتقديم الخدمات",
+    "selectProperties": "اختيار العقارات",
+    "selectPropertiesHint": "اختر عقاراً واحداً أو أكثر",
+    "selectProperty": "اختيار العقار",
+    "selectUnit": "اختيار الوحدة",
+    "chooseProperty": "اختر عقاراً",
+    "noPropertiesAvailable": "لا توجد عقارات متاحة",
+    "noUnitsAvailable": "لا توجد وحدات متاحة في هذا العقار",
+    "propertiesSelected": "تم اختيار {{count}} عقار",
+    "propertySelectionRequired": "يجب اختيار عقار واحد على الأقل",
+    "propertyRequired": "العقار مطلوب",
+    "unitRequired": "الوحدة مطلوبة"
   },
   "permit": {
     "permits": "التصاريح",

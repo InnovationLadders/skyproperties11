@@ -821,7 +821,22 @@
     "unassignTenantConfirm": "Are you sure you want to remove the tenant from this unit?",
     "searchUnits": "Search units by number or property...",
     "noUnitsFound": "No units found",
-    "memberSince": "Member since"
+    "memberSince": "Member since",
+    "propertyManagerDescription": "User will be assigned to manage the selected properties",
+    "unitOwnerDescription": "User will be assigned as the owner of the selected unit",
+    "tenantDescription": "User will be assigned as the tenant of the selected unit",
+    "serviceProviderDescription": "User will be assigned to provide services for the selected properties",
+    "selectProperties": "Select Properties",
+    "selectPropertiesHint": "Choose one or more properties",
+    "selectProperty": "Select Property",
+    "selectUnit": "Select Unit",
+    "chooseProperty": "Choose a property",
+    "noPropertiesAvailable": "No properties available",
+    "noUnitsAvailable": "No units available in this property",
+    "propertiesSelected": "{{count}} property selected",
+    "propertySelectionRequired": "At least one property must be selected",
+    "propertyRequired": "Property is required",
+    "unitRequired": "Unit is required"
   },
   "permit": {
     "permits": "Permits",
