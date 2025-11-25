@@ -72,6 +72,9 @@ export const Navbar = () => {
             <Link to="/public/directory" className="text-gray-700 hover:text-primary">
               {t('publicDirectory.title')}
             </Link>
+            <Link to="/permits/request" className="text-gray-700 hover:text-primary">
+              {t('permit.requestPermit')}
+            </Link>
 
             {currentUser ? (
               <>
@@ -218,6 +221,20 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('landing.featuredProperties')}
+            </Link>
+            <Link
+              to="/public/directory"
+              className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('publicDirectory.title')}
+            </Link>
+            <Link
+              to="/permits/request"
+              className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('permit.requestPermit')}
             </Link>
 
             {currentUser ? (
