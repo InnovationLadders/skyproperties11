@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
-import { Building2, Loader2 } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Building2, Loader2, FileText } from 'lucide-react';
 import { getPublicUnits, getAllPropertiesForFilter, getAvailableFloorsForProperty } from '../../utils/publicDirectoryService';
 import { BusinessUnitCard } from '../../components/directory/BusinessUnitCard';
 import { DirectoryFilters } from '../../components/directory/DirectoryFilters';
+import { Button } from '../../components/ui/Button';
 
 export default function PublicDirectoryPage() {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+  const navigate = useNavigate();
 
   const [units, setUnits] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);
@@ -21,6 +23,7 @@ export default function PublicDirectoryPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPropertySelector, setShowPropertySelector] = useState(false);
 
   const [searchParams] = useSearchParams();
 
@@ -92,6 +95,11 @@ export default function PublicDirectoryPage() {
 
   const availableFloors = getAvailableFloorsForProperty(units, filters.propertyId);
 
+  const handleRequestPermitForProperty = (propertyId) => {
+    navigate(`/permits/request?propertyId=${propertyId}`);
+    setShowPropertySelector(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
@@ -107,9 +115,41 @@ export default function PublicDirectoryPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12 mb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Building2 className="w-12 h-12" />
-            <h1 className="text-4xl font-bold">{t('publicDirectory.title')}</h1>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <Building2 className="w-12 h-12" />
+              <h1 className="text-4xl font-bold">{t('publicDirectory.title')}</h1>
+            </div>
+            <div className="relative">
+              <Button
+                onClick={() => setShowPropertySelector(!showPropertySelector)}
+                className="bg-white text-blue-600 hover:bg-blue-50 shadow-lg"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                {t('permit.requestForProperty')}
+              </Button>
+
+              {showPropertySelector && properties.length > 0 && (
+                <div className="absolute top-full mt-2 right-0 bg-white rounded-lg shadow-xl border border-slate-200 py-2 min-w-[250px] z-10">
+                  <div className="px-4 py-2 border-b border-slate-200">
+                    <p className="text-sm font-medium text-slate-700">
+                      {t('permit.selectProperty')}
+                    </p>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {properties.map((property) => (
+                      <button
+                        key={property.id}
+                        onClick={() => handleRequestPermitForProperty(property.id)}
+                        className="w-full px-4 py-2 text-left text-slate-700 hover:bg-blue-50 transition-colors"
+                      >
+                        {property.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <p className="text-blue-100 text-lg max-w-2xl">
             {t('publicDirectory.subtitle')}
