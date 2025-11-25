@@ -229,12 +229,25 @@ export const LandingPage = () => {
                               </div>
                             </div>
                           </CardContent>
-                          <CardFooter>
-                            <Button className="w-full" onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/property/${property.id}`);
-                            }}>
+                          <CardFooter className="flex gap-2">
+                            <Button
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/property/${property.id}`);
+                              }}
+                            >
                               {t('landing.viewDetails')}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/public/directory?propertyId=${property.id}`);
+                              }}
+                            >
+                              {t('landing.viewGuide')}
                             </Button>
                           </CardFooter>
                         </Card>
