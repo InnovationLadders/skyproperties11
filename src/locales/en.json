@@ -136,7 +136,8 @@
     "internalView": "Internal View",
     "external": "External",
     "internal": "Internal",
-    "requestContact": "Request Contact"
+    "requestContact": "Request Contact",
+    "viewDetails": "View Details"
   },
   "unit": {
     "units": "Units",
@@ -499,7 +500,8 @@
     "emailPlaceholder": "your@email.com",
     "phonePlaceholder": "+1 (555) 123-4567",
     "messagePlaceholder": "I'm interested in this property...",
-    "inquiryError": "Failed to submit inquiry. Please try again."
+    "inquiryError": "Failed to submit inquiry. Please try again.",
+    "contactInfo": "Contact Information"
   },
   "media": {
     "noMediaYet": "No media uploaded yet",

@@ -14,8 +14,8 @@ export const MyRentalPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [rentedUnit, setRentedUnit] = useState(null);
-  const [property, setProperty] = useState(null);
+  const [rentedUnits, setRentedUnits] = useState([]);
+  const [properties, setProperties] = useState({});
   const [contract, setContract] = useState(null);
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,19 +40,21 @@ export const MyRentalPage = () => {
         return;
       }
 
-      const unitData = {
-        id: unitsSnapshot.docs[0].id,
-        ...unitsSnapshot.docs[0].data(),
-      };
-      setRentedUnit(unitData);
+      const unitsData = unitsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRentedUnits(unitsData);
 
-      if (unitData.propertyId) {
-        const propertiesSnapshot = await getDocs(collection(db, 'properties'));
-        const propertyDoc = propertiesSnapshot.docs.find(doc => doc.id === unitData.propertyId);
-        if (propertyDoc) {
-          setProperty({ id: propertyDoc.id, ...propertyDoc.data() });
+      const propertyIds = [...new Set(unitsData.map(u => u.propertyId).filter(Boolean))];
+      const propertiesSnapshot = await getDocs(collection(db, 'properties'));
+      const propertiesData = {};
+      propertiesSnapshot.docs.forEach(doc => {
+        if (propertyIds.includes(doc.id)) {
+          propertiesData[doc.id] = { id: doc.id, ...doc.data() };
         }
-      }
+      });
+      setProperties(propertiesData);
 
       const contractsQuery = query(
         collection(db, 'contracts'),
@@ -124,7 +126,7 @@ export const MyRentalPage = () => {
     );
   }
 
-  if (!rentedUnit) {
+  if (rentedUnits.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -150,6 +152,7 @@ export const MyRentalPage = () => {
 
   const monthsRemaining = calculateMonthsRemaining();
   const unpaidTotal = getUnpaidBillsTotal();
+  const mainProperty = properties[rentedUnits[0].propertyId];
 
   return (
     <div className="min-h-screen bg-background">
@@ -203,74 +206,79 @@ export const MyRentalPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Building2 className="h-5 w-5 text-primary" />
-                    <CardTitle>{t('unit.unit')} {rentedUnit.unitNumber}</CardTitle>
-                  </div>
-                  <CardDescription>
-                    <div className="flex items-center text-sm">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {property?.name || t('unit.unknownProperty')}
-                    </div>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center">
-                      <Layers className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-muted-foreground mr-2">{t('unit.floor')}:</span>
-                      <span className="font-medium">{rentedUnit.floor || t('unit.na')}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-muted-foreground mr-2">{t('unit.type')}:</span>
-                      <span className="font-medium">
-                        {rentedUnit.type ? t(`unit.${rentedUnit.type}`) : t('unit.na')}
-                      </span>
-                    </div>
-                    {rentedUnit.size && (
-                      <div className="flex items-center">
-                        <span className="text-muted-foreground mr-2">{t('unit.size')}:</span>
-                        <span className="font-medium">{rentedUnit.size} {t('unit.sqm')}</span>
+              {rentedUnits.map((unit) => {
+                const property = properties[unit.propertyId];
+                return (
+                  <Card key={unit.id}>
+                    <CardHeader>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Building2 className="h-5 w-5 text-primary" />
+                        <CardTitle>{t('unit.unit')} {unit.unitNumber}</CardTitle>
                       </div>
-                    )}
-                    {rentedUnit.viewType && (
-                      <div className="flex items-center">
-                        <span className="text-muted-foreground mr-2">{t('unit.view')}:</span>
-                        <span className="font-medium">
-                          {t(`unit.${rentedUnit.viewType}View`)}
-                        </span>
+                      <CardDescription>
+                        <div className="flex items-center text-sm">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {property?.name || t('unit.unknownProperty')}
+                        </div>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center">
+                          <Layers className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span className="text-muted-foreground mr-2">{t('unit.floor')}:</span>
+                          <span className="font-medium">{unit.floor || t('unit.na')}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-muted-foreground mr-2">{t('unit.type')}:</span>
+                          <span className="font-medium">
+                            {unit.type ? t(`unit.${unit.type}`) : t('unit.na')}
+                          </span>
+                        </div>
+                        {unit.size && (
+                          <div className="flex items-center">
+                            <span className="text-muted-foreground mr-2">{t('unit.size')}:</span>
+                            <span className="font-medium">{unit.size} {t('unit.sqm')}</span>
+                          </div>
+                        )}
+                        {unit.viewType && (
+                          <div className="flex items-center">
+                            <span className="text-muted-foreground mr-2">{t('unit.view')}:</span>
+                            <span className="font-medium">
+                              {t(`unit.${unit.viewType}View`)}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {rentedUnit.description && (
-                    <div className="mt-4 pt-4 border-t">
-                      <p className="text-sm text-muted-foreground">{rentedUnit.description}</p>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex gap-2">
-                  <Button
-                    onClick={() => navigate('/tickets/create')}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <Wrench className="h-4 w-4 mr-2" />
-                    {t('ticket.createTicket')}
-                  </Button>
-                  {property && (
-                    <Button
-                      onClick={() => navigate(`/property/${property.id}`)}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <ImageIcon className="h-4 w-4 mr-2" />
-                      {t('property.viewDetails')}
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
+                      {unit.description && (
+                        <div className="mt-4 pt-4 border-t">
+                          <p className="text-sm text-muted-foreground">{unit.description}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex gap-2">
+                      <Button
+                        onClick={() => navigate('/tickets/create')}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Wrench className="h-4 w-4 mr-2" />
+                        {t('ticket.createTicket')}
+                      </Button>
+                      {property && (
+                        <Button
+                          onClick={() => navigate(`/property/${property.id}`)}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          {t('property.viewDetails')}
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                );
+              })}
 
               {contract && (
                 <Card>
@@ -427,7 +435,7 @@ export const MyRentalPage = () => {
                 </CardContent>
               </Card>
 
-              {property && (
+              {mainProperty && (
                 <Card>
                   <CardHeader>
                     <CardTitle>{t('contactModal.contactInfo')}</CardTitle>
@@ -435,27 +443,27 @@ export const MyRentalPage = () => {
                   <CardContent className="space-y-3 text-sm">
                     <div>
                       <p className="text-muted-foreground mb-1">{t('property.propertyName')}</p>
-                      <p className="font-medium">{property.name}</p>
+                      <p className="font-medium">{mainProperty.name}</p>
                     </div>
-                    {property.address && (
+                    {mainProperty.address && (
                       <div>
                         <p className="text-muted-foreground mb-1">{t('property.address')}</p>
-                        <p className="font-medium">{property.address}</p>
+                        <p className="font-medium">{mainProperty.address}</p>
                       </div>
                     )}
-                    {property.phone && (
+                    {mainProperty.phone && (
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <a href={`tel:${property.phone}`} className="text-primary hover:underline">
-                          {property.phone}
+                        <a href={`tel:${mainProperty.phone}`} className="text-primary hover:underline">
+                          {mainProperty.phone}
                         </a>
                       </div>
                     )}
-                    {property.email && (
+                    {mainProperty.email && (
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <a href={`mailto:${property.email}`} className="text-primary hover:underline">
-                          {property.email}
+                        <a href={`mailto:${mainProperty.email}`} className="text-primary hover:underline">
+                          {mainProperty.email}
                         </a>
                       </div>
                     )}

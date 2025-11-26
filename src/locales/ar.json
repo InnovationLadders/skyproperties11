@@ -137,7 +137,8 @@
     "internalView": "إطلالة داخلية",
     "external": "خارجي",
     "internal": "داخلي",
-    "requestContact": "طلب اتصال"
+    "requestContact": "طلب اتصال",
+    "viewDetails": "عرض التفاصيل"
   },
   "unit": {
     "units": "الوحدات",
@@ -500,7 +501,8 @@
     "emailPlaceholder": "your@email.com",
     "phonePlaceholder": "+966 55 123 4567",
     "messagePlaceholder": "أنا مهتم بهذا العقار...",
-    "inquiryError": "فشل إرسال الاستفسار. الرجاء المحاولة مرة أخرى."
+    "inquiryError": "فشل إرسال الاستفسار. الرجاء المحاولة مرة أخرى.",
+    "contactInfo": "معلومات الاتصال"
   },
   "media": {
     "noMediaYet": "لم يتم تحميل وسائط بعد",
