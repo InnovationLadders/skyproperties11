@@ -60,7 +60,7 @@ export const Navbar = () => {
                 <span className="text-white font-bold text-xl">SP</span>
               </div>
               <span className="text-xl font-bold text-gray-900 hidden sm:block">
-                SkyProperties
+                SkyProperty
               </span>
             </Link>
           </div>
