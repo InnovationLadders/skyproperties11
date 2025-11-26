@@ -40,6 +40,7 @@ import PublicDirectoryPage from './pages/public/PublicDirectoryPage';
 import PublicUnitDetailPage from './pages/public/PublicUnitDetailPage';
 import { FilesManagementPage } from './pages/files/FilesManagementPage';
 import { MyUnitsPage } from './pages/units/MyUnitsPage';
+import { MyRentalPage } from './pages/rental/MyRentalPage';
 import './lib/i18n';
 
 function App() {
@@ -214,6 +215,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PaymentsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/my-rental"
+                element={
+                  <ProtectedRoute>
+                    <MyRentalPage />
                   </ProtectedRoute>
                 }
               />
