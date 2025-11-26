@@ -39,6 +39,7 @@ import PermitDetailPage from './pages/permits/PermitDetailPage';
 import PublicDirectoryPage from './pages/public/PublicDirectoryPage';
 import PublicUnitDetailPage from './pages/public/PublicUnitDetailPage';
 import { FilesManagementPage } from './pages/files/FilesManagementPage';
+import { MyUnitsPage } from './pages/units/MyUnitsPage';
 import './lib/i18n';
 
 function App() {
@@ -105,6 +106,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <UnitsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-units"
+                element={
+                  <ProtectedRoute>
+                    <MyUnitsPage />
                   </ProtectedRoute>
                 }
               />
