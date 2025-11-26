@@ -1,4 +1,4 @@
-# SkyProperties - Property Management & Marketplace
+# SkyProperty - Property Management & Marketplace
 
 A comprehensive bilingual (English/Arabic) property management and marketplace platform built with React, Firebase, and Three.js.
 
