@@ -489,7 +489,7 @@
     "updateFailed": "Failed to update profile"
   },
   "navbar": {
-    "skyProperties": "SkyProperties",
+    "skyProperties": "SkyProperty",
     "userMenu": "User menu",
     "profile": "Profile",
     "settings": "Settings",
