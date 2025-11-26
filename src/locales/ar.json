@@ -340,7 +340,17 @@
       "appliance": "أجهزة",
       "structural": "إنشائي",
       "other": "أخرى"
-    }
+    },
+    "ticketWillBeCreatedFor": "سيتم إنشاء التذكرة لـ:",
+    "selectUnitForTicket": "يرجى اختيار الوحدة التي تريد إنشاء تذكرة لها",
+    "propertyRequired": "يرجى اختيار عقار",
+    "unauthorizedProperty": "ليس لديك صلاحية إنشاء تذاكر لهذا العقار",
+    "createError": "فشل إنشاء التذكرة. يرجى المحاولة مرة أخرى.",
+    "noManagedProperties": "أنت لا تدير أي عقارات. يرجى الاتصال بالمسؤول.",
+    "noUnitsAssigned": "ليس لديك أي وحدات مخصصة. يرجى الاتصال بالمسؤول.",
+    "noPropertiesForUnits": "وحداتك غير مرتبطة بأي عقارات.",
+    "noPermission": "ليس لديك صلاحية إنشاء تذاكر.",
+    "fetchPropertiesError": "فشل تحميل العقارات. يرجى المحاولة مرة أخرى."
   },
   "contract": {
     "contracts": "العقود",

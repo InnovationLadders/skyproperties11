@@ -339,7 +339,17 @@
       "appliance": "Appliance",
       "structural": "Structural",
       "other": "Other"
-    }
+    },
+    "ticketWillBeCreatedFor": "Ticket will be created for:",
+    "selectUnitForTicket": "Please select which unit you want to create a ticket for",
+    "propertyRequired": "Please select a property",
+    "unauthorizedProperty": "You do not have permission to create tickets for this property",
+    "createError": "Failed to create ticket. Please try again.",
+    "noManagedProperties": "You do not manage any properties. Please contact the administrator.",
+    "noUnitsAssigned": "You do not have any units assigned. Please contact the administrator.",
+    "noPropertiesForUnits": "Your units are not associated with any properties.",
+    "noPermission": "You do not have permission to create tickets.",
+    "fetchPropertiesError": "Failed to load properties. Please try again."
   },
   "contract": {
     "contracts": "Contracts",

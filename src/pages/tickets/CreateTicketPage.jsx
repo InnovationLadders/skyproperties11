@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
+import { ArrowLeft, Save, Building2, Home } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { TICKET_STATUS, USER_ROLES } from '../../utils/constants';
 import { getManagedPropertyIds, getUserUnitIds } from '../../utils/permissionsService';
@@ -20,11 +20,15 @@ export const CreateTicketPage = () => {
   const [loading, setLoading] = useState(false);
   const [properties, setProperties] = useState([]);
   const [availablePropertyIds, setAvailablePropertyIds] = useState([]);
+  const [userUnits, setUserUnits] = useState([]);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [isTenant, setIsTenant] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     propertyId: '',
     unitNumber: '',
+    unitId: '',
     category: 'general',
     priority: 'medium',
     status: TICKET_STATUS.OPEN,
@@ -33,27 +37,30 @@ export const CreateTicketPage = () => {
   const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
-    fetchProperties();
+    fetchData();
   }, []);
 
-  const fetchProperties = async () => {
+  const fetchData = async () => {
     try {
+      const role = userProfile?.role;
+      setIsTenant(role === USER_ROLES.TENANT);
+
       let allowedPropertyIds = [];
       let propertiesData = [];
 
-      if (userProfile?.role === USER_ROLES.ADMIN) {
+      if (role === USER_ROLES.ADMIN) {
         const snapshot = await getDocs(collection(db, 'properties'));
         propertiesData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         allowedPropertyIds = propertiesData.map(p => p.id);
-      } else if (userProfile?.role === USER_ROLES.PROPERTY_MANAGER) {
+        setProperties(propertiesData);
+        setAvailablePropertyIds(allowedPropertyIds);
+      } else if (role === USER_ROLES.PROPERTY_MANAGER) {
         const managedIds = await getManagedPropertyIds(currentUser.uid);
 
         if (managedIds.length === 0) {
-          setProperties([]);
-          setAvailablePropertyIds([]);
           setError(t('ticket.noManagedProperties') || 'You do not manage any properties. Please contact the administrator.');
           return;
         }
@@ -66,50 +73,124 @@ export const CreateTicketPage = () => {
             ...doc.data(),
           }));
         allowedPropertyIds = managedIds;
-      } else if (userProfile?.role === USER_ROLES.UNIT_OWNER || userProfile?.role === USER_ROLES.TENANT) {
-        const unitIds = await getUserUnitIds(currentUser.uid);
-
-        if (unitIds.length === 0) {
-          setProperties([]);
-          setAvailablePropertyIds([]);
-          setError(t('ticket.noUnitsAssigned') || 'You do not have any units assigned. Please contact the administrator.');
-          return;
-        }
-
-        const unitsSnapshot = await getDocs(collection(db, 'units'));
-        const userUnits = unitsSnapshot.docs
-          .filter(doc => unitIds.includes(doc.id))
-          .map(doc => doc.data());
-
-        const propertyIds = [...new Set(userUnits.map(unit => unit.propertyId).filter(Boolean))];
-
-        if (propertyIds.length === 0) {
-          setProperties([]);
-          setAvailablePropertyIds([]);
-          setError(t('ticket.noPropertiesForUnits') || 'Your units are not associated with any properties.');
-          return;
-        }
-
-        const propertiesSnapshot = await getDocs(collection(db, 'properties'));
-        propertiesData = propertiesSnapshot.docs
-          .filter(doc => propertyIds.includes(doc.id))
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-        allowedPropertyIds = propertyIds;
+        setProperties(propertiesData);
+        setAvailablePropertyIds(allowedPropertyIds);
+      } else if (role === USER_ROLES.TENANT) {
+        await fetchTenantUnits();
+      } else if (role === USER_ROLES.UNIT_OWNER) {
+        await fetchOwnerUnits();
       } else {
-        setProperties([]);
-        setAvailablePropertyIds([]);
         setError(t('ticket.noPermission') || 'You do not have permission to create tickets.');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(t('ticket.fetchPropertiesError') || 'Failed to load data. Please try again.');
+    }
+  };
+
+  const fetchTenantUnits = async () => {
+    try {
+      const unitsQuery = query(
+        collection(db, 'units'),
+        where('tenantId', '==', currentUser.uid)
+      );
+      const unitsSnapshot = await getDocs(unitsQuery);
+
+      if (unitsSnapshot.empty) {
+        setError(t('ticket.noUnitsAssigned') || 'You do not have any units assigned. Please contact the administrator.');
         return;
       }
 
+      const units = unitsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setUserUnits(units);
+
+      const propertyIds = [...new Set(units.map(unit => unit.propertyId).filter(Boolean))];
+      const propertiesSnapshot = await getDocs(collection(db, 'properties'));
+      const propertiesData = propertiesSnapshot.docs
+        .filter(doc => propertyIds.includes(doc.id))
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
       setProperties(propertiesData);
-      setAvailablePropertyIds(allowedPropertyIds);
+      setAvailablePropertyIds(propertyIds);
+
+      if (units.length === 1) {
+        const unit = units[0];
+        const property = propertiesData.find(p => p.id === unit.propertyId);
+        setSelectedUnit(unit);
+        setFormData(prev => ({
+          ...prev,
+          propertyId: unit.propertyId || '',
+          unitNumber: unit.unitNumber || '',
+          unitId: unit.id || '',
+        }));
+      }
     } catch (error) {
-      console.error('Error fetching properties:', error);
-      setError(t('ticket.fetchPropertiesError') || 'Failed to load properties. Please try again.');
+      console.error('Error fetching tenant units:', error);
+      setError(t('ticket.fetchPropertiesError') || 'Failed to load your units. Please try again.');
+    }
+  };
+
+  const fetchOwnerUnits = async () => {
+    try {
+      const unitIds = await getUserUnitIds(currentUser.uid);
+
+      if (unitIds.length === 0) {
+        setError(t('ticket.noUnitsAssigned') || 'You do not have any units assigned. Please contact the administrator.');
+        return;
+      }
+
+      const unitsSnapshot = await getDocs(collection(db, 'units'));
+      const units = unitsSnapshot.docs
+        .filter(doc => unitIds.includes(doc.id))
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+      setUserUnits(units);
+
+      const propertyIds = [...new Set(units.map(unit => unit.propertyId).filter(Boolean))];
+
+      if (propertyIds.length === 0) {
+        setError(t('ticket.noPropertiesForUnits') || 'Your units are not associated with any properties.');
+        return;
+      }
+
+      const propertiesSnapshot = await getDocs(collection(db, 'properties'));
+      const propertiesData = propertiesSnapshot.docs
+        .filter(doc => propertyIds.includes(doc.id))
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+      setProperties(propertiesData);
+      setAvailablePropertyIds(propertyIds);
+    } catch (error) {
+      console.error('Error fetching owner units:', error);
+      setError(t('ticket.fetchPropertiesError') || 'Failed to load your units. Please try again.');
+    }
+  };
+
+  const handleUnitChange = (e) => {
+    const unitId = e.target.value;
+    const unit = userUnits.find(u => u.id === unitId);
+
+    if (unit) {
+      setSelectedUnit(unit);
+      setFormData(prev => ({
+        ...prev,
+        propertyId: unit.propertyId || '',
+        unitNumber: unit.unitNumber || '',
+        unitId: unit.id || '',
+      }));
     }
   };
 
@@ -167,6 +248,133 @@ export const CreateTicketPage = () => {
     }
   };
 
+  const getPropertyName = (propertyId) => {
+    const property = properties.find(p => p.id === propertyId);
+    return property?.name || t('unit.unknownProperty');
+  };
+
+  const renderPropertyAndUnitFields = () => {
+    if (isTenant && userUnits.length === 1 && selectedUnit) {
+      return (
+        <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 text-blue-800 font-medium">
+            <Building2 className="h-5 w-5" />
+            <span>{t('ticket.ticketWillBeCreatedFor')}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm text-muted-foreground">{t('property.propertyName')}</Label>
+              <div className="mt-1 px-3 py-2 bg-white border border-input rounded-md text-sm font-medium">
+                {getPropertyName(selectedUnit.propertyId)}
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm text-muted-foreground">{t('unit.unitNumber')}</Label>
+              <div className="mt-1 px-3 py-2 bg-white border border-input rounded-md text-sm font-medium">
+                {selectedUnit.unitNumber || t('unit.na')}
+                {selectedUnit.floor && ` - ${t('unit.floor')} ${selectedUnit.floor}`}
+              </div>
+            </div>
+          </div>
+          {selectedUnit.type && (
+            <div className="text-sm text-muted-foreground">
+              <span className="font-medium">{t('unit.type')}:</span> {t(`unit.${selectedUnit.type}`)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (isTenant && userUnits.length > 1) {
+      return (
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+            <div className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              <span>{t('ticket.selectUnitForTicket')}</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="unitSelect">{t('unit.selectUnit')} *</Label>
+            <select
+              id="unitSelect"
+              value={selectedUnit?.id || ''}
+              onChange={handleUnitChange}
+              required
+              className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+            >
+              <option value="">{t('unit.selectUnit')}</option>
+              {userUnits.map((unit) => {
+                const propertyName = getPropertyName(unit.propertyId);
+                return (
+                  <option key={unit.id} value={unit.id}>
+                    {propertyName} - {t('unit.unit')} {unit.unitNumber}
+                    {unit.floor ? ` - ${t('unit.floor')} ${unit.floor}` : ''}
+                    {unit.type ? ` (${t(`unit.${unit.type}`)})` : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          {selectedUnit && (
+            <div className="p-3 bg-gray-50 border rounded-lg">
+              <div className="text-sm space-y-1">
+                <div>
+                  <span className="text-muted-foreground">{t('property.propertyName')}:</span>{' '}
+                  <span className="font-medium">{getPropertyName(selectedUnit.propertyId)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t('unit.unitNumber')}:</span>{' '}
+                  <span className="font-medium">{selectedUnit.unitNumber}</span>
+                </div>
+                {selectedUnit.floor && (
+                  <div>
+                    <span className="text-muted-foreground">{t('unit.floor')}:</span>{' '}
+                    <span className="font-medium">{selectedUnit.floor}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="propertyId">{t('property.propertyName')} *</Label>
+          <select
+            id="propertyId"
+            name="propertyId"
+            value={formData.propertyId}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+          >
+            <option value="">{t('ticket.selectProperty')}</option>
+            {properties.map((property) => (
+              <option key={property.id} value={property.id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="unitNumber">{t('unit.unitNumber')}</Label>
+          <Input
+            id="unitNumber"
+            name="unitNumber"
+            value={formData.unitNumber}
+            onChange={handleChange}
+            placeholder={t('ticket.unitNumberPlaceholder')}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -208,37 +416,7 @@ export const CreateTicketPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="propertyId">{t('property.propertyName')} *</Label>
-                  <select
-                    id="propertyId"
-                    name="propertyId"
-                    value={formData.propertyId}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
-                  >
-                    <option value="">{t('ticket.selectProperty')}</option>
-                    {properties.map((property) => (
-                      <option key={property.id} value={property.id}>
-                        {property.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="unitNumber">{t('unit.unitNumber')}</Label>
-                  <Input
-                    id="unitNumber"
-                    name="unitNumber"
-                    value={formData.unitNumber}
-                    onChange={handleChange}
-                    placeholder={t('ticket.unitNumberPlaceholder')}
-                  />
-                </div>
-              </div>
+              {renderPropertyAndUnitFields()}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
