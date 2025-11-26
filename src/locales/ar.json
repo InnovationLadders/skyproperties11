@@ -260,7 +260,14 @@
     "totalUnits": "إجمالي الوحدات",
     "confirmImport": "تأكيد الاستيراد",
     "showingFirst50": "عرض أول 50 وحدة",
-    "skipped": "تم التخطي"
+    "skipped": "تم التخطي",
+    "selectUnit": "اختر وحدة",
+    "noManagedProperties": "لا تدير أي عقارات. يرجى الاتصال بالمسؤول.",
+    "fetchError": "فشل تحميل الوحدة",
+    "propertyRequired": "الرجاء اختيار عقار",
+    "saveError": "فشل حفظ الوحدة. يرجى المحاولة مرة أخرى.",
+    "unauthorizedEdit": "ليس لديك صلاحية تعديل هذه الوحدة",
+    "unauthorizedProperty": "ليس لديك صلاحية إنشاء/تعديل وحدات لهذا العقار"
   },
   "ticket": {
     "tickets": "التذاكر",
@@ -432,7 +439,8 @@
       "monthly": "شهري",
       "quarterly": "ربع سنوي",
       "annually": "سنوي"
-    }
+    },
+    "noManagedProperties": "لا تدير أي عقارات"
   },
   "payment": {
     "payments": "المدفوعات",
@@ -619,7 +627,8 @@
     "unit": "الوحدة",
     "selectProperty": "اختر عقاراً",
     "selectUnit": "اختر وحدة",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "noManagedProperties": "لا تدير أي عقارات"
   },
   "billingSettings": {
     "title": "إعدادات الفوترة",
@@ -746,7 +755,8 @@
     "clickToSelectLocation": "انقر على الخريطة أو اسحب العلامة لتحديد موقع العقار",
     "selectLocation": "اختر الموقع على الخريطة",
     "coordinates": "الإحداثيات",
-    "locationSet": "تم تعيين الموقع"
+    "locationSet": "تم تعيين الموقع",
+    "loadingMap": "جارٍ تحميل الخريطة..."
   },
   "user": {
     "users": "المستخدمون",
@@ -958,6 +968,7 @@
       "parking": "الوصول إلى منطقة الموقف",
       "utility": "الوصول إلى منطقة المرافق"
     },
+    "status": "الحالة",
     "statuses": {
       "pending": "معلق",
       "approved": "موافق عليه",

@@ -29,6 +29,7 @@
     "confirm": "Confirm",
     "optional": "Optional",
     "required": "Required",
+    "name": "Name",
     "creating": "Creating...",
     "saving": "Saving...",
     "close": "Close",
@@ -259,7 +260,14 @@
     "totalUnits": "Total Units",
     "confirmImport": "Confirm Import",
     "showingFirst50": "Showing first 50 units",
-    "skipped": "Skipped"
+    "skipped": "Skipped",
+    "selectUnit": "Select Unit",
+    "noManagedProperties": "You do not manage any properties. Please contact the administrator.",
+    "fetchError": "Failed to load unit",
+    "propertyRequired": "Please select a property",
+    "saveError": "Failed to save unit. Please try again.",
+    "unauthorizedEdit": "You do not have permission to edit this unit",
+    "unauthorizedProperty": "You do not have permission to create/edit units for this property"
   },
   "ticket": {
     "tickets": "Tickets",
@@ -431,7 +439,8 @@
       "monthly": "Monthly",
       "quarterly": "Quarterly",
       "annually": "Annually"
-    }
+    },
+    "noManagedProperties": "You do not manage any properties"
   },
   "payment": {
     "payments": "Payments",
@@ -618,7 +627,8 @@
     "unit": "Unit",
     "selectProperty": "Select Property",
     "selectUnit": "Select Unit",
-    "optional": "Optional"
+    "optional": "Optional",
+    "noManagedProperties": "You do not manage any properties"
   },
   "billingSettings": {
     "title": "Billing Settings",
@@ -745,7 +755,8 @@
     "clickToSelectLocation": "Click on the map or drag the marker to select the property location",
     "selectLocation": "Select Location on Map",
     "coordinates": "Coordinates",
-    "locationSet": "Location has been set"
+    "locationSet": "Location has been set",
+    "loadingMap": "Loading map..."
   },
   "user": {
     "users": "Users",
@@ -957,6 +968,7 @@
       "parking": "Parking Area Access",
       "utility": "Utility Area Access"
     },
+    "status": "Status",
     "statuses": {
       "pending": "Pending",
       "approved": "Approved",
