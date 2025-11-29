@@ -41,6 +41,8 @@ import PublicUnitDetailPage from './pages/public/PublicUnitDetailPage';
 import { FilesManagementPage } from './pages/files/FilesManagementPage';
 import { MyUnitsPage } from './pages/units/MyUnitsPage';
 import { MyRentalPage } from './pages/rental/MyRentalPage';
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import './lib/i18n';
 
 function App() {
@@ -57,6 +59,9 @@ function App() {
 
               <Route path="/public/directory" element={<PublicDirectoryPage />} />
               <Route path="/public/directory/unit/:unitId" element={<PublicUnitDetailPage />} />
+
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
 
               <Route
                 path="/dashboard"
