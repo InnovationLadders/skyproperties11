@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Avatar } from '../ui/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { USER_ROLES } from '../../utils/constants';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 export const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -173,6 +174,8 @@ export const Navbar = () => {
                 </Link>
               </>
             )}
+
+            {currentUser && <NotificationBell />}
 
             <div className="relative">
               <Button

@@ -12,6 +12,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
+import { notifyTicketCreated, notifyTicketAssigned, notifyTicketStatusUpdated } from './internalNotificationsService';
 
 const TICKETS_COLLECTION = 'tickets';
 const TICKET_COMMENTS_COLLECTION = 'ticket_comments';
@@ -55,7 +56,16 @@ export const createTicket = async (ticketData) => {
     };
 
     const docRef = await addDoc(collection(db, TICKETS_COLLECTION), ticket);
-    return { id: docRef.id, ...ticket };
+    const createdTicket = { id: docRef.id, ...ticket };
+
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const creatorName = userDoc.exists() ? userDoc.data().name || user.email : user.email;
+
+    await notifyTicketCreated(createdTicket, creatorName).catch(err =>
+      console.error('Error sending notification:', err)
+    );
+
+    return createdTicket;
   } catch (error) {
     console.error('Error creating ticket:', error);
     throw error;
@@ -127,6 +137,10 @@ export const getAllTickets = async () => {
 export const updateTicketStatus = async (ticketId, status) => {
   try {
     const ticketRef = doc(db, TICKETS_COLLECTION, ticketId);
+    const ticketDoc = await getDoc(ticketRef);
+    const ticketData = ticketDoc.data();
+    const previousStatus = ticketData.status;
+
     const updates = {
       status,
       updatedAt: serverTimestamp()
@@ -139,6 +153,11 @@ export const updateTicketStatus = async (ticketId, status) => {
     }
 
     await updateDoc(ticketRef, updates);
+
+    const updatedTicket = { id: ticketId, ...ticketData, ...updates };
+    await notifyTicketStatusUpdated(updatedTicket, previousStatus).catch(err =>
+      console.error('Error sending notification:', err)
+    );
   } catch (error) {
     console.error('Error updating ticket status:', error);
     throw error;
@@ -148,10 +167,21 @@ export const updateTicketStatus = async (ticketId, status) => {
 export const assignTicket = async (ticketId, userId) => {
   try {
     const ticketRef = doc(db, TICKETS_COLLECTION, ticketId);
+    const ticketDoc = await getDoc(ticketRef);
+    const ticketData = ticketDoc.data();
+
     await updateDoc(ticketRef, {
       assignedTo: userId,
       updatedAt: serverTimestamp()
     });
+
+    const assigneeDoc = await getDoc(doc(db, 'users', userId));
+    const assigneeName = assigneeDoc.exists() ? assigneeDoc.data().name || assigneeDoc.data().email : '';
+
+    const updatedTicket = { id: ticketId, ...ticketData, assignedTo: userId };
+    await notifyTicketAssigned(updatedTicket, assigneeName).catch(err =>
+      console.error('Error sending notification:', err)
+    );
   } catch (error) {
     console.error('Error assigning ticket:', error);
     throw error;

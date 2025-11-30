@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { PERMIT_STATUS, PERMIT_TYPES, USER_ROLES } from './constants';
+import { notifyPermitRequested, notifyPermitStatusChanged } from './internalNotificationsService';
 
 export const createPermitRequest = async (permitData, userProfile) => {
   try {
@@ -47,7 +48,13 @@ export const createPermitRequest = async (permitData, userProfile) => {
 
     const docRef = await addDoc(collection(db, 'permits'), permit);
     console.log('Permit request created successfully with ID:', docRef.id);
-    return { id: docRef.id, ...permit };
+
+    const createdPermit = { id: docRef.id, ...permit };
+    await notifyPermitRequested(createdPermit, permit.userName).catch(err =>
+      console.error('Error sending notification:', err)
+    );
+
+    return createdPermit;
   } catch (error) {
     console.error('Error creating permit request:', error);
     throw error;
@@ -204,6 +211,9 @@ export const getAllPermits = async (filters = {}) => {
 export const approvePermit = async (permitId, approvedBy, qrCodeData) => {
   try {
     const permitRef = doc(db, 'permits', permitId);
+    const permitDoc = await getDoc(permitRef);
+    const permitData = permitDoc.data();
+
     await updateDoc(permitRef, {
       status: PERMIT_STATUS.APPROVED,
       approvedBy: approvedBy,
@@ -211,6 +221,12 @@ export const approvePermit = async (permitId, approvedBy, qrCodeData) => {
       qrCode: qrCodeData,
       updatedAt: Timestamp.now(),
     });
+
+    const updatedPermit = { id: permitId, ...permitData, status: PERMIT_STATUS.APPROVED };
+    await notifyPermitStatusChanged(updatedPermit, 'approved').catch(err =>
+      console.error('Error sending notification:', err)
+    );
+
     console.log('Permit approved successfully:', permitId);
   } catch (error) {
     console.error('Error approving permit:', error);
@@ -221,6 +237,9 @@ export const approvePermit = async (permitId, approvedBy, qrCodeData) => {
 export const rejectPermit = async (permitId, rejectedBy, rejectionReason) => {
   try {
     const permitRef = doc(db, 'permits', permitId);
+    const permitDoc = await getDoc(permitRef);
+    const permitData = permitDoc.data();
+
     await updateDoc(permitRef, {
       status: PERMIT_STATUS.REJECTED,
       rejectedBy: rejectedBy,
@@ -228,6 +247,12 @@ export const rejectPermit = async (permitId, rejectedBy, rejectionReason) => {
       rejectionReason: rejectionReason || '',
       updatedAt: Timestamp.now(),
     });
+
+    const updatedPermit = { id: permitId, ...permitData, status: PERMIT_STATUS.REJECTED };
+    await notifyPermitStatusChanged(updatedPermit, 'rejected', rejectionReason).catch(err =>
+      console.error('Error sending notification:', err)
+    );
+
     console.log('Permit rejected successfully:', permitId);
   } catch (error) {
     console.error('Error rejecting permit:', error);
@@ -238,6 +263,9 @@ export const rejectPermit = async (permitId, rejectedBy, rejectionReason) => {
 export const revokePermit = async (permitId, revokedBy, revocationReason) => {
   try {
     const permitRef = doc(db, 'permits', permitId);
+    const permitDoc = await getDoc(permitRef);
+    const permitData = permitDoc.data();
+
     await updateDoc(permitRef, {
       status: PERMIT_STATUS.REVOKED,
       revokedBy: revokedBy,
@@ -245,6 +273,12 @@ export const revokePermit = async (permitId, revokedBy, revocationReason) => {
       revocationReason: revocationReason || '',
       updatedAt: Timestamp.now(),
     });
+
+    const updatedPermit = { id: permitId, ...permitData, status: PERMIT_STATUS.REVOKED };
+    await notifyPermitStatusChanged(updatedPermit, 'revoked', revocationReason).catch(err =>
+      console.error('Error sending notification:', err)
+    );
+
     console.log('Permit revoked successfully:', permitId);
   } catch (error) {
     console.error('Error revoking permit:', error);

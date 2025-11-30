@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
@@ -49,15 +50,17 @@ import { ManageBookingsPage } from './pages/bookings/ManageBookingsPage';
 import { BookingDetailPage } from './pages/bookings/BookingDetailPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import TicketReportPage from './pages/reports/TicketReportPage';
+import NotificationsPage from './pages/notifications/NotificationsPage';
 import './lib/i18n';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<MainLayout />}>
+        <NotificationsProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<MainLayout />}>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -406,10 +409,20 @@ function App() {
                 }
               />
 
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
         </BrowserRouter>
+        </NotificationsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

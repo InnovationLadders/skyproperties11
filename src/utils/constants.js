@@ -214,3 +214,38 @@ export const TICKET_CATEGORIES = {
   INQUIRY: 'inquiry',
   REQUEST: 'request',
 };
+
+export const INTERNAL_NOTIFICATION_TYPES = {
+  TICKET_CREATED: 'ticketCreated',
+  TICKET_ASSIGNED: 'ticketAssigned',
+  TICKET_STATUS_UPDATED: 'ticketStatusUpdated',
+  TICKET_COMPLETED: 'ticketCompleted',
+  TICKET_CLOSED: 'ticketClosed',
+  TICKET_COMMENTED: 'ticketCommented',
+  BILL_ISSUED: 'billIssued',
+  BILL_REMINDER: 'billReminder',
+  BILL_PAID: 'billPaid',
+  BILL_OVERDUE: 'billOverdue',
+  PERMIT_REQUESTED: 'permitRequested',
+  PERMIT_APPROVED: 'permitApproved',
+  PERMIT_REJECTED: 'permitRejected',
+  PERMIT_REVOKED: 'permitRevoked',
+  BOOKING_REQUESTED: 'bookingRequested',
+  BOOKING_APPROVED: 'bookingApproved',
+  BOOKING_REJECTED: 'bookingRejected',
+  BOOKING_CANCELLED: 'bookingCancelled',
+  BOOKING_REMINDER: 'bookingReminder',
+  CONTRACT_CREATED: 'contractCreated',
+  CONTRACT_EXPIRING: 'contractExpiring',
+  CONTRACT_EXPIRED: 'contractExpired',
+  CONTRACT_RENEWED: 'contractRenewed',
+};
+
+export const NOTIFICATION_CATEGORY = {
+  TICKETS: 'tickets',
+  BILLING: 'billing',
+  PERMITS: 'permits',
+  BOOKINGS: 'bookings',
+  CONTRACTS: 'contracts',
+  SYSTEM: 'system',
+};
