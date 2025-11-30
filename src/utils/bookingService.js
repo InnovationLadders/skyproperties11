@@ -57,15 +57,20 @@ export const getBookingsByUser = async (userId) => {
   try {
     const q = query(
       collection(db, 'bookings'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    return bookings.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('Error fetching user bookings:', error);
     return [];
@@ -76,15 +81,20 @@ export const getBookingsByUnit = async (unitId) => {
   try {
     const q = query(
       collection(db, 'bookings'),
-      where('unitId', '==', unitId),
-      orderBy('startDate', 'desc')
+      where('unitId', '==', unitId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    return bookings.sort((a, b) => {
+      const aTime = a.startDate?.toMillis ? a.startDate.toMillis() : 0;
+      const bTime = b.startDate?.toMillis ? b.startDate.toMillis() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('Error fetching unit bookings:', error);
     return [];
@@ -95,15 +105,20 @@ export const getBookingsByProperty = async (propertyId) => {
   try {
     const q = query(
       collection(db, 'bookings'),
-      where('propertyId', '==', propertyId),
-      orderBy('createdAt', 'desc')
+      where('propertyId', '==', propertyId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    return bookings.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('Error fetching property bookings:', error);
     return [];
@@ -112,12 +127,18 @@ export const getBookingsByProperty = async (propertyId) => {
 
 export const getAllBookings = async () => {
   try {
-    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'bookings'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    return bookings.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('Error fetching all bookings:', error);
     return [];
@@ -131,22 +152,26 @@ export const getPendingBookings = async (propertyId = null) => {
       q = query(
         collection(db, 'bookings'),
         where('propertyId', '==', propertyId),
-        where('status', '==', BOOKING_STATUS.PENDING),
-        orderBy('createdAt', 'desc')
+        where('status', '==', BOOKING_STATUS.PENDING)
       );
     } else {
       q = query(
         collection(db, 'bookings'),
-        where('status', '==', BOOKING_STATUS.PENDING),
-        orderBy('createdAt', 'desc')
+        where('status', '==', BOOKING_STATUS.PENDING)
       );
     }
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const bookings = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    return bookings.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error('Error fetching pending bookings:', error);
     return [];
