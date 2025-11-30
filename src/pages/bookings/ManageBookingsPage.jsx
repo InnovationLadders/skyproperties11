@@ -34,12 +34,19 @@ export const ManageBookingsPage = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    fetchProperties();
-    fetchBookings();
+    const loadData = async () => {
+      await fetchProperties();
+      await fetchBookings();
+    };
+    if (currentUser && userProfile) {
+      loadData();
+    }
   }, [currentUser, userProfile]);
 
   useEffect(() => {
-    fetchBookings();
+    if (currentUser && userProfile) {
+      fetchBookings();
+    }
   }, [propertyFilter]);
 
   const fetchProperties = async () => {
@@ -54,7 +61,7 @@ export const ManageBookingsPage = () => {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      let data;
+      let data = [];
 
       if (userProfile.role === USER_ROLES.ADMIN) {
         if (propertyFilter === 'all') {
@@ -63,21 +70,37 @@ export const ManageBookingsPage = () => {
           data = await getBookingsByProperty(propertyFilter);
         }
       } else if (userProfile.role === USER_ROLES.PROPERTY_MANAGER) {
+        let managedProperties = properties;
+
+        if (managedProperties.length === 0) {
+          console.log('[ManageBookingsPage] Properties not loaded yet, fetching...');
+          managedProperties = await getUserAccessibleProperties(currentUser.uid, userProfile.role);
+        }
+
+        console.log('[ManageBookingsPage] Manager properties:', managedProperties.length);
+
+        if (managedProperties.length === 0) {
+          console.warn('[ManageBookingsPage] No properties assigned to this manager');
+          setBookings([]);
+          setLoading(false);
+          return;
+        }
+
         if (propertyFilter === 'all') {
-          const allBookings = [];
-          for (const property of properties) {
-            const propertyBookings = await getBookingsByProperty(property.id);
-            allBookings.push(...propertyBookings);
-          }
-          data = allBookings;
+          const bookingsArrays = await Promise.all(
+            managedProperties.map(property => getBookingsByProperty(property.id))
+          );
+          data = bookingsArrays.flat();
         } else {
           data = await getBookingsByProperty(propertyFilter);
         }
       }
 
-      setBookings(data);
+      console.log('[ManageBookingsPage] Fetched bookings:', data.length);
+      setBookings(data || []);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
