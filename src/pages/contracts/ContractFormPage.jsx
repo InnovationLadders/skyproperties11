@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import { ArrowLeft, Save, Upload, FileText, X } from 'lucide-react';
 import { CONTRACT_TYPES, CONTRACT_STATUS, USER_ROLES } from '../../utils/constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { getManagedPropertyIds } from '../../utils/permissionsService';
+import { createContract, updateContract } from '../../utils/contractService';
 
 export const ContractFormPage = () => {
   const { t } = useTranslation();
@@ -238,20 +239,20 @@ export const ContractFormPage = () => {
         documentUrl,
         startDate: new Date(formData.startDate).toISOString(),
         endDate: new Date(formData.endDate).toISOString(),
-        updatedAt: serverTimestamp(),
       };
 
+      let result;
       if (isEditMode) {
-        await updateDoc(doc(db, 'contracts', contractId), contractData);
+        result = await updateContract(contractId, contractData);
       } else {
-        const newDocRef = doc(collection(db, 'contracts'));
-        await setDoc(newDocRef, {
-          ...contractData,
-          createdAt: serverTimestamp(),
-        });
+        result = await createContract(contractData);
       }
 
-      navigate('/contracts');
+      if (result.success) {
+        navigate('/contracts');
+      } else {
+        setError(result.error || t('contract.failedToSave'));
+      }
     } catch (error) {
       console.error('Error saving contract:', error);
       setError(t('contract.failedToSave'));

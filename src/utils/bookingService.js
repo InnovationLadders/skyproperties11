@@ -1,6 +1,8 @@
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { BOOKING_STATUS, USER_ROLES } from './constants';
+import { notifyBookingRequested, notifyBookingStatusChanged } from './internalNotificationsService';
+import { getUserById } from './userService';
 
 export const createBooking = async (bookingData, currentUser) => {
   try {
@@ -45,6 +47,21 @@ export const createBooking = async (bookingData, currentUser) => {
     };
 
     const docRef = await addDoc(collection(db, 'bookings'), booking);
+
+    if (unitData.requiresApproval) {
+      const userDoc = await getUserById(currentUser.uid);
+      const requesterName = userDoc?.name || currentUser.email;
+
+      await notifyBookingRequested(
+        {
+          id: docRef.id,
+          ...booking,
+          facilityName: `${propertyData.name} - ${unitData.unitNumber}`,
+          date: startDate,
+        },
+        requesterName
+      );
+    }
 
     return { success: true, bookingId: docRef.id };
   } catch (error) {
@@ -229,6 +246,24 @@ export const updateBookingStatus = async (bookingId, status, notes = '', updated
       updatedAt: serverTimestamp(),
       updatedBy,
     });
+
+    const unitDoc = await getDoc(doc(db, 'units', bookingData.unitId));
+    const unitData = unitDoc.exists() ? unitDoc.data() : {};
+    const propertyDoc = await getDoc(doc(db, 'properties', bookingData.propertyId));
+    const propertyData = propertyDoc.exists() ? propertyDoc.data() : {};
+
+    const facilityName = `${propertyData.name || 'Property'} - ${unitData.unitNumber || bookingData.unitNumber || 'Unit'}`;
+
+    await notifyBookingStatusChanged(
+      {
+        id: bookingId,
+        ...bookingData,
+        facilityName,
+        date: bookingData.startDate,
+      },
+      status,
+      notes
+    );
 
     return { success: true };
   } catch (error) {

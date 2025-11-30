@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { BILL_STATUS, BILL_TYPES } from './constants';
+import { notifyBillIssued, notifyBillPaid } from './internalNotificationsService';
 
 export const createBill = async (billData) => {
   try {
@@ -34,6 +35,15 @@ export const createBill = async (billData) => {
 
     const docRef = await addDoc(collection(db, 'bills'), bill);
     console.log('Bill created successfully with ID:', docRef.id);
+
+    await notifyBillIssued(
+      {
+        id: docRef.id,
+        ...bill,
+      },
+      bill.recipientName
+    );
+
     return { id: docRef.id, ...bill };
   } catch (error) {
     console.error('Error creating bill:', error);
@@ -149,11 +159,22 @@ export const recordPayment = async (billId, paymentData) => {
 
     const docRef = await addDoc(collection(db, 'payments'), payment);
 
+    const billDoc = await getDoc(doc(db, 'bills', billId));
+    const billData = billDoc.exists() ? billDoc.data() : {};
+
     await updateBill(billId, {
       status: BILL_STATUS.PAID,
       paidAmount: paymentData.amount,
       paidDate: Timestamp.now(),
       transactionId: paymentData.transactionId,
+    });
+
+    await notifyBillPaid({
+      id: billId,
+      ...billData,
+      recipientId: billData.recipientId,
+      amount: paymentData.amount,
+      currency: billData.currency || 'SAR',
     });
 
     return { id: docRef.id, ...payment };
