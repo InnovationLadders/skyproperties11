@@ -1530,7 +1530,9 @@
     "revenue": "Revenue",
     "detailedReports": "Detailed Reports",
     "total": "Total",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "noProperties": "No Properties",
+    "noPropertiesDesc": "No properties available to display reports. Please add a property first."
   },
   "notifications": {
     "notifications": "Notifications",

@@ -1530,6 +1530,8 @@
     "revenue": "الإيرادات",
     "detailedReports": "التقارير التفصيلية",
     "total": "الإجمالي",
+    "noProperties": "لا توجد عقارات",
+    "noPropertiesDesc": "لا توجد عقارات متاحة لعرض التقارير. يرجى إضافة عقار أولاً.",
     "viewDetails": "عرض التفاصيل"
   },
   "notifications": {

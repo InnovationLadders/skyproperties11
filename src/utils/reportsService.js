@@ -276,15 +276,32 @@ export const getContractsReport = async (propertyId, startDate, endDate) => {
 
 export const getBillingReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId) {
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, unpaid: 0, pending: 0, paid: 0, overdue: 0, cancelled: 0 },
+        byType: { rent: 0, commission: 0, serviceFees: 0, other: 0 },
+        totalIssued: 0,
+        totalCollected: 0,
+        totalOutstanding: 0,
+        collectionRate: 0,
+        bills: [],
+      };
+    }
+
     const billsRef = collection(db, 'bills');
     const q = query(
       billsRef,
-      where('propertyId', '==', propertyId),
       where('createdAt', '>=', Timestamp.fromDate(startDate)),
       where('createdAt', '<=', Timestamp.fromDate(endDate))
     );
     const snapshot = await getDocs(q);
-    const bills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let bills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    bills = bills.filter(bill => {
+      return bill.propertyId === propertyId ||
+             (bill.unitId && bill.unitId.includes(propertyId));
+    });
 
     const summary = {
       total: bills.length,
@@ -330,6 +347,17 @@ export const getBillingReport = async (propertyId, startDate, endDate) => {
 
 export const getBookingsReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId) {
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0, completed: 0 },
+        approvalRate: 0,
+        facilityUsage: {},
+        totalRevenue: 0,
+        bookings: [],
+      };
+    }
+
     const bookingsRef = collection(db, 'bookings');
     const q = query(
       bookingsRef,
@@ -378,6 +406,16 @@ export const getBookingsReport = async (propertyId, startDate, endDate) => {
 
 export const getPermitsReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId) {
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, pending: 0, approved: 0, rejected: 0, active: 0, expired: 0, revoked: 0 },
+        approvalRate: 0,
+        byType: {},
+        permits: [],
+      };
+    }
+
     const permitsRef = collection(db, 'permits');
     const q = query(
       permitsRef,
@@ -472,6 +510,10 @@ export const getComparisonData = async (propertyId, period) => {
 
 export const getOverviewReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId || !startDate || !endDate) {
+      throw new Error('Missing required parameters for overview report');
+    }
+
     const [tickets, units, contracts, billing, bookings, permits] = await Promise.all([
       getTicketsReport(propertyId, startDate, endDate),
       getUnitsReport(propertyId, startDate, endDate),

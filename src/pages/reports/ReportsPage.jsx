@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   TrendingUp,
 } from 'lucide-react';
-import { MainLayout } from '../../components/layout/MainLayout';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DateRangePicker } from '../../components/reports/DateRangePicker';
@@ -45,7 +44,7 @@ export default function ReportsPage() {
   }, [user]);
 
   useEffect(() => {
-    if (selectedProperty) {
+    if (selectedProperty && dateRange) {
       loadOverview();
     }
   }, [selectedProperty, dateRange]);
@@ -151,22 +150,35 @@ export default function ReportsPage() {
     },
   ];
 
-  if (loading) {
+  if (loading && properties.length === 0) {
     return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
         </div>
-      </MainLayout>
+      </div>
+    );
+  }
+
+  if (!loading && properties.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            {t('reports.noProperties')}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {t('reports.noPropertiesDesc')}
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -371,7 +383,6 @@ export default function ReportsPage() {
             ))}
           </div>
         </div>
-      </div>
-    </MainLayout>
+    </div>
   );
 }
