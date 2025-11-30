@@ -53,6 +53,15 @@ export const UnitFormPage = () => {
     contactPhone: '',
     contactEmail: '',
     workingHours: '',
+    isBookable: false,
+    requiresApproval: false,
+    bookingPrice: 0,
+    bookingSettings: {
+      maxDuration: 8,
+      startTime: '08:00',
+      endTime: '22:00',
+      workingDays: [1, 2, 3, 4, 5, 6, 0],
+    },
   });
   const [error, setError] = useState('');
   const [coordinatesEnabled, setCoordinatesEnabled] = useState(false);
@@ -430,7 +439,114 @@ export const UnitFormPage = () => {
                     <option value={FACILITY_TYPES.CAR_PARKING}>{t('unit.carParking')}</option>
                     <option value={FACILITY_TYPES.OUTDOOR_PARK}>{t('unit.outdoorPark')}</option>
                     <option value={FACILITY_TYPES.KIOSK}>{t('unit.kiosk')}</option>
+                    <option value={FACILITY_TYPES.MEETING_ROOM}>{t('unit.meetingRoom')}</option>
+                    <option value={FACILITY_TYPES.SWIMMING_POOL}>{t('unit.swimmingPool')}</option>
+                    <option value={FACILITY_TYPES.CONFERENCE_HALL}>{t('unit.conferenceHall')}</option>
+                    <option value={FACILITY_TYPES.GYM}>{t('unit.gym')}</option>
+                    <option value={FACILITY_TYPES.PLAYGROUND}>{t('unit.playground')}</option>
+                    <option value={FACILITY_TYPES.BBQ_AREA}>{t('unit.bbqArea')}</option>
                   </select>
+                </div>
+              )}
+
+              {formData.category === UNIT_CATEGORY.FACILITY && (
+                <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                  <div className="text-sm font-semibold text-foreground border-b pb-2">
+                    {t('unit.bookingSettings')}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="isBookable"
+                      name="isBookable"
+                      checked={formData.isBookable}
+                      onChange={(e) => setFormData({ ...formData, isBookable: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="isBookable">{t('unit.isBookable')}</Label>
+                  </div>
+
+                  {formData.isBookable && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="requiresApproval"
+                          name="requiresApproval"
+                          checked={formData.requiresApproval}
+                          onChange={(e) => setFormData({ ...formData, requiresApproval: e.target.checked })}
+                          className="w-4 h-4"
+                        />
+                        <Label htmlFor="requiresApproval">{t('unit.requiresApproval')}</Label>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="bookingPrice">{t('unit.bookingPricePerHour')}</Label>
+                        <Input
+                          id="bookingPrice"
+                          name="bookingPrice"
+                          type="number"
+                          value={formData.bookingPrice}
+                          onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="maxDuration">{t('unit.maxDurationHours')}</Label>
+                          <Input
+                            id="maxDuration"
+                            type="number"
+                            value={formData.bookingSettings.maxDuration}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              bookingSettings: {
+                                ...formData.bookingSettings,
+                                maxDuration: parseInt(e.target.value) || 8
+                              }
+                            })}
+                            min="1"
+                            max="24"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="startTime">{t('unit.startTime')}</Label>
+                          <Input
+                            id="startTime"
+                            type="time"
+                            value={formData.bookingSettings.startTime}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              bookingSettings: {
+                                ...formData.bookingSettings,
+                                startTime: e.target.value
+                              }
+                            })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="endTime">{t('unit.endTime')}</Label>
+                          <Input
+                            id="endTime"
+                            type="time"
+                            value={formData.bookingSettings.endTime}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              bookingSettings: {
+                                ...formData.bookingSettings,
+                                endTime: e.target.value
+                              }
+                            })}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

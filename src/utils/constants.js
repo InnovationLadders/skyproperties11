@@ -17,6 +17,12 @@ export const FACILITY_TYPES = {
   CAR_PARKING: 'carParking',
   OUTDOOR_PARK: 'outdoorPark',
   KIOSK: 'kiosk',
+  MEETING_ROOM: 'meetingRoom',
+  SWIMMING_POOL: 'swimmingPool',
+  CONFERENCE_HALL: 'conferenceHall',
+  GYM: 'gym',
+  PLAYGROUND: 'playground',
+  BBQ_AREA: 'bbqArea',
 };
 
 export const UNIT_STATUS = {
@@ -153,4 +159,26 @@ export const BUSINESS_CATEGORIES = {
   EDUCATION: 'education',
   ENTERTAINMENT: 'entertainment',
   OTHER: 'other',
+};
+
+export const BOOKING_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  CANCELLED: 'cancelled',
+  COMPLETED: 'completed',
+};
+
+export const BOOKING_DURATION_TYPES = {
+  HOURLY: 'hourly',
+  HALF_DAY: 'halfDay',
+  FULL_DAY: 'fullDay',
+};
+
+export const BOOKING_NOTIFICATION_TYPES = {
+  BOOKING_CREATED: 'bookingCreated',
+  BOOKING_APPROVED: 'bookingApproved',
+  BOOKING_REJECTED: 'bookingRejected',
+  BOOKING_CANCELLED: 'bookingCancelled',
+  BOOKING_REMINDER: 'bookingReminder',
 };

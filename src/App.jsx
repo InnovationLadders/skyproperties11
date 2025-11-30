@@ -43,6 +43,10 @@ import { MyUnitsPage } from './pages/units/MyUnitsPage';
 import { MyRentalPage } from './pages/rental/MyRentalPage';
 import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import { MyBookingsPage } from './pages/bookings/MyBookingsPage';
+import { CreateBookingPage } from './pages/bookings/CreateBookingPage';
+import { ManageBookingsPage } from './pages/bookings/ManageBookingsPage';
+import { BookingDetailPage } from './pages/bookings/BookingDetailPage';
 import './lib/i18n';
 
 function App() {
@@ -346,6 +350,39 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <FilesManagementPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute>
+                    <MyBookingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookings/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateBookingPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookings/manage"
+                element={
+                  <ProtectedRoute>
+                    <ManageBookingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookings/:bookingId"
+                element={
+                  <ProtectedRoute>
+                    <BookingDetailPage />
                   </ProtectedRoute>
                 }
               />

@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen } from 'lucide-react';
+import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen, Calendar } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { BillingStats } from '../components/billing/BillingStats';
 import { USER_ROLES } from '../utils/constants';
@@ -109,6 +109,13 @@ export const DashboardPage = () => {
           link: '/files',
           color: 'from-teal-500 to-teal-600',
         },
+        {
+          title: t('booking.manageBookings'),
+          description: t('booking.reviewAndApprove'),
+          icon: Calendar,
+          link: '/bookings/manage',
+          color: 'from-pink-500 to-pink-600',
+        },
       ];
     }
 
@@ -163,6 +170,13 @@ export const DashboardPage = () => {
           link: '/files',
           color: 'from-cyan-500 to-cyan-600',
         },
+        {
+          title: t('booking.manageBookings'),
+          description: t('booking.reviewAndApprove'),
+          icon: Calendar,
+          link: '/bookings/manage',
+          color: 'from-pink-500 to-pink-600',
+        },
       ];
     }
 
@@ -203,6 +217,13 @@ export const DashboardPage = () => {
           link: '/permits',
           color: 'from-orange-500 to-orange-600',
         },
+        {
+          title: t('booking.myBookings'),
+          description: t('booking.manageYourBookings'),
+          icon: Calendar,
+          link: '/bookings',
+          color: 'from-pink-500 to-pink-600',
+        },
       ];
     }
 
@@ -242,6 +263,13 @@ export const DashboardPage = () => {
           icon: FileText,
           link: '/permits',
           color: 'from-orange-500 to-orange-600',
+        },
+        {
+          title: t('booking.myBookings'),
+          description: t('booking.manageYourBookings'),
+          icon: Calendar,
+          link: '/bookings',
+          color: 'from-pink-500 to-pink-600',
         },
       ];
     }
