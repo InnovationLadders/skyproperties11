@@ -183,21 +183,40 @@ export const deleteNotification = async (notificationId) => {
   }
 };
 
-export const subscribeToNotifications = (userId, callback) => {
-  const q = query(
-    collection(db, 'notifications'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(50)
-  );
+export const subscribeToNotifications = (userId, callback, errorCallback) => {
+  try {
+    console.log('[subscribeToNotifications] Setting up subscription for user:', userId);
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
 
-  return onSnapshot(q, (snapshot) => {
-    const notifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    callback(notifications);
-  });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        console.log('[subscribeToNotifications] Snapshot received:', snapshot.docs.length, 'notifications');
+        const notifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        callback(notifications);
+      },
+      (error) => {
+        console.error('[subscribeToNotifications] Snapshot error:', error);
+        if (errorCallback) {
+          errorCallback(error);
+        }
+      }
+    );
+  } catch (error) {
+    console.error('[subscribeToNotifications] Setup error:', error);
+    if (errorCallback) {
+      errorCallback(error);
+    }
+    return () => {}; // Return empty unsubscribe function
+  }
 };
 
 export const getPropertyManagerId = async (propertyId) => {
@@ -430,4 +449,96 @@ export const notifyContractExpiring = async (contract, daysUntilExpiry) => {
   }));
 
   await createBulkNotifications(notifications);
+};
+
+export const createTestNotifications = async (userId) => {
+  try {
+    console.log('[createTestNotifications] Creating test notifications for user:', userId);
+
+    const testNotifications = [
+      {
+        userId,
+        type: INTERNAL_NOTIFICATION_TYPES.TICKET_CREATED,
+        title: 'New Maintenance Ticket',
+        message: 'A new maintenance ticket #T-001 has been created for broken AC unit',
+        relatedId: 'test-ticket-1',
+        relatedType: 'ticket',
+        actionUrl: '/tickets',
+        category: NOTIFICATION_CATEGORY.TICKETS,
+        metadata: {
+          ticketNumber: 'T-001',
+          priority: 'high',
+        },
+      },
+      {
+        userId,
+        type: INTERNAL_NOTIFICATION_TYPES.BILL_ISSUED,
+        title: 'New Bill Issued',
+        message: 'Your monthly rent bill for 2500 SAR has been issued',
+        relatedId: 'test-bill-1',
+        relatedType: 'bill',
+        actionUrl: '/billing',
+        category: NOTIFICATION_CATEGORY.BILLING,
+        metadata: {
+          amount: 2500,
+          currency: 'SAR',
+        },
+      },
+      {
+        userId,
+        type: INTERNAL_NOTIFICATION_TYPES.PERMIT_APPROVED,
+        title: 'Permit Approved',
+        message: 'Your parking permit request has been approved',
+        relatedId: 'test-permit-1',
+        relatedType: 'permit',
+        actionUrl: '/permits',
+        category: NOTIFICATION_CATEGORY.PERMITS,
+        metadata: {
+          permitType: 'parking',
+        },
+      },
+      {
+        userId,
+        type: INTERNAL_NOTIFICATION_TYPES.BOOKING_APPROVED,
+        title: 'Booking Confirmed',
+        message: 'Your gym facility booking has been confirmed for tomorrow',
+        relatedId: 'test-booking-1',
+        relatedType: 'booking',
+        actionUrl: '/bookings',
+        category: NOTIFICATION_CATEGORY.BOOKINGS,
+        metadata: {
+          facilityName: 'Gym',
+          date: new Date().toISOString(),
+        },
+      },
+      {
+        userId,
+        type: INTERNAL_NOTIFICATION_TYPES.CONTRACT_EXPIRING,
+        title: 'Contract Expiring Soon',
+        message: 'Your rental contract will expire in 30 days',
+        relatedId: 'test-contract-1',
+        relatedType: 'contract',
+        actionUrl: '/contracts',
+        category: NOTIFICATION_CATEGORY.CONTRACTS,
+        metadata: {
+          daysUntilExpiry: 30,
+          contractType: 'rent',
+        },
+      },
+    ];
+
+    // Create half as read, half as unread
+    const notifications = testNotifications.map((notification, index) => ({
+      ...notification,
+      isRead: index < 2, // First 2 are read
+      createdAt: Timestamp.fromDate(new Date(Date.now() - (index * 3600000))), // Stagger by 1 hour each
+    }));
+
+    const result = await createBulkNotifications(notifications);
+    console.log('[createTestNotifications] Test notifications created:', result);
+    return result;
+  } catch (error) {
+    console.error('[createTestNotifications] Error creating test notifications:', error);
+    return { success: false, error: error.message };
+  }
 };

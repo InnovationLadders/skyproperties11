@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, CheckCheck, Filter } from 'lucide-react';
+import { Bell, CheckCheck, Filter, RefreshCw, Plus, AlertCircle } from 'lucide-react';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { NotificationItem } from '../../components/notifications/NotificationItem';
 import { useNotifications } from '../../contexts/NotificationsContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { NOTIFICATION_CATEGORY } from '../../utils/constants';
+import { createTestNotifications } from '../../utils/internalNotificationsService';
 
 export default function NotificationsPage() {
   const { t } = useTranslation();
-  const { notifications, markAllAsRead, loading } = useNotifications();
+  const { notifications, markAllAsRead, loading, error, refreshNotifications } = useNotifications();
+  const { currentUser } = useAuth();
   const [filter, setFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [creatingTest, setCreatingTest] = useState(false);
 
   const filteredNotifications = notifications.filter((notification) => {
     if (filter === 'unread' && notification.isRead) return false;
@@ -38,6 +42,20 @@ export default function NotificationsPage() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
+  const handleCreateTestNotifications = async () => {
+    if (!currentUser) return;
+
+    try {
+      setCreatingTest(true);
+      await createTestNotifications(currentUser.uid);
+      // Notifications will auto-update via subscription
+    } catch (err) {
+      console.error('Error creating test notifications:', err);
+    } finally {
+      setCreatingTest(false);
+    }
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -51,12 +69,24 @@ export default function NotificationsPage() {
               {t('notifications.manageNotifications')}
             </p>
           </div>
-          {unreadCount > 0 && (
-            <Button onClick={markAllAsRead} variant="outline">
-              <CheckCheck className="h-4 w-4 mr-2" />
-              {t('notifications.markAllRead')}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {process.env.NODE_ENV === 'development' && (
+              <Button
+                onClick={handleCreateTestNotifications}
+                disabled={creatingTest}
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {creatingTest ? 'Creating...' : 'Test Notifications'}
+              </Button>
+            )}
+            {unreadCount > 0 && (
+              <Button onClick={markAllAsRead} variant="outline">
+                <CheckCheck className="h-4 w-4 mr-2" />
+                {t('notifications.markAllRead')}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
@@ -98,7 +128,21 @@ export default function NotificationsPage() {
         </div>
 
         <Card className="overflow-hidden">
-          {loading ? (
+          {error ? (
+            <div className="p-12 text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Error Loading Notifications
+              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {error}
+              </p>
+              <Button onClick={refreshNotifications} variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          ) : loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-4 text-gray-600 dark:text-gray-400">

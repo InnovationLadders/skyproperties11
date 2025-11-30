@@ -20,46 +20,65 @@ export const useNotifications = () => {
 };
 
 export const NotificationsProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!currentUser) {
+      console.log('[NotificationsContext] No current user, clearing notifications');
       setNotifications([]);
       setUnreadCount(0);
       setLoading(false);
+      setError(null);
       return;
     }
 
+    console.log('[NotificationsContext] Setting up notifications for user:', currentUser.uid);
     setLoading(true);
+    setError(null);
 
-    const unsubscribe = subscribeToNotifications(user.uid, (newNotifications) => {
-      setNotifications(newNotifications);
-      const unread = newNotifications.filter(n => !n.isRead).length;
-      setUnreadCount(unread);
-      setLoading(false);
-    });
+    const unsubscribe = subscribeToNotifications(
+      currentUser.uid,
+      (newNotifications) => {
+        console.log('[NotificationsContext] Received notifications:', newNotifications.length);
+        setNotifications(newNotifications);
+        const unread = newNotifications.filter(n => !n.isRead).length;
+        setUnreadCount(unread);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error('[NotificationsContext] Subscription error:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    );
 
     return () => {
       if (unsubscribe) {
+        console.log('[NotificationsContext] Unsubscribing from notifications');
         unsubscribe();
       }
     };
-  }, [user]);
+  }, [currentUser]);
 
   const refreshNotifications = async () => {
-    if (!user) return;
+    if (!currentUser) return;
 
     try {
-      const { notifications: newNotifications } = await getUserNotifications(user.uid);
+      console.log('[NotificationsContext] Refreshing notifications');
+      const { notifications: newNotifications } = await getUserNotifications(currentUser.uid);
       setNotifications(newNotifications);
 
-      const { count } = await getUnreadCount(user.uid);
+      const { count } = await getUnreadCount(currentUser.uid);
       setUnreadCount(count);
+      setError(null);
     } catch (error) {
-      console.error('Error refreshing notifications:', error);
+      console.error('[NotificationsContext] Error refreshing notifications:', error);
+      setError(error.message);
     }
   };
 
@@ -78,16 +97,17 @@ export const NotificationsProvider = ({ children }) => {
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!user) return;
+    if (!currentUser) return;
 
     try {
-      await markAllAsRead(user.uid);
+      console.log('[NotificationsContext] Marking all as read');
+      await markAllAsRead(currentUser.uid);
       setNotifications(prev =>
         prev.map(n => ({ ...n, isRead: true }))
       );
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error('[NotificationsContext] Error marking all as read:', error);
     }
   };
 
@@ -110,6 +130,7 @@ export const NotificationsProvider = ({ children }) => {
     notifications,
     unreadCount,
     loading,
+    error,
     refreshNotifications,
     markAsRead: handleMarkAsRead,
     markAllAsRead: handleMarkAllAsRead,
