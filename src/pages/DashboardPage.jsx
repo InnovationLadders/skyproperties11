@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen, Calendar } from 'lucide-react';
+import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen, Calendar, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { BillingStats } from '../components/billing/BillingStats';
 import { USER_ROLES } from '../utils/constants';
@@ -116,6 +116,13 @@ export const DashboardPage = () => {
           link: '/bookings/manage',
           color: 'from-pink-500 to-pink-600',
         },
+        {
+          title: t('reports.reports'),
+          description: t('reports.comprehensiveAnalytics'),
+          icon: BarChart3,
+          link: '/reports',
+          color: 'from-amber-500 to-amber-600',
+        },
       ];
     }
 
@@ -176,6 +183,13 @@ export const DashboardPage = () => {
           icon: Calendar,
           link: '/bookings/manage',
           color: 'from-pink-500 to-pink-600',
+        },
+        {
+          title: t('reports.reports'),
+          description: t('reports.comprehensiveAnalytics'),
+          icon: BarChart3,
+          link: '/reports',
+          color: 'from-amber-500 to-amber-600',
         },
       ];
     }

@@ -182,3 +182,35 @@ export const BOOKING_NOTIFICATION_TYPES = {
   BOOKING_CANCELLED: 'bookingCancelled',
   BOOKING_REMINDER: 'bookingReminder',
 };
+
+export const REPORT_PERIODS = {
+  MONTHLY: 'monthly',
+  QUARTERLY: 'quarterly',
+  YEARLY: 'yearly',
+  CUSTOM: 'custom',
+};
+
+export const REPORT_TYPES = {
+  TICKETS: 'tickets',
+  UNITS: 'units',
+  CONTRACTS: 'contracts',
+  BILLING: 'billing',
+  BOOKINGS: 'bookings',
+  PERMITS: 'permits',
+  OVERVIEW: 'overview',
+};
+
+export const TICKET_PRIORITIES = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  URGENT: 'urgent',
+};
+
+export const TICKET_CATEGORIES = {
+  MAINTENANCE: 'maintenance',
+  REPAIR: 'repair',
+  COMPLAINT: 'complaint',
+  INQUIRY: 'inquiry',
+  REQUEST: 'request',
+};

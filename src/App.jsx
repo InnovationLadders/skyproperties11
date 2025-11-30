@@ -47,6 +47,8 @@ import { MyBookingsPage } from './pages/bookings/MyBookingsPage';
 import { CreateBookingPage } from './pages/bookings/CreateBookingPage';
 import { ManageBookingsPage } from './pages/bookings/ManageBookingsPage';
 import { BookingDetailPage } from './pages/bookings/BookingDetailPage';
+import ReportsPage from './pages/reports/ReportsPage';
+import TicketReportPage from './pages/reports/TicketReportPage';
 import './lib/i18n';
 
 function App() {
@@ -383,6 +385,23 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <BookingDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports/tickets"
+                element={
+                  <ProtectedRoute>
+                    <TicketReportPage />
                   </ProtectedRoute>
                 }
               />
