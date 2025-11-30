@@ -53,16 +53,36 @@ export const getPreviousPeriodRange = (period) => {
 
 export const getTicketsReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId || !startDate || !endDate) {
+      console.error('[getTicketsReport] Missing required parameters');
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, open: 0, assigned: 0, inProgress: 0, completed: 0, rated: 0, closed: 0 },
+        byPriority: { low: 0, medium: 0, high: 0, urgent: 0 },
+        byCategory: { maintenance: 0, repair: 0, complaint: 0, inquiry: 0, request: 0 },
+        metrics: { avgResponseTime: 0, avgResolutionTime: 0, completionRate: 0, avgRating: 0 },
+        timeline: [],
+        topIssues: [],
+        slowestTickets: [],
+        tickets: [],
+      };
+    }
+
+    console.log('[getTicketsReport] Fetching tickets for property:', propertyId);
     const ticketsRef = collection(db, 'tickets');
-    const q = query(
-      ticketsRef,
-      where('propertyId', '==', propertyId),
-      where('createdAt', '>=', Timestamp.fromDate(startDate)),
-      where('createdAt', '<=', Timestamp.fromDate(endDate))
-    );
+    const q = query(ticketsRef, where('propertyId', '==', propertyId));
 
     const snapshot = await getDocs(q);
-    const tickets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let tickets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Filter by date range in JavaScript to avoid composite index requirement
+    tickets = tickets.filter(ticket => {
+      if (!ticket.createdAt) return false;
+      const createdDate = ticket.createdAt?.toDate?.() || new Date(ticket.createdAt);
+      return createdDate >= startDate && createdDate <= endDate;
+    });
+
+    console.log('[getTicketsReport] Filtered tickets count:', tickets.length);
 
     const summary = {
       total: tickets.length,
@@ -179,13 +199,35 @@ export const getTicketsReport = async (propertyId, startDate, endDate) => {
       tickets,
     };
   } catch (error) {
-    console.error('Error fetching tickets report:', error);
-    throw error;
+    console.error('[getTicketsReport] Error fetching tickets report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, open: 0, assigned: 0, inProgress: 0, completed: 0, rated: 0, closed: 0 },
+      byPriority: { low: 0, medium: 0, high: 0, urgent: 0 },
+      byCategory: { maintenance: 0, repair: 0, complaint: 0, inquiry: 0, request: 0 },
+      metrics: { avgResponseTime: 0, avgResolutionTime: 0, completionRate: 0, avgRating: 0 },
+      timeline: [],
+      topIssues: [],
+      slowestTickets: [],
+      tickets: [],
+    };
   }
 };
 
 export const getUnitsReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId) {
+      console.error('[getUnitsReport] Missing propertyId');
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, available: 0, reserved: 0, sold: 0, rented: 0 },
+        occupancyRate: 0,
+        byCategory: { normal: 0, facility: 0 },
+        units: [],
+      };
+    }
+
+    console.log('[getUnitsReport] Fetching units for property:', propertyId);
     const unitsRef = collection(db, 'units');
     const q = query(unitsRef, where('propertyId', '==', propertyId));
     const snapshot = await getDocs(q);
@@ -216,25 +258,45 @@ export const getUnitsReport = async (propertyId, startDate, endDate) => {
       units,
     };
   } catch (error) {
-    console.error('Error fetching units report:', error);
-    throw error;
+    console.error('[getUnitsReport] Error fetching units report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, available: 0, reserved: 0, sold: 0, rented: 0 },
+      occupancyRate: 0,
+      byCategory: { normal: 0, facility: 0 },
+      units: [],
+    };
   }
 };
 
 export const getContractsReport = async (propertyId, startDate, endDate) => {
   try {
+    if (!propertyId || !startDate || !endDate) {
+      console.error('[getContractsReport] Missing required parameters');
+      return {
+        period: { startDate, endDate },
+        summary: { total: 0, draft: 0, active: 0, expiring: 0, expired: 0, terminated: 0 },
+        byType: { rent: 0, operations: 0, maintenance: 0 },
+        totalValue: 0,
+        expiringContracts: [],
+        contracts: [],
+      };
+    }
+
+    console.log('[getContractsReport] Fetching contracts for property:', propertyId);
     const contractsRef = collection(db, 'contracts');
-    const q = query(
-      contractsRef,
-      where('propertyId', '==', propertyId)
-    );
+    const q = query(contractsRef, where('propertyId', '==', propertyId));
     const snapshot = await getDocs(q);
     const allContracts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+    // Filter by date range in JavaScript
     const contracts = allContracts.filter(c => {
+      if (!c.createdAt) return false;
       const createdDate = c.createdAt?.toDate?.() || new Date(c.createdAt);
       return createdDate >= startDate && createdDate <= endDate;
     });
+
+    console.log('[getContractsReport] Filtered contracts count:', contracts.length);
 
     const summary = {
       total: contracts.length,
@@ -269,14 +331,22 @@ export const getContractsReport = async (propertyId, startDate, endDate) => {
       contracts,
     };
   } catch (error) {
-    console.error('Error fetching contracts report:', error);
-    throw error;
+    console.error('[getContractsReport] Error fetching contracts report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, draft: 0, active: 0, expiring: 0, expired: 0, terminated: 0 },
+      byType: { rent: 0, operations: 0, maintenance: 0 },
+      totalValue: 0,
+      expiringContracts: [],
+      contracts: [],
+    };
   }
 };
 
 export const getBillingReport = async (propertyId, startDate, endDate) => {
   try {
-    if (!propertyId) {
+    if (!propertyId || !startDate || !endDate) {
+      console.error('[getBillingReport] Missing required parameters');
       return {
         period: { startDate, endDate },
         summary: { total: 0, unpaid: 0, pending: 0, paid: 0, overdue: 0, cancelled: 0 },
@@ -289,19 +359,35 @@ export const getBillingReport = async (propertyId, startDate, endDate) => {
       };
     }
 
+    console.log('[getBillingReport] Fetching bills for property:', propertyId);
     const billsRef = collection(db, 'bills');
-    const q = query(
-      billsRef,
-      where('createdAt', '>=', Timestamp.fromDate(startDate)),
-      where('createdAt', '<=', Timestamp.fromDate(endDate))
-    );
-    const snapshot = await getDocs(q);
+
+    // Query by propertyId first (more efficient than createdAt range)
+    // We'll get all bills for this property, then filter by date in JS
+    const unitsRef = collection(db, 'units');
+    const unitsQuery = query(unitsRef, where('propertyId', '==', propertyId));
+    const unitsSnapshot = await getDocs(unitsQuery);
+    const unitIds = unitsSnapshot.docs.map(doc => doc.id);
+
+    // Get all bills (we need to check both propertyId and unitId)
+    const snapshot = await getDocs(billsRef);
     let bills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+    // Filter by property and date range in JavaScript
     bills = bills.filter(bill => {
-      return bill.propertyId === propertyId ||
-             (bill.unitId && bill.unitId.includes(propertyId));
+      // Check if bill belongs to this property
+      const belongsToProperty = bill.propertyId === propertyId ||
+                               (bill.unitId && unitIds.includes(bill.unitId));
+
+      if (!belongsToProperty) return false;
+
+      // Check date range
+      if (!bill.createdAt) return false;
+      const createdDate = bill.createdAt?.toDate?.() || new Date(bill.createdAt);
+      return createdDate >= startDate && createdDate <= endDate;
     });
+
+    console.log('[getBillingReport] Filtered bills count:', bills.length);
 
     const summary = {
       total: bills.length,
@@ -340,14 +426,24 @@ export const getBillingReport = async (propertyId, startDate, endDate) => {
       bills,
     };
   } catch (error) {
-    console.error('Error fetching billing report:', error);
-    throw error;
+    console.error('[getBillingReport] Error fetching billing report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, unpaid: 0, pending: 0, paid: 0, overdue: 0, cancelled: 0 },
+      byType: { rent: 0, commission: 0, serviceFees: 0, other: 0 },
+      totalIssued: 0,
+      totalCollected: 0,
+      totalOutstanding: 0,
+      collectionRate: 0,
+      bills: [],
+    };
   }
 };
 
 export const getBookingsReport = async (propertyId, startDate, endDate) => {
   try {
-    if (!propertyId) {
+    if (!propertyId || !startDate || !endDate) {
+      console.error('[getBookingsReport] Missing required parameters');
       return {
         period: { startDate, endDate },
         summary: { total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0, completed: 0 },
@@ -358,15 +454,20 @@ export const getBookingsReport = async (propertyId, startDate, endDate) => {
       };
     }
 
+    console.log('[getBookingsReport] Fetching bookings for property:', propertyId);
     const bookingsRef = collection(db, 'bookings');
-    const q = query(
-      bookingsRef,
-      where('propertyId', '==', propertyId),
-      where('createdAt', '>=', Timestamp.fromDate(startDate)),
-      where('createdAt', '<=', Timestamp.fromDate(endDate))
-    );
+    const q = query(bookingsRef, where('propertyId', '==', propertyId));
     const snapshot = await getDocs(q);
-    const bookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let bookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Filter by date range in JavaScript
+    bookings = bookings.filter(booking => {
+      if (!booking.createdAt) return false;
+      const createdDate = booking.createdAt?.toDate?.() || new Date(booking.createdAt);
+      return createdDate >= startDate && createdDate <= endDate;
+    });
+
+    console.log('[getBookingsReport] Filtered bookings count:', bookings.length);
 
     const summary = {
       total: bookings.length,
@@ -399,14 +500,22 @@ export const getBookingsReport = async (propertyId, startDate, endDate) => {
       bookings,
     };
   } catch (error) {
-    console.error('Error fetching bookings report:', error);
-    throw error;
+    console.error('[getBookingsReport] Error fetching bookings report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0, completed: 0 },
+      approvalRate: 0,
+      facilityUsage: {},
+      totalRevenue: 0,
+      bookings: [],
+    };
   }
 };
 
 export const getPermitsReport = async (propertyId, startDate, endDate) => {
   try {
-    if (!propertyId) {
+    if (!propertyId || !startDate || !endDate) {
+      console.error('[getPermitsReport] Missing required parameters');
       return {
         period: { startDate, endDate },
         summary: { total: 0, pending: 0, approved: 0, rejected: 0, active: 0, expired: 0, revoked: 0 },
@@ -416,15 +525,20 @@ export const getPermitsReport = async (propertyId, startDate, endDate) => {
       };
     }
 
+    console.log('[getPermitsReport] Fetching permits for property:', propertyId);
     const permitsRef = collection(db, 'permits');
-    const q = query(
-      permitsRef,
-      where('propertyId', '==', propertyId),
-      where('createdAt', '>=', Timestamp.fromDate(startDate)),
-      where('createdAt', '<=', Timestamp.fromDate(endDate))
-    );
+    const q = query(permitsRef, where('propertyId', '==', propertyId));
     const snapshot = await getDocs(q);
-    const permits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let permits = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Filter by date range in JavaScript
+    permits = permits.filter(permit => {
+      if (!permit.createdAt) return false;
+      const createdDate = permit.createdAt?.toDate?.() || new Date(permit.createdAt);
+      return createdDate >= startDate && createdDate <= endDate;
+    });
+
+    console.log('[getPermitsReport] Filtered permits count:', permits.length);
 
     const summary = {
       total: permits.length,
@@ -453,13 +567,29 @@ export const getPermitsReport = async (propertyId, startDate, endDate) => {
       permits,
     };
   } catch (error) {
-    console.error('Error fetching permits report:', error);
-    throw error;
+    console.error('[getPermitsReport] Error fetching permits report:', error);
+    return {
+      period: { startDate, endDate },
+      summary: { total: 0, pending: 0, approved: 0, rejected: 0, active: 0, expired: 0, revoked: 0 },
+      approvalRate: 0,
+      byType: {},
+      permits: [],
+    };
   }
 };
 
 export const getComparisonData = async (propertyId, period) => {
   try {
+    if (!propertyId || !period) {
+      console.error('[getComparisonData] Missing required parameters');
+      return {
+        tickets: { current: 0, previous: 0, change: 0 },
+        completionRate: { current: 0, previous: 0, change: 0 },
+        avgResolutionTime: { current: 0, previous: 0, change: 0 },
+      };
+    }
+
+    console.log('[getComparisonData] Fetching comparison data for:', propertyId, period);
     const currentRange = getDateRange(period);
     const previousRange = getPreviousPeriodRange(period);
 
@@ -503,18 +633,26 @@ export const getComparisonData = async (propertyId, period) => {
       },
     };
   } catch (error) {
-    console.error('Error fetching comparison data:', error);
-    throw error;
+    console.error('[getComparisonData] Error fetching comparison data:', error);
+    return {
+      tickets: { current: 0, previous: 0, change: 0 },
+      completionRate: { current: 0, previous: 0, change: 0 },
+      avgResolutionTime: { current: 0, previous: 0, change: 0 },
+    };
   }
 };
 
 export const getOverviewReport = async (propertyId, startDate, endDate) => {
   try {
     if (!propertyId || !startDate || !endDate) {
+      console.error('[getOverviewReport] Missing required parameters');
       throw new Error('Missing required parameters for overview report');
     }
 
-    const [tickets, units, contracts, billing, bookings, permits] = await Promise.all([
+    console.log('[getOverviewReport] Fetching overview for property:', propertyId);
+
+    // Use Promise.allSettled to get all reports even if some fail
+    const results = await Promise.allSettled([
       getTicketsReport(propertyId, startDate, endDate),
       getUnitsReport(propertyId, startDate, endDate),
       getContractsReport(propertyId, startDate, endDate),
@@ -522,6 +660,20 @@ export const getOverviewReport = async (propertyId, startDate, endDate) => {
       getBookingsReport(propertyId, startDate, endDate),
       getPermitsReport(propertyId, startDate, endDate),
     ]);
+
+    // Extract data from settled promises, use default values for failed ones
+    const reportNames = ['tickets', 'units', 'contracts', 'billing', 'bookings', 'permits'];
+    const [tickets, units, contracts, billing, bookings, permits] = results.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      } else {
+        console.error(`[getOverviewReport] ${reportNames[index]} report failed:`, result.reason);
+        // Return the default error value from the failed function
+        return result.reason || {};
+      }
+    });
+
+    console.log('[getOverviewReport] Overview report completed');
 
     return {
       period: { startDate, endDate },
@@ -533,7 +685,7 @@ export const getOverviewReport = async (propertyId, startDate, endDate) => {
       permits,
     };
   } catch (error) {
-    console.error('Error fetching overview report:', error);
+    console.error('[getOverviewReport] Error fetching overview report:', error);
     throw error;
   }
 };

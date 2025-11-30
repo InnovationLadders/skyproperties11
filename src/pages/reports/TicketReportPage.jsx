@@ -10,7 +10,6 @@ import {
   TrendingUp,
   Star,
 } from 'lucide-react';
-import { MainLayout } from '../../components/layout/MainLayout';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { DateRangePicker } from '../../components/reports/DateRangePicker';
@@ -27,7 +26,7 @@ export default function TicketReportPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, userData } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const propertyId = searchParams.get('propertyId');
 
   const [loading, setLoading] = useState(true);
@@ -68,30 +67,25 @@ export default function TicketReportPage() {
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
-          </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
   if (!reportData) {
     return (
-      <MainLayout>
-        <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400">{t('reports.noData')}</p>
-        </div>
-      </MainLayout>
+      <div className="text-center py-12">
+        <p className="text-gray-600 dark:text-gray-400">{t('reports.noData')}</p>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={() => navigate(-1)}>
@@ -110,7 +104,7 @@ export default function TicketReportPage() {
           <ExportButton
             data={reportData}
             reportType="tickets"
-            propertyName={userData?.propertyName || 'Property'}
+            propertyName={userProfile?.propertyName || 'Property'}
           />
         </div>
 
@@ -236,7 +230,6 @@ export default function TicketReportPage() {
             ))}
           </div>
         </Card>
-      </div>
-    </MainLayout>
+    </div>
   );
 }
