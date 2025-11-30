@@ -29,7 +29,7 @@ import { db } from '../../lib/firebase';
 export default function ReportsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, userData } = useAuth();
+  const { currentUser, userProfile } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState(REPORT_PERIODS.MONTHLY);
@@ -40,24 +40,35 @@ export default function ReportsPage() {
   const [selectedProperty, setSelectedProperty] = useState(null);
 
   useEffect(() => {
-    loadProperties();
-  }, [user]);
+    if (currentUser && userProfile) {
+      loadProperties();
+    }
+  }, [currentUser, userProfile]);
 
   useEffect(() => {
     if (selectedProperty && dateRange) {
       loadOverview();
+    } else if (properties.length === 0 && !loading) {
+      setLoading(false);
     }
-  }, [selectedProperty, dateRange]);
+  }, [selectedProperty, dateRange, properties.length]);
 
   const loadProperties = async () => {
+    if (!currentUser || !userProfile) {
+      console.log('[ReportsPage] User not loaded yet');
+      return;
+    }
+
     try {
       const propertiesRef = collection(db, 'properties');
       let q;
 
-      if (userData?.role === 'admin') {
+      console.log('[ReportsPage] Loading properties for role:', userProfile.role);
+
+      if (userProfile?.role === 'admin') {
         q = query(propertiesRef);
       } else {
-        q = query(propertiesRef, where('managerId', '==', user.uid));
+        q = query(propertiesRef, where('managerId', '==', currentUser.uid));
       }
 
       const snapshot = await getDocs(q);
@@ -66,12 +77,18 @@ export default function ReportsPage() {
         ...doc.data(),
       }));
 
+      console.log('[ReportsPage] Loaded properties:', propertiesList.length);
       setProperties(propertiesList);
+
       if (propertiesList.length > 0) {
         setSelectedProperty(propertiesList[0].id);
+      } else {
+        console.warn('[ReportsPage] No properties found for this user');
+        setLoading(false);
       }
     } catch (error) {
-      console.error('Error loading properties:', error);
+      console.error('[ReportsPage] Error loading properties:', error);
+      setLoading(false);
     }
   };
 
@@ -150,7 +167,7 @@ export default function ReportsPage() {
     },
   ];
 
-  if (loading && properties.length === 0) {
+  if (loading && !selectedProperty && properties.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
