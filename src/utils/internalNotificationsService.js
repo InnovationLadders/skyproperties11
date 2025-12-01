@@ -290,9 +290,10 @@ export const notifyTicketCreated = async (ticket, creatorName) => {
         actionUrl: `/tickets/${ticket.id}`,
         category: NOTIFICATION_CATEGORY.TICKETS,
         metadata: {
-          ticketNumber: ticket.ticketNumber,
+          ticketId: ticket.id,
+          ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
           creatorName,
-          priority: ticket.priority,
+          priority: ticket.priority || 'medium',
         },
       }));
 
@@ -313,9 +314,10 @@ export const notifyTicketCreated = async (ticket, creatorName) => {
       actionUrl: `/tickets/${ticket.id}`,
       category: NOTIFICATION_CATEGORY.TICKETS,
       metadata: {
-        ticketNumber: ticket.ticketNumber,
+        ticketId: ticket.id,
+        ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
         creatorName,
-        priority: ticket.priority,
+        priority: ticket.priority || 'medium',
       },
     });
 
@@ -339,7 +341,8 @@ export const notifyTicketAssigned = async (ticket, assigneeName) => {
     actionUrl: `/tickets/${ticket.id}`,
     category: NOTIFICATION_CATEGORY.TICKETS,
     metadata: {
-      ticketNumber: ticket.ticketNumber,
+      ticketId: ticket.id,
+      ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
       title: ticket.title,
     },
   });
@@ -356,7 +359,8 @@ export const notifyTicketStatusUpdated = async (ticket, previousStatus) => {
     actionUrl: `/tickets/${ticket.id}`,
     category: NOTIFICATION_CATEGORY.TICKETS,
     metadata: {
-      ticketNumber: ticket.ticketNumber,
+      ticketId: ticket.id,
+      ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
       previousStatus,
       newStatus: ticket.status,
     },
@@ -550,7 +554,8 @@ export const notifyTicketCommented = async (ticket, commentAuthorId, commentAuth
     actionUrl: `/tickets/${ticket.id}`,
     category: NOTIFICATION_CATEGORY.TICKETS,
     metadata: {
-      ticketNumber: ticket.ticketNumber,
+      ticketId: ticket.id,
+      ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
       commentAuthor: commentAuthorName,
       commentPreview: commentText.substring(0, 100),
     },
@@ -572,7 +577,8 @@ export const notifyTicketCompleted = async (ticket) => {
     actionUrl: `/tickets/${ticket.id}`,
     category: NOTIFICATION_CATEGORY.TICKETS,
     metadata: {
-      ticketNumber: ticket.ticketNumber,
+      ticketId: ticket.id,
+      ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
       title: ticket.title,
     },
   });
@@ -589,7 +595,8 @@ export const notifyTicketClosed = async (ticket) => {
     actionUrl: `/tickets/${ticket.id}`,
     category: NOTIFICATION_CATEGORY.TICKETS,
     metadata: {
-      ticketNumber: ticket.ticketNumber,
+      ticketId: ticket.id,
+      ...(ticket.ticketNumber && { ticketNumber: ticket.ticketNumber }),
       title: ticket.title,
     },
   });
