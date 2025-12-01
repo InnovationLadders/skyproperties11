@@ -221,36 +221,109 @@ export const subscribeToNotifications = (userId, callback, errorCallback) => {
 
 export const getPropertyManagerId = async (propertyId) => {
   try {
-    const propertyDoc = await getDoc(doc(db, 'properties', propertyId));
-    if (propertyDoc.exists()) {
-      return propertyDoc.data().managerId;
+    console.log('[getPropertyManagerId] Fetching manager for propertyId:', propertyId);
+
+    if (!propertyId) {
+      console.warn('[getPropertyManagerId] No propertyId provided');
+      return null;
     }
+
+    const propertyDoc = await getDoc(doc(db, 'properties', propertyId));
+
+    if (propertyDoc.exists()) {
+      const managerId = propertyDoc.data().managerId;
+      console.log('[getPropertyManagerId] Found managerId:', managerId);
+      return managerId;
+    }
+
+    console.warn('[getPropertyManagerId] Property document does not exist for:', propertyId);
     return null;
   } catch (error) {
-    console.error('Error getting property manager:', error);
+    console.error('[getPropertyManagerId] Error getting property manager:', error);
     return null;
   }
 };
 
-export const notifyTicketCreated = async (ticket, creatorName) => {
-  const managerId = await getPropertyManagerId(ticket.propertyId);
-  if (!managerId) return;
+export const getAllAdmins = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('role', '==', 'admin'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => doc.id);
+  } catch (error) {
+    console.error('[getAllAdmins] Error getting admins:', error);
+    return [];
+  }
+};
 
-  await createNotification({
-    userId: managerId,
-    type: INTERNAL_NOTIFICATION_TYPES.TICKET_CREATED,
-    title: 'ticket.newTicket',
-    message: 'notifications.ticketCreated',
-    relatedId: ticket.id,
-    relatedType: 'ticket',
-    actionUrl: `/tickets/${ticket.id}`,
-    category: NOTIFICATION_CATEGORY.TICKETS,
-    metadata: {
+export const notifyTicketCreated = async (ticket, creatorName) => {
+  try {
+    console.log('[notifyTicketCreated] Starting notification for ticket:', ticket.id);
+    console.log('[notifyTicketCreated] Ticket data:', {
       ticketNumber: ticket.ticketNumber,
+      propertyId: ticket.propertyId,
       creatorName,
-      priority: ticket.priority,
-    },
-  });
+      priority: ticket.priority
+    });
+
+    const managerId = await getPropertyManagerId(ticket.propertyId);
+
+    if (!managerId) {
+      console.warn('[notifyTicketCreated] No property manager found, notifying all admins as fallback');
+
+      const adminIds = await getAllAdmins();
+
+      if (adminIds.length === 0) {
+        console.error('[notifyTicketCreated] No admins found to notify!');
+        return;
+      }
+
+      console.log('[notifyTicketCreated] Found', adminIds.length, 'admins to notify');
+
+      const notifications = adminIds.map(adminId => ({
+        userId: adminId,
+        type: INTERNAL_NOTIFICATION_TYPES.TICKET_CREATED,
+        title: 'ticket.newTicket',
+        message: 'notifications.ticketCreated',
+        relatedId: ticket.id,
+        relatedType: 'ticket',
+        actionUrl: `/tickets/${ticket.id}`,
+        category: NOTIFICATION_CATEGORY.TICKETS,
+        metadata: {
+          ticketNumber: ticket.ticketNumber,
+          creatorName,
+          priority: ticket.priority,
+        },
+      }));
+
+      await createBulkNotifications(notifications);
+      console.log('[notifyTicketCreated] Successfully notified all admins');
+      return;
+    }
+
+    console.log('[notifyTicketCreated] Notifying property manager:', managerId);
+
+    await createNotification({
+      userId: managerId,
+      type: INTERNAL_NOTIFICATION_TYPES.TICKET_CREATED,
+      title: 'ticket.newTicket',
+      message: 'notifications.ticketCreated',
+      relatedId: ticket.id,
+      relatedType: 'ticket',
+      actionUrl: `/tickets/${ticket.id}`,
+      category: NOTIFICATION_CATEGORY.TICKETS,
+      metadata: {
+        ticketNumber: ticket.ticketNumber,
+        creatorName,
+        priority: ticket.priority,
+      },
+    });
+
+    console.log('[notifyTicketCreated] Successfully notified property manager');
+  } catch (error) {
+    console.error('[notifyTicketCreated] Error sending notification:', error);
+    console.error('[notifyTicketCreated] Error details:', error.message, error.stack);
+  }
 };
 
 export const notifyTicketAssigned = async (ticket, assigneeName) => {
