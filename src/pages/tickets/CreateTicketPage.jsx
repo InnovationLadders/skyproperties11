@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { doc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, getDocs, query, where, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import { ArrowLeft, Save, Building2, Home } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { TICKET_STATUS, USER_ROLES } from '../../utils/constants';
 import { getManagedPropertyIds, getUserUnitIds } from '../../utils/permissionsService';
+import { notifyTicketCreated } from '../../utils/internalNotificationsService';
 
 export const CreateTicketPage = () => {
   const { t } = useTranslation();
@@ -231,13 +232,33 @@ export const CreateTicketPage = () => {
       }
 
       const newDocRef = doc(collection(db, 'tickets'));
-      await setDoc(newDocRef, {
+      const ticketData = {
         ...formData,
         imageUrl,
         createdBy: currentUser.uid,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      await setDoc(newDocRef, ticketData);
+
+      console.log('[CreateTicketPage] Ticket created successfully, now sending notifications');
+      console.log('[CreateTicketPage] Ticket ID:', newDocRef.id);
+      console.log('[CreateTicketPage] Property ID:', formData.propertyId);
+
+      const creatorName = userProfile?.name || userProfile?.email || 'Unknown User';
+
+      await notifyTicketCreated(
+        {
+          id: newDocRef.id,
+          ...formData,
+          imageUrl,
+          createdBy: currentUser.uid,
+        },
+        creatorName
+      );
+
+      console.log('[CreateTicketPage] Notification sent successfully');
 
       navigate('/tickets');
     } catch (error) {

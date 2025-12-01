@@ -4,11 +4,43 @@
 عند إنشاء تذكرة من قبل مالك وحدة، لم يظهر إشعار لمدير العقار.
 
 ## السبب
+**المشكلة الرئيسية:** دالة `notifyTicketCreated` **لم يتم استدعاؤها أصلاً** في صفحة إنشاء التذكرة (`CreateTicketPage.jsx`)!
+
+المشاكل الثانوية:
 - الكود السابق كان يخرج صامتاً (`return`) إذا لم يجد `managerId` للعقار
 - لم يكن هناك logging كافٍ لتتبع المشكلة
 - لم يكن هناك خطة احتياطية إذا لم يتم العثور على مدير العقار
 
 ## الإصلاحات المطبقة
+
+### 0. إضافة استدعاء notifyTicketCreated في صفحة الإنشاء ✅ **الأهم!**
+
+**المشكلة:** الصفحة كانت تنشئ التذكرة وتنتقل مباشرة بدون إرسال أي إشعارات!
+
+**الحل:**
+```javascript
+// في CreateTicketPage.jsx - السطر 234
+await setDoc(newDocRef, ticketData);
+
+// ✅ إضافة هذا الكود الجديد:
+console.log('[CreateTicketPage] Ticket created, sending notifications');
+
+const creatorName = userProfile?.name || userProfile?.email || 'Unknown User';
+
+await notifyTicketCreated(
+  {
+    id: newDocRef.id,
+    ...formData,
+    imageUrl,
+    createdBy: currentUser.uid,
+  },
+  creatorName
+);
+
+console.log('[CreateTicketPage] Notification sent successfully');
+
+navigate('/tickets');
+```
 
 ### 1. إضافة Logging تفصيلي ✅
 
@@ -129,10 +161,15 @@ export const notifyTicketCreated = async (ticket, creatorName) => {
 - Unit Owner ID: `bxFtlnRCNSTA1fFSyZVNIYrzwVU2`
 
 ### الملفات المعدلة
-- `src/utils/internalNotificationsService.js`
-  - تحسين `getPropertyManagerId()`
-  - إضافة `getAllAdmins()`
-  - تحسين `notifyTicketCreated()`
+1. **`src/pages/tickets/CreateTicketPage.jsx`** ⭐ الأهم
+   - إضافة import لـ `notifyTicketCreated`
+   - إضافة استدعاء `notifyTicketCreated` بعد إنشاء التذكرة
+   - إضافة logging للتتبع
+
+2. **`src/utils/internalNotificationsService.js`**
+   - تحسين `getPropertyManagerId()` مع logging
+   - إضافة `getAllAdmins()` كخطة احتياطية
+   - تحسين `notifyTicketCreated()` مع معالجة أفضل للأخطاء
 
 ## التحديثات المستقبلية المقترحة
 
