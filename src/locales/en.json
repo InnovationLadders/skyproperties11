@@ -1559,11 +1559,14 @@
     "ticketCreated": "New ticket #{{ticketNumber}} created by {{creatorName}}",
     "ticketAssigned": "Ticket #{{ticketNumber}} assigned to you: {{title}}",
     "ticketStatusUpdated": "Ticket #{{ticketNumber}} status updated from {{previousStatus}} to {{newStatus}}",
-    "ticketCompleted": "Ticket #{{ticketNumber}} completed",
-    "ticketClosed": "Ticket #{{ticketNumber}} closed",
+    "ticketCompleted": "Ticket #{{ticketNumber}} completed: {{title}}",
+    "ticketClosed": "Ticket #{{ticketNumber}} has been closed: {{title}}",
+    "ticketCommented": "{{commentAuthor}} commented on ticket #{{ticketNumber}}: {{commentPreview}}",
     "billIssued": "New bill issued for {{amount}} {{currency}} - Type: {{billType}}",
     "billPaid": "Payment confirmed for {{amount}} {{currency}}",
-    "billOverdue": "Overdue bill for {{amount}} {{currency}}",
+    "billOverdue": "Bill overdue: {{amount}} {{currency}} - Due date: {{dueDate}}",
+    "billOverdueManager": "Bill overdue from {{recipientName}}: {{amount}} {{currency}} - {{daysOverdue}} days overdue",
+    "billReminder": "Reminder: Bill of {{amount}} {{currency}} due in {{daysUntilDue}} days",
     "permitRequested": "New permit request from {{requesterName}} - Type: {{permitType}}",
     "permitApproved": "Permit request approved - Type: {{permitType}}",
     "permitRejected": "Permit request rejected - Type: {{permitType}}{{#reason}} - Reason: {{reason}}{{/reason}}",
@@ -1572,8 +1575,10 @@
     "bookingApproved": "Booking request approved for facility: {{facilityName}}",
     "bookingRejected": "Booking request rejected for facility: {{facilityName}}{{#reason}} - Reason: {{reason}}{{/reason}}",
     "bookingCancelled": "Booking cancelled for facility: {{facilityName}}",
+    "bookingReminder": "Reminder: Your booking for {{facilityName}} starts in {{hoursUntilBooking}} hours at {{timeSlot}}",
+    "contractCreated": "New contract created - Type: {{contractType}} - Period: {{startDate}} to {{endDate}}",
     "contractExpiring": "Contract expires in {{daysUntilExpiry}} days - Type: {{contractType}}",
-    "contractExpired": "Contract expired - Type: {{contractType}}",
-    "contractRenewed": "Contract renewed - Type: {{contractType}}"
+    "contractExpired": "Contract expired - Type: {{contractType}} - End date: {{endDate}}",
+    "contractRenewed": "Contract renewed - Type: {{contractType}} - New period: {{newStartDate}} to {{newEndDate}}"
   }
 }

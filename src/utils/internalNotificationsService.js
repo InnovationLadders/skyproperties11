@@ -451,6 +451,229 @@ export const notifyContractExpiring = async (contract, daysUntilExpiry) => {
   await createBulkNotifications(notifications);
 };
 
+export const notifyTicketCommented = async (ticket, commentAuthorId, commentAuthorName, commentText) => {
+  const userIdsToNotify = new Set();
+
+  if (ticket.createdBy && ticket.createdBy !== commentAuthorId) {
+    userIdsToNotify.add(ticket.createdBy);
+  }
+
+  if (ticket.assignedTo && ticket.assignedTo !== commentAuthorId) {
+    userIdsToNotify.add(ticket.assignedTo);
+  }
+
+  const managerId = await getPropertyManagerId(ticket.propertyId);
+  if (managerId && managerId !== commentAuthorId) {
+    userIdsToNotify.add(managerId);
+  }
+
+  const notifications = Array.from(userIdsToNotify).map(userId => ({
+    userId,
+    type: INTERNAL_NOTIFICATION_TYPES.TICKET_COMMENTED,
+    title: 'ticket.newComment',
+    message: 'notifications.ticketCommented',
+    relatedId: ticket.id,
+    relatedType: 'ticket',
+    actionUrl: `/tickets/${ticket.id}`,
+    category: NOTIFICATION_CATEGORY.TICKETS,
+    metadata: {
+      ticketNumber: ticket.ticketNumber,
+      commentAuthor: commentAuthorName,
+      commentPreview: commentText.substring(0, 100),
+    },
+  }));
+
+  if (notifications.length > 0) {
+    await createBulkNotifications(notifications);
+  }
+};
+
+export const notifyTicketCompleted = async (ticket) => {
+  await createNotification({
+    userId: ticket.createdBy,
+    type: INTERNAL_NOTIFICATION_TYPES.TICKET_COMPLETED,
+    title: 'ticket.completed',
+    message: 'notifications.ticketCompleted',
+    relatedId: ticket.id,
+    relatedType: 'ticket',
+    actionUrl: `/tickets/${ticket.id}`,
+    category: NOTIFICATION_CATEGORY.TICKETS,
+    metadata: {
+      ticketNumber: ticket.ticketNumber,
+      title: ticket.title,
+    },
+  });
+};
+
+export const notifyTicketClosed = async (ticket) => {
+  await createNotification({
+    userId: ticket.createdBy,
+    type: INTERNAL_NOTIFICATION_TYPES.TICKET_CLOSED,
+    title: 'ticket.closed',
+    message: 'notifications.ticketClosed',
+    relatedId: ticket.id,
+    relatedType: 'ticket',
+    actionUrl: `/tickets/${ticket.id}`,
+    category: NOTIFICATION_CATEGORY.TICKETS,
+    metadata: {
+      ticketNumber: ticket.ticketNumber,
+      title: ticket.title,
+    },
+  });
+};
+
+export const notifyBillOverdue = async (bill) => {
+  const notifications = [
+    {
+      userId: bill.recipientId,
+      type: INTERNAL_NOTIFICATION_TYPES.BILL_OVERDUE,
+      title: 'billing.overdue',
+      message: 'notifications.billOverdue',
+      relatedId: bill.id,
+      relatedType: 'bill',
+      actionUrl: `/billing/${bill.id}`,
+      category: NOTIFICATION_CATEGORY.BILLING,
+      metadata: {
+        amount: bill.amount,
+        currency: bill.currency,
+        dueDate: bill.dueDate,
+        billType: bill.billType,
+      },
+    },
+  ];
+
+  const managerId = await getPropertyManagerId(bill.propertyId);
+  if (managerId) {
+    notifications.push({
+      userId: managerId,
+      type: INTERNAL_NOTIFICATION_TYPES.BILL_OVERDUE,
+      title: 'billing.overdueNotice',
+      message: 'notifications.billOverdueManager',
+      relatedId: bill.id,
+      relatedType: 'bill',
+      actionUrl: `/billing/${bill.id}`,
+      category: NOTIFICATION_CATEGORY.BILLING,
+      metadata: {
+        amount: bill.amount,
+        currency: bill.currency,
+        recipientName: bill.recipientName,
+        daysOverdue: Math.floor((Date.now() - new Date(bill.dueDate).getTime()) / (1000 * 60 * 60 * 24)),
+      },
+    });
+  }
+
+  await createBulkNotifications(notifications);
+};
+
+export const notifyBillReminder = async (bill, daysUntilDue) => {
+  await createNotification({
+    userId: bill.recipientId,
+    type: INTERNAL_NOTIFICATION_TYPES.BILL_REMINDER,
+    title: 'billing.reminder',
+    message: 'notifications.billReminder',
+    relatedId: bill.id,
+    relatedType: 'bill',
+    actionUrl: `/billing/${bill.id}`,
+    category: NOTIFICATION_CATEGORY.BILLING,
+    metadata: {
+      amount: bill.amount,
+      currency: bill.currency,
+      dueDate: bill.dueDate,
+      daysUntilDue,
+      billType: bill.billType,
+    },
+  });
+};
+
+export const notifyBookingReminder = async (booking, hoursUntilBooking) => {
+  await createNotification({
+    userId: booking.userId,
+    type: INTERNAL_NOTIFICATION_TYPES.BOOKING_REMINDER,
+    title: 'booking.reminder',
+    message: 'notifications.bookingReminder',
+    relatedId: booking.id,
+    relatedType: 'booking',
+    actionUrl: `/bookings/${booking.id}`,
+    category: NOTIFICATION_CATEGORY.BOOKINGS,
+    metadata: {
+      facilityName: booking.facilityName,
+      date: booking.date,
+      timeSlot: booking.timeSlot,
+      hoursUntilBooking,
+    },
+  });
+};
+
+export const notifyContractCreated = async (contract) => {
+  const userIds = [contract.partyAId, contract.partyBId].filter(Boolean);
+  const managerId = await getPropertyManagerId(contract.propertyId);
+  if (managerId && !userIds.includes(managerId)) {
+    userIds.push(managerId);
+  }
+
+  const notifications = userIds.map(userId => ({
+    userId,
+    type: INTERNAL_NOTIFICATION_TYPES.CONTRACT_CREATED,
+    title: 'contract.newContract',
+    message: 'notifications.contractCreated',
+    relatedId: contract.id,
+    relatedType: 'contract',
+    actionUrl: `/contracts/${contract.id}`,
+    category: NOTIFICATION_CATEGORY.CONTRACTS,
+    metadata: {
+      contractType: contract.type,
+      startDate: contract.startDate,
+      endDate: contract.endDate,
+    },
+  }));
+
+  await createBulkNotifications(notifications);
+};
+
+export const notifyContractExpired = async (contract) => {
+  const userIds = [contract.partyAId, contract.partyBId].filter(Boolean);
+
+  const notifications = userIds.map(userId => ({
+    userId,
+    type: INTERNAL_NOTIFICATION_TYPES.CONTRACT_EXPIRED,
+    title: 'contract.expired',
+    message: 'notifications.contractExpired',
+    relatedId: contract.id,
+    relatedType: 'contract',
+    actionUrl: `/contracts/${contract.id}`,
+    category: NOTIFICATION_CATEGORY.CONTRACTS,
+    metadata: {
+      contractType: contract.type,
+      endDate: contract.endDate,
+    },
+  }));
+
+  await createBulkNotifications(notifications);
+};
+
+export const notifyContractRenewed = async (contract, oldContractId) => {
+  const userIds = [contract.partyAId, contract.partyBId].filter(Boolean);
+
+  const notifications = userIds.map(userId => ({
+    userId,
+    type: INTERNAL_NOTIFICATION_TYPES.CONTRACT_RENEWED,
+    title: 'contract.renewed',
+    message: 'notifications.contractRenewed',
+    relatedId: contract.id,
+    relatedType: 'contract',
+    actionUrl: `/contracts/${contract.id}`,
+    category: NOTIFICATION_CATEGORY.CONTRACTS,
+    metadata: {
+      contractType: contract.type,
+      newStartDate: contract.startDate,
+      newEndDate: contract.endDate,
+      oldContractId,
+    },
+  }));
+
+  await createBulkNotifications(notifications);
+};
+
 export const createTestNotifications = async (userId) => {
   try {
     console.log('[createTestNotifications] Creating test notifications for user:', userId);

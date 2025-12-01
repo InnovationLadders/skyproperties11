@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { BILL_STATUS, BILL_TYPES } from './constants';
-import { notifyBillIssued, notifyBillPaid } from './internalNotificationsService';
+import { notifyBillIssued, notifyBillPaid, notifyBillOverdue, notifyBillReminder } from './internalNotificationsService';
 
 export const createBill = async (billData) => {
   try {
@@ -220,11 +220,47 @@ export const checkOverdueBills = async () => {
 
     for (const bill of overdueBills) {
       await updateBillStatus(bill.id, BILL_STATUS.OVERDUE);
+
+      await notifyBillOverdue(bill).catch(err =>
+        console.error('Error sending overdue notification:', err)
+      );
     }
 
     return overdueBills;
   } catch (error) {
     console.error('Error checking overdue bills:', error);
+    throw error;
+  }
+};
+
+export const checkUpcomingBills = async (daysAhead = 3) => {
+  try {
+    const now = new Date();
+    const futureDate = new Date(now);
+    futureDate.setDate(futureDate.getDate() + daysAhead);
+
+    const q = query(
+      collection(db, 'bills'),
+      where('status', '==', BILL_STATUS.UNPAID),
+      where('dueDate', '>=', Timestamp.now()),
+      where('dueDate', '<=', Timestamp.fromDate(futureDate))
+    );
+
+    const snapshot = await getDocs(q);
+    const upcomingBills = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    for (const bill of upcomingBills) {
+      const dueDate = bill.dueDate.toDate();
+      const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+      await notifyBillReminder(bill, daysUntilDue).catch(err =>
+        console.error('Error sending bill reminder:', err)
+      );
+    }
+
+    return upcomingBills;
+  } catch (error) {
+    console.error('Error checking upcoming bills:', error);
     throw error;
   }
 };

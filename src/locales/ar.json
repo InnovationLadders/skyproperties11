@@ -1559,11 +1559,14 @@
     "ticketCreated": "تم إنشاء تذكرة جديدة #{{ticketNumber}} بواسطة {{creatorName}}",
     "ticketAssigned": "تم تعيين تذكرة #{{ticketNumber}} لك: {{title}}",
     "ticketStatusUpdated": "تم تحديث حالة تذكرة #{{ticketNumber}} من {{previousStatus}} إلى {{newStatus}}",
-    "ticketCompleted": "تم إكمال تذكرة #{{ticketNumber}}",
-    "ticketClosed": "تم إغلاق تذكرة #{{ticketNumber}}",
+    "ticketCompleted": "تم إكمال تذكرة #{{ticketNumber}}: {{title}}",
+    "ticketClosed": "تم إغلاق تذكرة #{{ticketNumber}}: {{title}}",
+    "ticketCommented": "{{commentAuthor}} علّق على تذكرة #{{ticketNumber}}: {{commentPreview}}",
     "billIssued": "تم إصدار فاتورة جديدة بقيمة {{amount}} {{currency}} - نوع: {{billType}}",
     "billPaid": "تم تأكيد دفع فاتورة بقيمة {{amount}} {{currency}}",
-    "billOverdue": "فاتورة متأخرة بقيمة {{amount}} {{currency}}",
+    "billOverdue": "فاتورة متأخرة: {{amount}} {{currency}} - تاريخ الاستحقاق: {{dueDate}}",
+    "billOverdueManager": "فاتورة متأخرة من {{recipientName}}: {{amount}} {{currency}} - متأخرة {{daysOverdue}} يوم",
+    "billReminder": "تذكير: فاتورة بقيمة {{amount}} {{currency}} تستحق خلال {{daysUntilDue}} يوم",
     "permitRequested": "طلب تصريح جديد من {{requesterName}} - نوع: {{permitType}}",
     "permitApproved": "تمت الموافقة على طلب التصريح - نوع: {{permitType}}",
     "permitRejected": "تم رفض طلب التصريح - نوع: {{permitType}}{{#reason}} - السبب: {{reason}}{{/reason}}",
@@ -1572,8 +1575,10 @@
     "bookingApproved": "تمت الموافقة على طلب الحجز للمرفق: {{facilityName}}",
     "bookingRejected": "تم رفض طلب الحجز للمرفق: {{facilityName}}{{#reason}} - السبب: {{reason}}{{/reason}}",
     "bookingCancelled": "تم إلغاء الحجز للمرفق: {{facilityName}}",
+    "bookingReminder": "تذكير: يبدأ حجزك للمرفق {{facilityName}} بعد {{hoursUntilBooking}} ساعة في {{timeSlot}}",
+    "contractCreated": "تم إنشاء عقد جديد - نوع: {{contractType}} - الفترة: من {{startDate}} إلى {{endDate}}",
     "contractExpiring": "ينتهي العقد بعد {{daysUntilExpiry}} يوم - نوع: {{contractType}}",
-    "contractExpired": "انتهى العقد - نوع: {{contractType}}",
-    "contractRenewed": "تم تجديد العقد - نوع: {{contractType}}"
+    "contractExpired": "انتهى العقد - نوع: {{contractType}} - تاريخ الانتهاء: {{endDate}}",
+    "contractRenewed": "تم تجديد العقد - نوع: {{contractType}} - الفترة الجديدة: من {{newStartDate}} إلى {{newEndDate}}"
   }
 }

@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { CONTRACT_STATUS } from './constants';
-import { notifyContractExpiring } from './internalNotificationsService';
+import { notifyContractExpiring, notifyContractCreated, notifyContractExpired, notifyContractRenewed } from './internalNotificationsService';
 
 export const createContract = async (contractData) => {
   try {
@@ -31,6 +31,12 @@ export const createContract = async (contractData) => {
     };
 
     await setDoc(newDocRef, contract);
+
+    const createdContract = { id: newDocRef.id, ...contract };
+    await notifyContractCreated(createdContract).catch(err =>
+      console.error('Error sending contract creation notification:', err)
+    );
+
     return { success: true, contractId: newDocRef.id };
   } catch (error) {
     console.error('Error creating contract:', error);
@@ -181,6 +187,10 @@ export const checkExpiredContracts = async () => {
           updatedAt: serverTimestamp(),
         });
 
+        await notifyContractExpired(contract).catch(err =>
+          console.error('Error sending contract expiration notification:', err)
+        );
+
         expiredContracts.push(contract);
       }
     }
@@ -189,6 +199,46 @@ export const checkExpiredContracts = async () => {
   } catch (error) {
     console.error('Error checking expired contracts:', error);
     return [];
+  }
+};
+
+export const renewContract = async (oldContractId, newContractData) => {
+  try {
+    const oldContract = await getContractById(oldContractId);
+    if (!oldContract) {
+      return { success: false, error: 'Contract not found' };
+    }
+
+    await updateDoc(doc(db, 'contracts', oldContractId), {
+      status: CONTRACT_STATUS.EXPIRED,
+      renewedBy: newContractData.renewedById || null,
+      updatedAt: serverTimestamp(),
+    });
+
+    const newContract = {
+      ...newContractData,
+      type: oldContract.type,
+      propertyId: oldContract.propertyId,
+      unitId: oldContract.unitId,
+      partyAId: oldContract.partyAId,
+      partyBId: oldContract.partyBId,
+      previousContractId: oldContractId,
+      status: CONTRACT_STATUS.ACTIVE,
+    };
+
+    const result = await createContract(newContract);
+
+    if (result.success) {
+      const renewedContract = { id: result.contractId, ...newContract };
+      await notifyContractRenewed(renewedContract, oldContractId).catch(err =>
+        console.error('Error sending contract renewal notification:', err)
+      );
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error renewing contract:', error);
+    return { success: false, error: error.message };
   }
 };
 

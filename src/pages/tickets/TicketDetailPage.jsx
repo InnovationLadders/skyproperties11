@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { TICKET_STATUS, USER_ROLES } from '../../utils/constants';
 import { ArrowLeft, Clock, User, MapPin, AlertCircle, CheckCircle, Save, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { notifyTicketCommented, notifyTicketCompleted, notifyTicketClosed, notifyTicketStatusUpdated } from '../../utils/internalNotificationsService';
 
 export const TicketDetailPage = () => {
   const { t } = useTranslation();
@@ -187,6 +188,7 @@ export const TicketDetailPage = () => {
     if (!newStatus || newStatus === ticket.status) return;
 
     setUpdating(true);
+    const previousStatus = ticket.status;
     try {
       await updateDoc(doc(db, 'tickets', ticketId), {
         status: newStatus,
@@ -203,6 +205,22 @@ export const TicketDetailPage = () => {
         type: 'system',
         createdAt: serverTimestamp(),
       });
+
+      const updatedTicket = { ...ticket, status: newStatus };
+
+      if (newStatus === TICKET_STATUS.COMPLETED) {
+        await notifyTicketCompleted(updatedTicket).catch(err =>
+          console.error('Error sending completion notification:', err)
+        );
+      } else if (newStatus === TICKET_STATUS.CLOSED) {
+        await notifyTicketClosed(updatedTicket).catch(err =>
+          console.error('Error sending closed notification:', err)
+        );
+      } else {
+        await notifyTicketStatusUpdated(updatedTicket, previousStatus).catch(err =>
+          console.error('Error sending status update notification:', err)
+        );
+      }
 
       setError('');
     } catch (error) {
@@ -227,6 +245,15 @@ export const TicketDetailPage = () => {
         type: 'comment',
         createdAt: serverTimestamp(),
       });
+
+      await notifyTicketCommented(
+        ticket,
+        currentUser.uid,
+        userProfile?.displayName || userProfile?.email,
+        note
+      ).catch(err =>
+        console.error('Error sending comment notification:', err)
+      );
 
       setNote('');
       setError('');

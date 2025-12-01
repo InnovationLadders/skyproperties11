@@ -1,7 +1,7 @@
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, query, where, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { BOOKING_STATUS, USER_ROLES } from './constants';
-import { notifyBookingRequested, notifyBookingStatusChanged } from './internalNotificationsService';
+import { notifyBookingRequested, notifyBookingStatusChanged, notifyBookingReminder } from './internalNotificationsService';
 import { getUserById } from './userService';
 
 export const createBooking = async (bookingData, currentUser) => {
@@ -282,6 +282,55 @@ export const rejectBooking = async (bookingId, notes = '', rejectedBy) => {
 
 export const cancelBooking = async (bookingId, cancelledBy) => {
   return updateBookingStatus(bookingId, BOOKING_STATUS.CANCELLED, '', cancelledBy);
+};
+
+export const checkUpcomingBookings = async (hoursAhead = 24) => {
+  try {
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+
+    const q = query(
+      collection(db, 'bookings'),
+      where('status', '==', BOOKING_STATUS.APPROVED),
+      where('startDate', '>=', Timestamp.now()),
+      where('startDate', '<=', Timestamp.fromDate(futureDate))
+    );
+
+    const snapshot = await getDocs(q);
+    const upcomingBookings = [];
+
+    for (const docSnapshot of snapshot.docs) {
+      const booking = { id: docSnapshot.id, ...docSnapshot.data() };
+      const startDate = booking.startDate.toDate();
+      const hoursUntilBooking = Math.ceil((startDate - now) / (1000 * 60 * 60));
+
+      const unitDoc = await getDoc(doc(db, 'units', booking.unitId));
+      const unitData = unitDoc.exists() ? unitDoc.data() : {};
+      const propertyDoc = await getDoc(doc(db, 'properties', booking.propertyId));
+      const propertyData = propertyDoc.exists() ? propertyDoc.data() : {};
+
+      const facilityName = `${propertyData.name || 'Property'} - ${unitData.unitNumber || booking.unitNumber || 'Unit'}`;
+
+      await notifyBookingReminder(
+        {
+          ...booking,
+          facilityName,
+          date: startDate.toISOString(),
+          timeSlot: `${startDate.toLocaleTimeString()} - ${booking.endDate.toDate().toLocaleTimeString()}`,
+        },
+        hoursUntilBooking
+      ).catch(err =>
+        console.error('Error sending booking reminder:', err)
+      );
+
+      upcomingBookings.push({ ...booking, hoursUntilBooking });
+    }
+
+    return upcomingBookings;
+  } catch (error) {
+    console.error('Error checking upcoming bookings:', error);
+    return [];
+  }
 };
 
 export const getBookingById = async (bookingId) => {
