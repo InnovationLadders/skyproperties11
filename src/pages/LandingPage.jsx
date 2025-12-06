@@ -87,8 +87,11 @@ export const LandingPage = () => {
     <div className="min-h-screen">
       <section className="relative text-white py-20 px-4 overflow-hidden">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${bannerImage})` }}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-gray-100"
+          style={{
+            backgroundImage: bannerImage ? `url(${bannerImage})` : 'none',
+            backgroundColor: bannerImage ? 'transparent' : '#1890FF'
+          }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-secondary/80"></div>
         </div>
