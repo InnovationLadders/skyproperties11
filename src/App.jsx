@@ -11,6 +11,7 @@ import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PropertyHomePage } from './pages/property/PropertyHomePage';
 import PropertyDetailPage from './pages/property/PropertyDetailPage';
+import UnitDetailPage from './pages/property/UnitDetailPage';
 import { PropertiesPage } from './pages/management/PropertiesPage';
 import { PropertyFormPage } from './pages/management/PropertyFormPage';
 import { PropertyManagerAssignment } from './pages/management/PropertyManagerAssignment';
@@ -83,6 +84,7 @@ function App() {
               />
 
               <Route path="/property/:propertyId" element={<PropertyHomePage />} />
+              <Route path="/property/:propertyId/unit/:unitId" element={<UnitDetailPage />} />
               <Route path="/property-details/:id" element={<PropertyDetailPage />} />
 
               <Route

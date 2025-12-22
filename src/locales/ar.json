@@ -217,7 +217,9 @@
     "shareProperty": "مشاركة العقار",
     "copyLink": "نسخ الرابط",
     "linkCopied": "تم نسخ الرابط",
-    "propertyLink": "رابط العقار"
+    "propertyLink": "رابط العقار",
+    "backToAvailableUnits": "العودة إلى الوحدات المتوفرة",
+    "backToProperty": "العودة إلى العقار"
   },
   "unit": {
     "units": "الوحدات",
