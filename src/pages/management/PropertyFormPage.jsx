@@ -9,7 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { CoordinatePicker } from '../../components/property/CoordinatePicker';
-import { ArrowLeft, Save, Upload, MapPin } from 'lucide-react';
+import { ArrowLeft, Save, Upload, MapPin, Plus, X, Image, Video } from 'lucide-react';
 
 export const PropertyFormPage = () => {
   const { t } = useTranslation();
@@ -25,13 +25,25 @@ export const PropertyFormPage = () => {
     totalUnits: 0,
     availableUnits: 0,
     coordinates: { lat: 24.7136, lng: 46.6753 },
+    yearBuilt: '',
+    totalFloors: '',
+    parkingSpaces: '',
+    features: [],
+    mediaGallery: [],
   });
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
   const [glbFile, setGlbFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [showCoordinatePicker, setShowCoordinatePicker] = useState(false);
+  const [newFeature, setNewFeature] = useState('');
+  const [newMediaType, setNewMediaType] = useState('image');
+  const [newMediaFile, setNewMediaFile] = useState(null);
+  const [newMediaUrl, setNewMediaUrl] = useState('');
+  const [newMediaCaption, setNewMediaCaption] = useState('');
 
   useEffect(() => {
     if (isEditMode) {
@@ -84,6 +96,91 @@ export const PropertyFormPage = () => {
     }
   };
 
+  const handleBannerChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setBannerFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddFeature = () => {
+    if (newFeature.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        features: [...(prev.features || []), newFeature.trim()]
+      }));
+      setNewFeature('');
+    }
+  };
+
+  const handleRemoveFeature = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleMediaFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewMediaFile(e.target.files[0]);
+    }
+  };
+
+  const handleAddMedia = async () => {
+    if (newMediaType === 'videoLink' && newMediaUrl.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        mediaGallery: [...(prev.mediaGallery || []), {
+          type: 'video',
+          url: newMediaUrl.trim(),
+          caption: newMediaCaption.trim(),
+          isLocal: false,
+          isPrimary: (prev.mediaGallery || []).length === 0
+        }]
+      }));
+      setNewMediaUrl('');
+      setNewMediaCaption('');
+    } else if (newMediaFile) {
+      const tempUrl = URL.createObjectURL(newMediaFile);
+      setFormData(prev => ({
+        ...prev,
+        mediaGallery: [...(prev.mediaGallery || []), {
+          type: newMediaType === 'image' ? 'image' : 'video',
+          url: tempUrl,
+          caption: newMediaCaption.trim(),
+          isLocal: true,
+          file: newMediaFile,
+          isPrimary: (prev.mediaGallery || []).length === 0
+        }]
+      }));
+      setNewMediaFile(null);
+      setNewMediaCaption('');
+    }
+  };
+
+  const handleRemoveMedia = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      mediaGallery: prev.mediaGallery.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSetPrimaryMedia = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      mediaGallery: prev.mediaGallery.map((item, i) => ({
+        ...item,
+        isPrimary: i === index
+      }))
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -93,11 +190,18 @@ export const PropertyFormPage = () => {
     try {
       let imageUrl = formData.imageUrl || '';
       let modelUrl = formData.modelUrl || '';
+      let bannerImage = formData.bannerImage || '';
 
       if (imageFile) {
         const imageRef = ref(storage, `properties/${Date.now()}_${imageFile.name}`);
         await uploadBytes(imageRef, imageFile);
         imageUrl = await getDownloadURL(imageRef);
+      }
+
+      if (bannerFile) {
+        const bannerRef = ref(storage, `properties/banners/${Date.now()}_${bannerFile.name}`);
+        await uploadBytes(bannerRef, bannerFile);
+        bannerImage = await getDownloadURL(bannerRef);
       }
 
       if (glbFile) {
@@ -106,10 +210,26 @@ export const PropertyFormPage = () => {
         modelUrl = await getDownloadURL(glbRef);
       }
 
+      const uploadedMediaGallery = await Promise.all(
+        (formData.mediaGallery || []).map(async (item) => {
+          if (item.isLocal && item.file) {
+            const mediaRef = ref(storage, `properties/media/${Date.now()}_${item.file.name}`);
+            await uploadBytes(mediaRef, item.file);
+            const url = await getDownloadURL(mediaRef);
+            const { file, ...rest } = item;
+            return { ...rest, url, isLocal: false };
+          }
+          return item;
+        })
+      );
+
       const propertyData = {
         ...formData,
         imageUrl,
+        bannerImage,
         modelUrl,
+        mediaGallery: uploadedMediaGallery,
+        mapCoordinates: formData.coordinates,
         updatedAt: serverTimestamp(),
       };
 
@@ -234,6 +354,67 @@ export const PropertyFormPage = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="banner">{t('property.bannerImage')}</Label>
+                <p className="text-xs text-muted-foreground">{t('property.bannerImageDesc')}</p>
+                <Input
+                  id="banner"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerChange}
+                />
+                {(bannerPreview || formData.bannerImage) && (
+                  <div className="mt-2">
+                    <img
+                      src={bannerPreview || formData.bannerImage}
+                      alt="Banner preview"
+                      className="w-full h-48 object-cover rounded-md"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {bannerFile ? t('property.changeBanner') : t('property.currentBanner')}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="yearBuilt">{t('property.yearBuilt')}</Label>
+                  <Input
+                    id="yearBuilt"
+                    name="yearBuilt"
+                    type="number"
+                    value={formData.yearBuilt}
+                    onChange={handleChange}
+                    placeholder="2020"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="totalFloors">{t('property.totalFloors')}</Label>
+                  <Input
+                    id="totalFloors"
+                    name="totalFloors"
+                    type="number"
+                    value={formData.totalFloors}
+                    onChange={handleChange}
+                    placeholder="10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="parkingSpaces">{t('property.parkingSpaces')}</Label>
+                  <Input
+                    id="parkingSpaces"
+                    name="parkingSpaces"
+                    type="number"
+                    value={formData.parkingSpaces}
+                    onChange={handleChange}
+                    placeholder="50"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="glbFile">3D Model File (GLB)</Label>
                 <Input
                   id="glbFile"
@@ -326,6 +507,150 @@ export const PropertyFormPage = () => {
                       }
                       address={formData.address}
                     />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-lg">{t('property.featuresSection')}</Label>
+                    <p className="text-sm text-muted-foreground">{t('property.manageFeaturesDesc')}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    value={newFeature}
+                    onChange={(e) => setNewFeature(e.target.value)}
+                    placeholder={t('property.featurePlaceholder')}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddFeature())}
+                  />
+                  <Button type="button" onClick={handleAddFeature} size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {formData.features && formData.features.length > 0 && (
+                  <div className="space-y-2">
+                    {formData.features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                      >
+                        <span className="text-sm">{feature}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveFeature(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-lg">{t('property.mediaGallerySection')}</Label>
+                    <p className="text-sm text-muted-foreground">{t('property.manageMediaDesc')}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <select
+                      value={newMediaType}
+                      onChange={(e) => setNewMediaType(e.target.value)}
+                      className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+                    >
+                      <option value="image">{t('property.imageFile')}</option>
+                      <option value="video">{t('property.videoFile')}</option>
+                      <option value="videoLink">{t('property.videoLink')}</option>
+                    </select>
+                  </div>
+
+                  {newMediaType === 'videoLink' ? (
+                    <Input
+                      value={newMediaUrl}
+                      onChange={(e) => setNewMediaUrl(e.target.value)}
+                      placeholder={t('property.videoUrlPlaceholder')}
+                    />
+                  ) : (
+                    <Input
+                      type="file"
+                      accept={newMediaType === 'image' ? 'image/*' : 'video/*'}
+                      onChange={handleMediaFileChange}
+                    />
+                  )}
+
+                  <Input
+                    value={newMediaCaption}
+                    onChange={(e) => setNewMediaCaption(e.target.value)}
+                    placeholder={t('property.captionPlaceholder')}
+                  />
+
+                  <Button type="button" onClick={handleAddMedia} className="w-full">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('property.addMedia')}
+                  </Button>
+                </div>
+
+                {formData.mediaGallery && formData.mediaGallery.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {formData.mediaGallery.map((item, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-video rounded-lg overflow-hidden border border-border">
+                          {item.type === 'image' ? (
+                            <img
+                              src={item.url}
+                              alt={item.caption || `Media ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <Video className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          {item.isPrimary && (
+                            <span className="bg-primary text-white text-xs px-2 py-1 rounded">
+                              {t('property.primary')}
+                            </span>
+                          )}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handleRemoveMedia(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {!item.isPrimary && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 w-full"
+                            onClick={() => handleSetPrimaryMedia(index)}
+                          >
+                            {t('property.setPrimary')}
+                          </Button>
+                        )}
+                        {item.caption && (
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
+                            {item.caption}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

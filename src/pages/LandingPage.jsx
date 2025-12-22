@@ -193,9 +193,9 @@ export const LandingPage = () => {
                             className="h-48 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center overflow-hidden cursor-pointer group relative"
                             onClick={() => {
                               setSelectedPropertyId(property.id);
-                              navigate(`/public/directory?propertyId=${property.id}`);
+                              navigate(`/property-details/${property.id}`);
                             }}
-                            title={t('landing.viewUnitsDirectory')}
+                            title={t('property.viewDetails')}
                           >
                             {property.imageUrl ? (
                               <img
@@ -208,7 +208,7 @@ export const LandingPage = () => {
                             )}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 px-4 py-2 rounded-lg shadow-lg">
-                                <p className="text-sm font-semibold text-gray-800">{t('landing.clickToViewUnits')}</p>
+                                <p className="text-sm font-semibold text-gray-800">{t('property.viewDetails')}</p>
                               </div>
                             </div>
                           </div>
@@ -234,6 +234,7 @@ export const LandingPage = () => {
                           </CardContent>
                           <CardFooter className="flex gap-2">
                             <Button
+                              variant="outline"
                               className="flex-1"
                               onClick={(e) => {
                                 e.stopPropagation();
