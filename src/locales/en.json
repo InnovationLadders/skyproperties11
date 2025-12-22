@@ -217,7 +217,9 @@
     "shareProperty": "Share Property",
     "copyLink": "Copy Link",
     "linkCopied": "Link copied to clipboard",
-    "propertyLink": "Property Link"
+    "propertyLink": "Property Link",
+    "backToAvailableUnits": "Back to Available Units",
+    "backToProperty": "Back to Property"
   },
   "unit": {
     "units": "Units",

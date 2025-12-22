@@ -1,35 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { BuildingModel3D } from '../../components/property/BuildingModel3D';
-import { ContactModal } from '../../components/property/ContactModal';
-import { MediaViewer } from '../../components/property/MediaViewer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Building2, MapPin, X, DollarSign, Ruler, ChevronLeft, ChevronRight, Play } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Building2, MapPin, DollarSign, Ruler } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const PropertyHomePage = () => {
   const { t } = useTranslation();
   const { propertyId } = useParams();
+  const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [units, setUnits] = useState([]);
-  const [selectedUnit, setSelectedUnit] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [showMediaViewer, setShowMediaViewer] = useState(false);
-  const [mediaViewerIndex, setMediaViewerIndex] = useState(0);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const unitDetailsRef = useRef(null);
-
-  useEffect(() => {
-    setCurrentMediaIndex(0);
-    if (selectedUnit && unitDetailsRef.current) {
-      unitDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [selectedUnit]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -76,7 +61,7 @@ export const PropertyHomePage = () => {
     }));
 
   const handleHotspotClick = (hotspot) => {
-    setSelectedUnit(hotspot.unit);
+    navigate(`/property/${propertyId}/unit/${hotspot.unit.id}`);
   };
 
   if (loading) {
@@ -111,8 +96,8 @@ export const PropertyHomePage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 gap-6">
+          <div>
             <div className="mb-3 px-1">
               <p className="text-sm text-muted-foreground">
                 {t('property.clickHotspot')}
@@ -165,7 +150,7 @@ export const PropertyHomePage = () => {
                       key={unit.id}
                       whileHover={{ scale: 1.02 }}
                       className="border rounded-lg cursor-pointer hover:border-primary transition-colors overflow-hidden"
-                      onClick={() => setSelectedUnit(unit)}
+                      onClick={() => navigate(`/property/${propertyId}/unit/${unit.id}`)}
                     >
                       {unit.media && unit.media.length > 0 ? (
                         <div className="relative aspect-video bg-gray-100 overflow-hidden">
@@ -245,228 +230,8 @@ export const PropertyHomePage = () => {
               </CardContent>
             </Card>
           </div>
-
-          <div className="lg:col-span-1" ref={unitDetailsRef}>
-            <AnimatePresence mode="wait">
-              {selectedUnit ? (
-                <motion.div
-                  key={selectedUnit.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card className="sticky top-20">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle>{t('unit.units')} {selectedUnit.unitNumber}</CardTitle>
-                          <CardDescription>{t('unit.floor')} {selectedUnit.floor}</CardDescription>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedUnit(null)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {selectedUnit.media && selectedUnit.media.length > 0 ? (
-                        <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group">
-                          <div
-                            className="w-full h-full cursor-pointer"
-                            onClick={() => {
-                              setMediaViewerIndex(currentMediaIndex);
-                              setShowMediaViewer(true);
-                            }}
-                          >
-                            {selectedUnit.media[currentMediaIndex].type === 'image' ? (
-                              <img
-                                src={selectedUnit.media[currentMediaIndex].url}
-                                alt={selectedUnit.media[currentMediaIndex].caption || 'Unit media'}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="relative w-full h-full">
-                                <img
-                                  src={selectedUnit.media[currentMediaIndex].thumbnailUrl}
-                                  alt="Video thumbnail"
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                                    <Play className="h-8 w-8 text-gray-800 ml-1" fill="currentColor" />
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {selectedUnit.media.length > 1 && (
-                            <>
-                              <Button
-                                variant="secondary"
-                                size="icon"
-                                className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCurrentMediaIndex((prev) =>
-                                    prev > 0 ? prev - 1 : selectedUnit.media.length - 1
-                                  );
-                                }}
-                              >
-                                <ChevronLeft className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="secondary"
-                                size="icon"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCurrentMediaIndex((prev) =>
-                                    prev < selectedUnit.media.length - 1 ? prev + 1 : 0
-                                  );
-                                }}
-                              >
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-
-                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                                {selectedUnit.media.map((_, index) => (
-                                  <button
-                                    key={index}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setCurrentMediaIndex(index);
-                                    }}
-                                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                      index === currentMediaIndex
-                                        ? 'bg-white w-4'
-                                        : 'bg-white/50'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-
-                              <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                                {currentMediaIndex + 1} / {selectedUnit.media.length}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Building2 className="h-16 w-16 text-muted-foreground" />
-                        </div>
-                      )}
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('property.listingType')}</span>
-                          <span className={`font-medium px-2 py-1 rounded text-sm ${
-                            selectedUnit.listingType === 'sale'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {selectedUnit.listingType === 'sale' ? t('property.forSale') : t('property.forRent')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('property.viewType')}</span>
-                          <span className={`font-medium px-2 py-1 rounded text-sm ${
-                            selectedUnit.viewType === 'external'
-                              ? 'bg-orange-100 text-orange-800'
-                              : 'bg-purple-100 text-purple-800'
-                          }`}>
-                            {selectedUnit.viewType === 'external' ? t('property.externalView') : t('property.internalView')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('unit.type')}</span>
-                          <span className="font-medium">{selectedUnit.type}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('unit.size')}</span>
-                          <span className="font-medium">{selectedUnit.size} sqm</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('unit.price')}</span>
-                          <span className="font-medium text-primary">
-                            ${selectedUnit.price?.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{t('unit.status')}</span>
-                          <span
-                            className={`font-medium ${
-                              selectedUnit.status === 'available'
-                                ? 'text-green-600'
-                                : 'text-gray-600'
-                            }`}
-                          >
-                            {t(`unit.${selectedUnit.status}`)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {selectedUnit.description && (
-                        <div>
-                          <h4 className="font-semibold mb-2">{t('property.description')}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedUnit.description}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="pt-4">
-                        <Button
-                          className="w-full"
-                          size="lg"
-                          onClick={() => setShowContactModal(true)}
-                        >
-                          {t('property.requestContact')}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="placeholder"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <Card>
-                    <CardContent className="py-12 text-center">
-                      <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">
-                        {t('property.selectUnitToView')}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
-
-      <ContactModal
-        isOpen={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        property={property}
-        unit={selectedUnit}
-      />
-
-      <MediaViewer
-        media={selectedUnit?.media || []}
-        initialIndex={mediaViewerIndex}
-        isOpen={showMediaViewer}
-        onClose={() => setShowMediaViewer(false)}
-      />
     </div>
   );
 };
