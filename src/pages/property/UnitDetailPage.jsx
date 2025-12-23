@@ -23,7 +23,6 @@ export default function UnitDetailPage() {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     fetchData();
   }, [propertyId, unitId]);
 

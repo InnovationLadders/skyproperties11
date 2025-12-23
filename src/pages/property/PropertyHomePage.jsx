@@ -17,10 +17,6 @@ export const PropertyHomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
     fetchPropertyData();
   }, [propertyId]);
 

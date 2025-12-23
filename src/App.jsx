@@ -4,6 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ScrollToTop } from './components/ScrollToTop';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
@@ -61,6 +62,7 @@ function App() {
       <AuthProvider>
         <NotificationsProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route element={<MainLayout />}>
               <Route path="/" element={<LandingPage />} />
