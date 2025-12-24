@@ -13,7 +13,7 @@ import {
   Layers,
   Car
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -28,7 +28,6 @@ export default function PropertyDetailPage() {
   const isRTL = i18n.language === 'ar';
 
   const [property, setProperty] = useState(null);
-  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -50,21 +49,6 @@ export default function PropertyDetailPage() {
 
       const propertyData = { id: propertyDoc.id, ...propertyDoc.data() };
       setProperty(propertyData);
-
-      const unitsQuery = query(
-        collection(db, 'units'),
-        where('propertyId', '==', id),
-        where('status', 'in', ['available', 'reserved']),
-        limit(6)
-      );
-
-      const unitsSnapshot = await getDocs(unitsQuery);
-      const unitsData = unitsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setUnits(unitsData);
     } catch (err) {
       console.error('Error loading property details:', err);
       setError(err.message);
@@ -328,55 +312,13 @@ export default function PropertyDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{t('property.availableUnitsSection')}</CardTitle>
-                <Link to={`/property/${id}`}>
-                  <Button variant="outline" size="sm">
-                    {t('property.viewAllUnits')}
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {units.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {units.map((unit) => (
-                    <div
-                      key={unit.id}
-                      className="border border-border rounded-lg p-4 hover:border-primary transition-colors"
-                    >
-                      <h3 className="font-semibold text-lg mb-2">{unit.unitNumber}</h3>
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <p>{t('unit.floor')}: {unit.floor}</p>
-                        <p>{unit.size} {t('unit.sqm')}</p>
-                        {unit.price && <p className="font-semibold text-foreground">${unit.price}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  {t('unit.noUnitsFound')}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-        >
           <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
             <CardContent className="py-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-bold mb-2">{t('property.quickLinks')}</h3>
                   <p className="text-blue-100">
-                    {t('property.viewDirectory')} & {t('property.viewIn3D')}
+                    {t('property.viewDirectory')}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -388,7 +330,8 @@ export default function PropertyDetailPage() {
                   </Link>
                   <Link to={`/property/${id}`}>
                     <Button variant="secondary">
-                      {t('property.viewIn3D')}
+                      <Building2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      {t('property.availableUnits')}
                     </Button>
                   </Link>
                 </div>
