@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen, Calendar, BarChart3, MessageSquare } from 'lucide-react';
+import { Building2, Users, Ticket, FileText, DollarSign, FolderOpen, Calendar, BarChart3, MessageSquare, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { BillingStats } from '../components/billing/BillingStats';
 import { USER_ROLES } from '../utils/constants';
@@ -129,6 +129,13 @@ export const DashboardPage = () => {
           icon: MessageSquare,
           link: '/contact-requests',
           color: 'from-cyan-500 to-cyan-600',
+        },
+        {
+          title: t('complaint.manageComplaintsTitle'),
+          description: t('complaint.manageComplaintsSubtitle'),
+          icon: AlertCircle,
+          link: '/complaints/manage',
+          color: 'from-red-500 to-red-600',
         },
       ];
     }
