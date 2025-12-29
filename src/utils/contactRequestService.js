@@ -178,3 +178,86 @@ export const getNewContactRequestsCount = async (propertyId) => {
     throw error;
   }
 };
+
+export const getAllContactRequestsAndInquiries = async (filters = {}) => {
+  try {
+    const allRequests = [];
+
+    const contactRequestsQuery = query(
+      collection(db, 'contactRequests'),
+      orderBy('createdAt', 'desc')
+    );
+    const contactRequestsSnapshot = await getDocs(contactRequestsQuery);
+    contactRequestsSnapshot.forEach((doc) => {
+      allRequests.push({
+        id: doc.id,
+        ...doc.data(),
+        source: 'contactRequests'
+      });
+    });
+
+    const inquiriesQuery = query(
+      collection(db, 'inquiries'),
+      orderBy('createdAt', 'desc')
+    );
+    const inquiriesSnapshot = await getDocs(inquiriesQuery);
+    inquiriesSnapshot.forEach((doc) => {
+      const data = doc.data();
+      allRequests.push({
+        id: doc.id,
+        ...data,
+        phoneNumber: data.phone,
+        status: data.status === 'new' ? CONTACT_REQUEST_STATUS.NEW : data.status,
+        source: 'inquiries'
+      });
+    });
+
+    let filteredRequests = allRequests;
+
+    if (filters.status) {
+      filteredRequests = filteredRequests.filter(req => req.status === filters.status);
+    }
+
+    if (filters.propertyId) {
+      filteredRequests = filteredRequests.filter(req => req.propertyId === filters.propertyId);
+    }
+
+    filteredRequests.sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+      return dateB - dateA;
+    });
+
+    return filteredRequests;
+  } catch (error) {
+    console.error('Error getting all contact requests and inquiries:', error);
+    throw error;
+  }
+};
+
+export const updateInquiryStatus = async (inquiryId, status) => {
+  try {
+    const inquiryRef = doc(db, 'inquiries', inquiryId);
+    await updateDoc(inquiryRef, {
+      status: status,
+      updatedAt: Timestamp.now(),
+    });
+    console.log('Inquiry status updated:', inquiryId, status);
+  } catch (error) {
+    console.error('Error updating inquiry status:', error);
+    throw error;
+  }
+};
+
+export const updateRequestStatus = async (requestId, status, source = 'contactRequests') => {
+  try {
+    if (source === 'inquiries') {
+      await updateInquiryStatus(requestId, status);
+    } else {
+      await updateContactRequestStatus(requestId, status);
+    }
+  } catch (error) {
+    console.error('Error updating request status:', error);
+    throw error;
+  }
+};

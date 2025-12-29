@@ -54,6 +54,7 @@ import { BookingDetailPage } from './pages/bookings/BookingDetailPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import TicketReportPage from './pages/reports/TicketReportPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
+import ContactRequestsPage from './pages/management/ContactRequestsPage';
 import './lib/i18n';
 
 function App() {
@@ -420,6 +421,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <NotificationsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/contact-requests"
+                element={
+                  <ProtectedRoute>
+                    <ContactRequestsPage />
                   </ProtectedRoute>
                 }
               />
