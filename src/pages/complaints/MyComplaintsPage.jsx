@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Plus } from 'lucide-react';
+import { MessageSquare, Plus, AlertCircle } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { ComplaintCard } from '../../components/complaints/ComplaintCard';
@@ -15,6 +15,7 @@ export const MyComplaintsPage = () => {
   const { user } = useAuth();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -27,10 +28,13 @@ export const MyComplaintsPage = () => {
   const loadComplaints = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getComplaintsByUserId(user.uid);
+      console.log('Loaded user complaints:', data.length);
       setComplaints(data);
     } catch (error) {
       console.error('Error loading complaints:', error);
+      setError(t('complaint.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -83,7 +87,21 @@ export const MyComplaintsPage = () => {
           </Button>
         </div>
 
-        {complaints.length === 0 ? (
+        {error && (
+          <Card className="p-6 mb-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-red-800 dark:text-red-200 mb-3">{error}</p>
+                <Button onClick={loadComplaints} variant="outline" size="sm">
+                  {t('common.retry')}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {complaints.length === 0 && !error ? (
           <Card className="p-12 text-center">
             <MessageSquare className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">

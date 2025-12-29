@@ -1780,7 +1780,8 @@
       "subjectRequired": "Subject is required",
       "descriptionRequired": "Description is required",
       "descriptionTooShort": "Description must be at least 20 characters",
-      "submitFailed": "Failed to submit complaint. Please try again."
+      "submitFailed": "Failed to submit complaint. Please try again.",
+      "loadFailed": "Failed to load complaints. Please check your connection and try again."
     }
   }
 }

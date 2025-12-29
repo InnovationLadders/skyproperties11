@@ -59,6 +59,7 @@ import ReportsPage from './pages/reports/ReportsPage';
 import TicketReportPage from './pages/reports/TicketReportPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import ContactRequestsPage from './pages/management/ContactRequestsPage';
+import { USER_ROLES } from './utils/constants';
 import './lib/i18n';
 
 function App() {
@@ -451,7 +452,7 @@ function App() {
               <Route
                 path="/complaints/manage"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
                     <ManageComplaintsPage />
                   </ProtectedRoute>
                 }

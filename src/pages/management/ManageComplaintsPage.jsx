@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, Search, Filter, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MessageSquare, Search, Filter, TrendingUp, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { ComplaintCard } from '../../components/complaints/ComplaintCard';
 import { ComplaintDetailModal } from '../../components/complaints/ComplaintDetailModal';
 import { getAllComplaints, getComplaintsStats } from '../../utils/complaintService';
-import { COMPLAINT_STATUS, COMPLAINT_TYPES } from '../../utils/constants';
+import { COMPLAINT_STATUS, COMPLAINT_TYPES, USER_ROLES } from '../../utils/constants';
 
 export const ManageComplaintsPage = () => {
   const { t } = useTranslation();
+  const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
   const [filteredComplaints, setFilteredComplaints] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -22,9 +27,13 @@ export const ManageComplaintsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    if (userProfile?.role !== USER_ROLES.ADMIN) {
+      navigate('/dashboard');
+      return;
+    }
     loadComplaints();
     loadStats();
-  }, []);
+  }, [userProfile, navigate]);
 
   useEffect(() => {
     filterComplaints();
@@ -33,10 +42,13 @@ export const ManageComplaintsPage = () => {
   const loadComplaints = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getAllComplaints();
+      console.log('Loaded complaints:', data.length);
       setComplaints(data);
     } catch (error) {
       console.error('Error loading complaints:', error);
+      setError(t('complaint.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -163,6 +175,20 @@ export const ManageComplaintsPage = () => {
             </Card>
           ))}
         </div>
+
+        {error && (
+          <Card className="p-6 mb-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-red-800 dark:text-red-200 mb-3">{error}</p>
+                <Button onClick={loadComplaints} variant="outline" size="sm">
+                  {t('common.retry')}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         <Card className="p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
