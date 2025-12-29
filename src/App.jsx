@@ -47,6 +47,10 @@ import { MyUnitsPage } from './pages/units/MyUnitsPage';
 import { MyRentalPage } from './pages/rental/MyRentalPage';
 import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import { IntellectualPropertyPage } from './pages/legal/IntellectualPropertyPage';
+import { SubmitComplaintPage } from './pages/complaints/SubmitComplaintPage';
+import { MyComplaintsPage } from './pages/complaints/MyComplaintsPage';
+import { ManageComplaintsPage } from './pages/management/ManageComplaintsPage';
 import { MyBookingsPage } from './pages/bookings/MyBookingsPage';
 import { CreateBookingPage } from './pages/bookings/CreateBookingPage';
 import { ManageBookingsPage } from './pages/bookings/ManageBookingsPage';
@@ -76,6 +80,8 @@ function App() {
 
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+              <Route path="/intellectual-property" element={<IntellectualPropertyPage />} />
+              <Route path="/submit-complaint" element={<SubmitComplaintPage />} />
 
               <Route
                 path="/dashboard"
@@ -430,6 +436,23 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ContactRequestsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/my-complaints"
+                element={
+                  <ProtectedRoute>
+                    <MyComplaintsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/complaints/manage"
+                element={
+                  <ProtectedRoute>
+                    <ManageComplaintsPage />
                   </ProtectedRoute>
                 }
               />

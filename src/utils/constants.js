@@ -249,3 +249,24 @@ export const NOTIFICATION_CATEGORY = {
   CONTRACTS: 'contracts',
   SYSTEM: 'system',
 };
+
+export const COMPLAINT_STATUS = {
+  NEW: 'new',
+  IN_PROGRESS: 'in_progress',
+  RESOLVED: 'resolved',
+  CLOSED: 'closed',
+};
+
+export const COMPLAINT_TYPES = {
+  SERVICE: 'service',
+  PROPERTY: 'property',
+  SYSTEM: 'system',
+  OTHER: 'other',
+};
+
+export const COMPLAINT_PRIORITY = {
+  NORMAL: 'normal',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  URGENT: 'urgent',
+};

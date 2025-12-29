@@ -18,6 +18,7 @@
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode",
     "back": "Back",
+    "backToHome": "Back to Home",
     "create": "Create",
     "add": "Add",
     "view": "View",
@@ -1391,6 +1392,8 @@
     "legalLinks": "Legal",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
+    "intellectualProperty": "Intellectual Property",
+    "submitComplaint": "Submit Complaint",
     "copyright": "© 2025 Innovation Ladders. All rights reserved.",
     "allRightsReserved": "Jeddah - Saudi Arabia",
     "home": "Home",
@@ -1444,6 +1447,30 @@
       "governingLawText": "These terms are governed by and construed in accordance with the laws of the Kingdom of Saudi Arabia.",
       "contact": "Contact Us",
       "contactText": "For any inquiries about these Terms of Service, please contact us at:"
+    },
+    "intellectualProperty": {
+      "title": "Intellectual Property Rights Policy",
+      "lastUpdated": "Last Updated: January 2025",
+      "introduction": "Introduction",
+      "introText": "Innovation Ladders respects intellectual property rights. This policy outlines the intellectual property rights related to the SkyProperties platform and its content, as well as the procedures for reporting intellectual property infringements.",
+      "copyright": "Copyright and Publishing Rights",
+      "copyrightText": "All content on the SkyProperties platform, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, data compilations, and software, is the exclusive property of Innovation Ladders or its content suppliers and is protected by Saudi Arabian and international copyright laws. Unauthorized reproduction, distribution, or modification of any content is strictly prohibited.",
+      "trademarks": "Trademarks",
+      "trademarksText": "SkyProperties, Innovation Ladders, and all related logos, product and service names, designs, and slogans are trademarks of Innovation Ladders or its affiliates. You may not use these marks without the prior written permission of Innovation Ladders. All other trademarks not owned by Innovation Ladders that appear on this platform are the property of their respective owners.",
+      "userContent": "User-Generated Content Rights",
+      "userContentText": "When you submit, post, or upload content to the platform (such as property listings, comments, or files), you retain ownership of your intellectual property rights. However, you grant Innovation Ladders a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, adapt, publish, and display such content for the purpose of operating and promoting the platform. You represent and warrant that you have all necessary rights to grant this license and that your content does not violate any third-party intellectual property rights.",
+      "mediaRights": "Images and Media Rights",
+      "mediaRightsText": "All images, videos, and other media uploaded to the platform must be owned by you or properly licensed. You are responsible for ensuring that you have the necessary rights and permissions to use and share any media content. Innovation Ladders is not liable for any intellectual property infringement arising from user-uploaded content.",
+      "fairUse": "Fair Use Policy",
+      "fairUseText": "Limited use of copyrighted material may be permitted under the fair use doctrine for purposes such as criticism, commentary, news reporting, teaching, or research. However, determining fair use is complex and case-specific. When in doubt, seek permission from the copyright owner or consult with legal counsel before using copyrighted material.",
+      "infringement": "Reporting Intellectual Property Infringement",
+      "infringementText": "If you believe that your intellectual property rights have been violated on our platform, please submit a detailed complaint to our legal department. Your complaint should include:\n\n1. Identification of the copyrighted work or intellectual property claimed to have been infringed\n2. Identification of the material that is claimed to be infringing, including its location on the platform\n3. Your contact information (name, address, telephone number, and email)\n4. A statement that you have a good faith belief that the disputed use is not authorized\n5. A statement made under penalty of perjury that the information in your notice is accurate\n6. Your physical or electronic signature\n\nUpon receiving a valid complaint, we will investigate promptly and take appropriate action, which may include removing or disabling access to the allegedly infringing material.",
+      "licenses": "Licenses and Permissions",
+      "licensesText": "The SkyProperties platform uses various third-party software and libraries, each with their own licenses. These licenses are respected and complied with. Any third-party content used on the platform is properly licensed or falls under fair use provisions. If you wish to use any content from our platform for purposes beyond personal, non-commercial use, you must obtain written permission from Innovation Ladders.",
+      "thirdParty": "Third-Party Intellectual Property",
+      "thirdPartyText": "The platform may contain links to third-party websites or reference third-party products and services. Innovation Ladders does not claim ownership of any intellectual property belonging to these third parties. The inclusion of any link or reference does not imply endorsement by Innovation Ladders.",
+      "contact": "Contact for Legal Inquiries",
+      "contactText": "For any questions regarding intellectual property rights or to report an infringement, please contact our legal department at:"
     }
   },
   "booking": {
@@ -1677,5 +1704,83 @@
     "contractExpiring": "Contract expires in {{daysUntilExpiry}} days - Type: {{contractType}}",
     "contractExpired": "Contract expired - Type: {{contractType}} - End date: {{endDate}}",
     "contractRenewed": "Contract renewed - Type: {{contractType}} - New period: {{newStartDate}} to {{newEndDate}}"
+  },
+  "complaint": {
+    "submitComplaintTitle": "Submit a Complaint",
+    "submitComplaintSubtitle": "We value your feedback. Please provide details about your complaint and we will respond promptly.",
+    "manageComplaintsTitle": "Manage Complaints",
+    "manageComplaintsSubtitle": "Review and respond to customer complaints",
+    "myComplaintsTitle": "My Complaints",
+    "myComplaintsSubtitle": "Track the status of your submitted complaints",
+    "name": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "type": "Complaint Type",
+    "subject": "Subject",
+    "description": "Description",
+    "submitButton": "Submit Complaint",
+    "submitNew": "Submit New Complaint",
+    "submitFirst": "Submit Your First Complaint",
+    "namePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "phonePlaceholder": "+966 50 000 0000",
+    "subjectPlaceholder": "Brief summary of your complaint",
+    "descriptionPlaceholder": "Please describe your complaint in detail...",
+    "descriptionHint": "Minimum 20 characters. Please be as detailed as possible.",
+    "submitSuccess": "Complaint Submitted Successfully!",
+    "submitSuccessMessage": "Thank you for submitting your complaint. We have received it and will review it shortly.",
+    "submitSuccessNote": "Please keep your reference number for future inquiries.",
+    "referenceNumberLabel": "Reference Number",
+    "submittedAt": "Submitted At",
+    "responses": "responses",
+    "responsesTitle": "Responses",
+    "noResponses": "No responses yet",
+    "addResponsePlaceholder": "Type your response here...",
+    "submitResponse": "Submit Response",
+    "changeStatus": "Change Status",
+    "changePriority": "Change Priority",
+    "searchPlaceholder": "Search by name, email, subject, or reference number...",
+    "noComplaints": "No Complaints Found",
+    "noComplaintsMessage": "There are no complaints matching your filters.",
+    "noComplaintsYet": "No Complaints Yet",
+    "noComplaintsYetMessage": "You haven't submitted any complaints yet.",
+    "types": {
+      "service": "Service Complaint",
+      "property": "Property Complaint",
+      "system": "System/Technical Issue",
+      "other": "Other"
+    },
+    "status": {
+      "new": "New",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "normal": "Normal",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "stats": {
+      "total": "Total Complaints",
+      "new": "New",
+      "inProgress": "In Progress",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "filters": {
+      "allStatuses": "All Statuses",
+      "allTypes": "All Types"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "subjectRequired": "Subject is required",
+      "descriptionRequired": "Description is required",
+      "descriptionTooShort": "Description must be at least 20 characters",
+      "submitFailed": "Failed to submit complaint. Please try again."
+    }
   }
 }

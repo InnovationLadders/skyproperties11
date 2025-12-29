@@ -26,6 +26,8 @@ export const Footer = () => {
   const legalLinks = [
     { label: t('footer.privacyPolicy'), path: '/privacy-policy' },
     { label: t('footer.termsOfService'), path: '/terms-of-service' },
+    { label: t('footer.intellectualProperty'), path: '/intellectual-property' },
+    { label: t('footer.submitComplaint'), path: '/submit-complaint' },
   ];
 
   return (
