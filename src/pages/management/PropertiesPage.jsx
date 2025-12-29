@@ -190,10 +190,7 @@ export const PropertiesPage = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {property.description || t('property.noDescription')}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-sm">
-                      <div>
-                        <span className="font-semibold">{property.totalUnits || 0}</span> {t('property.units').toLowerCase()}
-                      </div>
+                    <div className="mt-4 text-sm">
                       <div className="text-green-600">
                         <span className="font-semibold">{property.availableUnits || 0}</span> {t('property.available')}
                       </div>
