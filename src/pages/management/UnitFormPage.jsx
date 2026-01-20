@@ -62,6 +62,7 @@ export const UnitFormPage = () => {
       endTime: '22:00',
       workingDays: [1, 2, 3, 4, 5, 6, 0],
     },
+    virtual360Url: '',
   });
   const [error, setError] = useState('');
   const [coordinatesEnabled, setCoordinatesEnabled] = useState(false);
@@ -659,6 +660,29 @@ export const UnitFormPage = () => {
                   className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-sm"
                   placeholder={t('unit.descriptionPlaceholder')}
                 />
+              </div>
+
+              <div className="space-y-4 border-t pt-6">
+                <div>
+                  <Label htmlFor="virtual360Url" className="text-base font-semibold">
+                    {t('unit.virtual360Tour')}
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1 mb-3">
+                    {t('unit.virtual360Description')}
+                  </p>
+                  <Input
+                    id="virtual360Url"
+                    name="virtual360Url"
+                    type="url"
+                    value={formData.virtual360Url}
+                    onChange={handleChange}
+                    placeholder="https://my.matterport.com/show/?m=..."
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('unit.virtual360Hint')}
+                  </p>
+                </div>
               </div>
 
               {(hasRole(USER_ROLES.ADMIN) || hasRole(USER_ROLES.PROPERTY_MANAGER)) && (

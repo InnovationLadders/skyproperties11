@@ -362,7 +362,18 @@
     "propertyRequired": "Please select a property",
     "saveError": "Failed to save unit. Please try again.",
     "unauthorizedEdit": "You do not have permission to edit this unit",
-    "unauthorizedProperty": "You do not have permission to create/edit units for this property"
+    "unauthorizedProperty": "You do not have permission to create/edit units for this property",
+    "virtual360Tour": "360° Virtual Tour",
+    "virtual360Description": "Add a Matterport or similar 360° virtual tour link for this unit",
+    "virtual360Hint": "Paste the embed URL from Matterport, Kuula, or other 360° tour providers",
+    "exploreUnit360": "Explore Unit {{unitNumber}} in 360°",
+    "viewFullscreen": "View Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "loading360Tour": "Loading 360° tour...",
+    "error360Tour": "Failed to load 360° tour",
+    "openInNewTab": "Open in new tab",
+    "virtual360Tours": "360° Virtual Tours",
+    "explore360Description": "Experience these units through immersive 360° virtual tours"
   },
   "ticket": {
     "tickets": "Tickets",

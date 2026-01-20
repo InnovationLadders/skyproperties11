@@ -5,6 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { ContactModal } from '../../components/property/ContactModal';
 import { MediaViewer } from '../../components/property/MediaViewer';
+import { Virtual360Viewer } from '../../components/property/Virtual360Viewer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Building2, ArrowLeft, DollarSign, Ruler, ChevronLeft, ChevronRight, Play } from 'lucide-react';
@@ -118,6 +119,13 @@ export default function UnitDetailPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {unit.virtual360Url && (
+                <Virtual360Viewer
+                  url={unit.virtual360Url}
+                  unitNumber={unit.unitNumber}
+                />
+              )}
+
               {unit.media && unit.media.length > 0 ? (
                 <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group">
                   <div
