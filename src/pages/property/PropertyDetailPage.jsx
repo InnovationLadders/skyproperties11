@@ -13,13 +13,12 @@ import {
   Layers,
   Car
 } from 'lucide-react';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Button } from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { PropertyFeatures } from '../../components/property/PropertyFeatures';
 import { PropertyMediaGallery } from '../../components/property/PropertyMediaGallery';
-import { Virtual360Viewer } from '../../components/property/Virtual360Viewer';
 import { motion } from 'framer-motion';
 
 export default function PropertyDetailPage() {
@@ -31,7 +30,6 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [units360, setUnits360] = useState([]);
 
   useEffect(() => {
     loadPropertyDetails();
@@ -51,17 +49,6 @@ export default function PropertyDetailPage() {
 
       const propertyData = { id: propertyDoc.id, ...propertyDoc.data() };
       setProperty(propertyData);
-
-      const unitsQuery = query(
-        collection(db, 'units'),
-        where('propertyId', '==', id)
-      );
-      const unitsSnapshot = await getDocs(unitsQuery);
-      const unitsWithVirtual360 = unitsSnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(unit => unit.virtual360Url);
-
-      setUnits360(unitsWithVirtual360);
     } catch (err) {
       console.error('Error loading property details:', err);
       setError(err.message);
@@ -274,32 +261,6 @@ export default function PropertyDetailPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <PropertyFeatures features={features} />
-          </motion.div>
-        )}
-
-        {units360.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('unit.virtual360Tours')}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {t('unit.explore360Description')}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {units360.map((unit) => (
-                  <Virtual360Viewer
-                    key={unit.id}
-                    url={unit.virtual360Url}
-                    unitNumber={unit.unitNumber}
-                  />
-                ))}
-              </CardContent>
-            </Card>
           </motion.div>
         )}
 
