@@ -365,7 +365,7 @@
     "unauthorizedProperty": "ليس لديك صلاحية إنشاء/تعديل وحدات لهذا العقار",
     "virtual360Tour": "جولة افتراضية 360°",
     "virtual360Description": "أضف رابط جولة افتراضية 360° من Matterport أو منصات مشابهة لهذه الوحدة",
-    "virtual360Hint": "الصق رابط التضمين من Matterport أو Kuula أو مزودي الجولات الافتراضية 360° الآخرين",
+    "virtual360Hint": "",
     "exploreUnit360": "استكشف الوحدة {{unitNumber}} بتقنية 360°",
     "viewFullscreen": "عرض بملء الشاشة",
     "exitFullscreen": "الخروج من ملء الشاشة",
