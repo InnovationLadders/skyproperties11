@@ -365,7 +365,7 @@
     "unauthorizedProperty": "You do not have permission to create/edit units for this property",
     "virtual360Tour": "360° Virtual Tour",
     "virtual360Description": "Add a Matterport or similar 360° virtual tour link for this unit",
-    "virtual360Hint": "Paste the embed URL from Matterport, Kuula, or other 360° tour providers",
+    "virtual360Hint": "",
     "exploreUnit360": "Explore Unit {{unitNumber}} in 360°",
     "viewFullscreen": "View Fullscreen",
     "exitFullscreen": "Exit Fullscreen",
