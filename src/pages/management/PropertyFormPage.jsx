@@ -30,6 +30,7 @@ export const PropertyFormPage = () => {
     parkingSpaces: '',
     features: [],
     mediaGallery: [],
+    model3DScale: 1,
   });
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -67,7 +68,11 @@ export const PropertyFormPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'totalUnits' || name === 'availableUnits' ? parseInt(value) || 0 : value,
+      [name]: name === 'totalUnits' || name === 'availableUnits'
+        ? parseInt(value) || 0
+        : name === 'model3DScale'
+        ? parseFloat(value) || 1
+        : value,
     }));
   };
 
@@ -434,6 +439,89 @@ export const PropertyFormPage = () => {
                   <p className="text-sm text-muted-foreground">Current 3D model uploaded</p>
                 )}
               </div>
+
+              {(formData.modelUrl || glbFile) && (
+                <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="model3DScale" className="text-sm font-semibold">
+                      3D Model Scale (حجم النموذج)
+                    </Label>
+                    <span className="text-sm font-medium text-blue-600">
+                      {formData.model3DScale}x
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Adjust the size of the 3D model. Use larger values (5-10) for small models, smaller values (0.1-0.5) for large models.
+                  </p>
+                  <Input
+                    id="model3DScale"
+                    name="model3DScale"
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    max="10"
+                    value={formData.model3DScale}
+                    onChange={handleChange}
+                    className="text-center font-medium"
+                  />
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 0.1 }))}
+                      className={formData.model3DScale === 0.1 ? 'bg-primary text-white' : ''}
+                    >
+                      0.1x
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 0.5 }))}
+                      className={formData.model3DScale === 0.5 ? 'bg-primary text-white' : ''}
+                    >
+                      0.5x
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 1 }))}
+                      className={formData.model3DScale === 1 ? 'bg-primary text-white' : ''}
+                    >
+                      1x
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 2 }))}
+                      className={formData.model3DScale === 2 ? 'bg-primary text-white' : ''}
+                    >
+                      2x
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 5 }))}
+                      className={formData.model3DScale === 5 ? 'bg-primary text-white' : ''}
+                    >
+                      5x
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, model3DScale: 10 }))}
+                      className={formData.model3DScale === 10 ? 'bg-primary text-white' : ''}
+                    >
+                      10x
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

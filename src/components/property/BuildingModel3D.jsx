@@ -57,12 +57,12 @@ const Hotspot = ({ position, type, onClick, label }) => {
   );
 };
 
-const LoadedModel = ({ modelUrl, hotspots, onHotspotClick }) => {
+const LoadedModel = ({ modelUrl, hotspots, onHotspotClick, scale = 1 }) => {
   const { scene } = useGLTF(modelUrl);
   const modelRef = useRef();
 
   return (
-    <group ref={modelRef}>
+    <group ref={modelRef} scale={[scale, scale, scale]}>
       <primitive object={scene} />
       {hotspots?.map((hotspot, index) => (
         <Hotspot
@@ -132,7 +132,7 @@ const CameraController = ({ onControlsRef }) => {
   );
 };
 
-export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick }) => {
+export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale = 1 }) => {
   const [modelError, setModelError] = useState(false);
   const controlsRef = useRef(null);
   const cameraRef = useRef(null);
@@ -238,6 +238,7 @@ export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick }) => 
               modelUrl={modelUrl}
               hotspots={hotspots}
               onHotspotClick={onHotspotClick}
+              scale={scale}
             />
           </Suspense>
         ) : (

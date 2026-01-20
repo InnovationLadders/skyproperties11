@@ -106,6 +106,7 @@ export const PropertyHomePage = () => {
                     modelUrl={property.modelUrl}
                     hotspots={hotspots}
                     onHotspotClick={handleHotspotClick}
+                    scale={property.model3DScale || 1}
                   />
                   <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200">
                     <h4 className="text-xs font-semibold mb-2 text-gray-700">{t('property.legend')}</h4>

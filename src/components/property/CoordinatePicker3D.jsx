@@ -40,7 +40,7 @@ const CoordinateMarker = ({ position, label }) => {
   );
 };
 
-const ClickableModel = ({ modelUrl, onCoordinateClick, currentCoordinate, debugMode }) => {
+const ClickableModel = ({ modelUrl, onCoordinateClick, currentCoordinate, debugMode, scale = 1 }) => {
   const meshRef = useRef();
   const { camera, raycaster, mouse, scene } = useThree();
 
@@ -62,7 +62,7 @@ const ClickableModel = ({ modelUrl, onCoordinateClick, currentCoordinate, debugM
       const { scene: modelScene } = useGLTF(modelUrl);
       if (modelScene) {
         return (
-          <group ref={meshRef} onClick={handleClick}>
+          <group ref={meshRef} onClick={handleClick} scale={[scale, scale, scale]}>
             <primitive object={modelScene.clone()} />
           </group>
         );
@@ -72,15 +72,17 @@ const ClickableModel = ({ modelUrl, onCoordinateClick, currentCoordinate, debugM
     }
   }
 
-  return <PlaceholderBuilding onClick={handleClick} />;
+  return <PlaceholderBuilding onClick={handleClick} scale={scale} />;
 };
 
-const PlaceholderBuilding = ({ onClick }) => {
+const PlaceholderBuilding = ({ onClick, scale = 1 }) => {
   return (
-    <mesh position={[0, 4, 0]} onClick={onClick}>
-      <boxGeometry args={[4, 8, 3]} />
-      <meshStandardMaterial color="#708238" opacity={0.3} transparent />
-    </mesh>
+    <group scale={[scale, scale, scale]}>
+      <mesh position={[0, 4, 0]} onClick={onClick}>
+        <boxGeometry args={[4, 8, 3]} />
+        <meshStandardMaterial color="#708238" opacity={0.3} transparent />
+      </mesh>
+    </group>
   );
 };
 
@@ -137,6 +139,7 @@ export const CoordinatePicker3D = ({
   currentCoordinate = [0, 0, 0],
   onCoordinateChange,
   unitLabel,
+  scale = 1,
 }) => {
   const [localCoordinate, setLocalCoordinate] = useState(currentCoordinate);
   const [debugMode, setDebugMode] = useState(true);
@@ -223,6 +226,7 @@ export const CoordinatePicker3D = ({
               onCoordinateClick={handleCoordinateClick}
               currentCoordinate={localCoordinate}
               debugMode={debugMode}
+              scale={scale}
             />
 
             {localCoordinate && (

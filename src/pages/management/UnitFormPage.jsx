@@ -798,6 +798,7 @@ export const UnitFormPage = () => {
                               }));
                             }}
                             unitLabel={formData.unitNumber || 'Unit'}
+                            scale={selectedProperty.model3DScale || 1}
                           />
                         )}
                       </>
