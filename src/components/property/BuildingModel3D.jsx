@@ -24,7 +24,7 @@ const Hotspot = ({ position, type, onClick, label }) => {
     <group position={position}>
       {getShape() === 'box' ? (
         <Box
-          args={[0.3, 0.3, 0.3]}
+          args={[1.5, 1.5, 1.5]}
           onClick={onClick}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
@@ -43,7 +43,7 @@ const Hotspot = ({ position, type, onClick, label }) => {
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
         >
-          <sphereGeometry args={[0.2, 16, 16]} />
+          <sphereGeometry args={[1.0, 16, 16]} />
           <meshStandardMaterial
             color={getColor()}
             emissive={getColor()}

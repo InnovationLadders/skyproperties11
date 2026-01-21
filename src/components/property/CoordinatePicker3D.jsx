@@ -16,7 +16,7 @@ const CoordinateMarker = ({ position, label }) => {
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        <sphereGeometry args={[0.15, 16, 16]} />
+        <sphereGeometry args={[0.75, 16, 16]} />
         <meshStandardMaterial
           color="#f59e0b"
           emissive="#f59e0b"
