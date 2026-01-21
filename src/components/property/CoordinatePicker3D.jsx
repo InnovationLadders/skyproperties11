@@ -49,10 +49,11 @@ const ClickableModel = ({ modelUrl, onCoordinateClick, currentCoordinate, debugM
 
     if (event.point) {
       const clickedPoint = event.point;
+      // Divide by scale to convert world-space coordinates back to model-local coordinates
       onCoordinateClick([
-        Math.round(clickedPoint.x * 10) / 10,
-        Math.round(clickedPoint.y * 10) / 10,
-        Math.round(clickedPoint.z * 10) / 10,
+        Math.round((clickedPoint.x / scale) * 10) / 10,
+        Math.round((clickedPoint.y / scale) * 10) / 10,
+        Math.round((clickedPoint.z / scale) * 10) / 10,
       ]);
     }
   };
@@ -231,7 +232,11 @@ export const CoordinatePicker3D = ({
 
             {localCoordinate && (
               <CoordinateMarker
-                position={localCoordinate}
+                position={[
+                  localCoordinate[0] * scale,
+                  localCoordinate[1] * scale,
+                  localCoordinate[2] * scale
+                ]}
                 label={unitLabel}
               />
             )}
