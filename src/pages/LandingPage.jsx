@@ -223,10 +223,21 @@ export const LandingPage = () => {
                             <p className="text-sm text-muted-foreground line-clamp-2">
                               {property.description || t('property.noDescription')}
                             </p>
-                            <div className="mt-4">
+                            <div className="mt-4 flex items-center justify-between">
                               <div className="text-sm text-green-600">
                                 <span className="font-semibold">{property.availableUnits || 0}</span> {t('property.available')}
                               </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs h-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/property-details/${property.id}`);
+                                }}
+                              >
+                                {t('property.viewDetails')}
+                              </Button>
                             </div>
                           </CardContent>
                           <CardFooter className="flex gap-2">
