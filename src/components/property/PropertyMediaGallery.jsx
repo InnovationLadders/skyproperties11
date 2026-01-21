@@ -39,6 +39,15 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
     setSelectedIndex((prev) => (prev < media.length - 1 ? prev + 1 : 0));
   };
 
+  const handleDragEnd = (event, info) => {
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold) {
+      handlePrevious();
+    } else if (info.offset.x < -swipeThreshold) {
+      handleNext();
+    }
+  };
+
   const selectedMedia = selectedIndex !== null ? media[selectedIndex] : null;
 
   return (
@@ -132,9 +141,13 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
               </>
             )}
 
-            <div
+            <motion.div
               className="max-w-7xl max-h-[90vh] w-full px-4"
               onClick={(e) => e.stopPropagation()}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={handleDragEnd}
             >
               {selectedMedia.type === 'image' ? (
                 <motion.img
@@ -146,6 +159,7 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
                   src={selectedMedia.url}
                   alt={selectedMedia.caption || propertyName}
                   className="w-full h-full object-contain"
+                  draggable={false}
                 />
               ) : (
                 <motion.div
@@ -168,19 +182,19 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
               )}
 
               {selectedMedia.caption && (
-                <div className="mt-4 text-center">
+                <div className="mt-4 text-center pointer-events-none">
                   <p className="text-white text-sm">{selectedMedia.caption}</p>
                 </div>
               )}
 
               {media.length > 1 && (
-                <div className="mt-4 text-center">
+                <div className="mt-4 text-center pointer-events-none">
                   <p className="text-white/70 text-sm">
                     {selectedIndex + 1} / {media.length}
                   </p>
                 </div>
               )}
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

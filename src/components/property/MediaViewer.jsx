@@ -59,6 +59,15 @@ export const MediaViewer = ({ media = [], initialIndex = 0, isOpen, onClose }) =
     setCurrentIndex((prev) => (prev < media.length - 1 ? prev + 1 : 0));
   };
 
+  const handleDragEnd = (event, info) => {
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold) {
+      handlePrevious();
+    } else if (info.offset.x < -swipeThreshold) {
+      handleNext();
+    }
+  };
+
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = currentMedia.url;
@@ -146,12 +155,17 @@ export const MediaViewer = ({ media = [], initialIndex = 0, isOpen, onClose }) =
             transition={{ duration: 0.2 }}
             className="max-w-7xl max-h-[90vh] w-full mx-4"
             onClick={(e) => e.stopPropagation()}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
           >
             {currentMedia.type === 'image' ? (
               <img
                 src={currentMedia.url}
                 alt={currentMedia.caption || 'Media'}
                 className="w-full h-full object-contain"
+                draggable={false}
               />
             ) : (
               <video

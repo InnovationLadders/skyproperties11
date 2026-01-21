@@ -1,9 +1,9 @@
-import { useRef, useState, Suspense } from 'react';
+import { useRef, useState, Suspense, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Box, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { Button } from '../ui/Button';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw, ZoomIn, ZoomOut, Loader2, Building2 } from 'lucide-react';
 
 const Hotspot = ({ position, type, onClick, label }) => {
   const [hovered, setHovered] = useState(false);
@@ -57,9 +57,15 @@ const Hotspot = ({ position, type, onClick, label }) => {
   );
 };
 
-const LoadedModel = ({ modelUrl, hotspots, onHotspotClick, scale = 1 }) => {
+const LoadedModel = ({ modelUrl, hotspots, onHotspotClick, scale = 1, onLoaded }) => {
   const { scene } = useGLTF(modelUrl);
   const modelRef = useRef();
+
+  useEffect(() => {
+    if (scene && onLoaded) {
+      onLoaded();
+    }
+  }, [scene, onLoaded]);
 
   return (
     <group ref={modelRef} scale={[scale, scale, scale]}>
@@ -134,8 +140,21 @@ const CameraController = ({ onControlsRef }) => {
 
 export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale = 1 }) => {
   const [modelError, setModelError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const controlsRef = useRef(null);
   const cameraRef = useRef(null);
+
+  useEffect(() => {
+    if (modelUrl) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [modelUrl]);
+
+  const handleModelLoaded = () => {
+    setIsLoading(false);
+  };
 
   const handleControlsRef = (controls, camera) => {
     controlsRef.current = controls;
@@ -239,6 +258,7 @@ export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale
               hotspots={hotspots}
               onHotspotClick={onHotspotClick}
               scale={scale}
+              onLoaded={handleModelLoaded}
             />
           </Suspense>
         ) : (
@@ -250,6 +270,16 @@ export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale
       {modelError && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md text-sm">
           Failed to load 3D model. Showing placeholder.
+        </div>
+      )}
+
+      {isLoading && modelUrl && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
+          <div className="flex flex-col items-center gap-4">
+            <Building2 className="h-16 w-16 text-gray-400" />
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <p className="text-sm text-gray-600 font-medium">Loading 3D Model...</p>
+          </div>
         </div>
       )}
 
