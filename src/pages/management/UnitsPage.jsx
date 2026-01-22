@@ -395,7 +395,7 @@ export const UnitsPage = () => {
                   )}
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
-                      <CardTitle>{t('unit.units')} {unit.unitNumber}</CardTitle>
+                      <CardTitle>{unit.unitNumber}</CardTitle>
                       <span className={`text-xs px-2 py-1 rounded ${getStatusColor(unit.status)}`}>
                         {t(`unit.${unit.status}`)}
                       </span>
@@ -543,7 +543,7 @@ export const UnitsPage = () => {
                                 )}
                                 <CardHeader>
                                   <div className="flex justify-between items-start">
-                                    <CardTitle>{unit.facilityType === FACILITY_TYPES.CAR_PARKING ? t('unit.carParking') : unit.facilityType === FACILITY_TYPES.OUTDOOR_PARK ? t('unit.outdoorPark') : t('unit.kiosk')} {unit.unitNumber}</CardTitle>
+                                    <CardTitle>{unit.unitNumber}</CardTitle>
                                     <span className={`text-xs px-2 py-1 rounded ${getStatusColor(unit.status)}`}>
                                       {t(`unit.${unit.status}`)}
                                     </span>

@@ -187,7 +187,7 @@ export const PropertyHomePage = () => {
                       )}
                       <div className="p-4">
                         <div className="flex justify-between items-start mb-3">
-                          <h4 className="font-semibold text-lg">{t('unit.units')} {unit.unitNumber}</h4>
+                          <h4 className="font-semibold text-lg">{unit.unitNumber}</h4>
                           <span
                             className={`text-xs px-2 py-1 rounded ${
                               unit.status === 'available'
