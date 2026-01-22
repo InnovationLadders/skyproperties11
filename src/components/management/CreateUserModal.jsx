@@ -483,7 +483,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                {t('unit.unit')} {unit.unitNumber}
+                                {unit.unitNumber}
                               </div>
                               <span className={`text-xs px-2 py-0.5 rounded ${getUnitStatusColor(unit.status)}`}>
                                 {t(`unit.${unit.status}`)}

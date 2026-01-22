@@ -167,7 +167,7 @@ export const MyUnitsPage = () => {
                         <div className="flex items-center space-x-2">
                           <Building2 className="h-5 w-5 text-primary" />
                           <CardTitle className="text-lg">
-                            {t('unit.unit')} {unit.unitNumber}
+                            {unit.unitNumber}
                           </CardTitle>
                         </div>
                         <span

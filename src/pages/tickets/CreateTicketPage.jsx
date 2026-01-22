@@ -329,7 +329,7 @@ export const CreateTicketPage = () => {
                 const propertyName = getPropertyName(unit.propertyId);
                 return (
                   <option key={unit.id} value={unit.id}>
-                    {propertyName} - {t('unit.unit')} {unit.unitNumber}
+                    {propertyName} - {unit.unitNumber}
                     {unit.floor ? ` - ${t('unit.floor')} ${unit.floor}` : ''}
                     {unit.type ? ` (${t(`unit.${unit.type}`)})` : ''}
                   </option>

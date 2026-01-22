@@ -213,7 +213,7 @@ export const MyRentalPage = () => {
                     <CardHeader>
                       <div className="flex items-center space-x-2 mb-2">
                         <Building2 className="h-5 w-5 text-primary" />
-                        <CardTitle>{t('unit.unit')} {unit.unitNumber}</CardTitle>
+                        <CardTitle>{unit.unitNumber}</CardTitle>
                       </div>
                       <CardDescription>
                         <div className="flex items-center text-sm">
