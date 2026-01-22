@@ -108,27 +108,6 @@ export const PropertyHomePage = () => {
                     onHotspotClick={handleHotspotClick}
                     scale={property.model3DScale || 1}
                   />
-                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200">
-                    <h4 className="text-xs font-semibold mb-2 text-gray-700">{t('property.legend')}</h4>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded"></div>
-                        <span className="text-xs text-gray-700">{t('property.forSaleExternal')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-xs text-gray-700">{t('property.forSaleInternal')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                        <span className="text-xs text-gray-700">{t('property.forRentExternal')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="text-xs text-gray-700">{t('property.forRentInternal')}</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
