@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Box, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Button } from '../ui/Button';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw, ZoomIn, ZoomOut, Loader2, Building2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw, ZoomIn, ZoomOut, Loader2, Building2, Minimize2, Maximize2 } from 'lucide-react';
 
 const Hotspot = ({ position, type, onClick, label, unit }) => {
   const [hovered, setHovered] = useState(false);
@@ -170,6 +170,8 @@ const CameraController = ({ onControlsRef }) => {
 export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale = 1 }) => {
   const [modelError, setModelError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLegendMinimized, setIsLegendMinimized] = useState(false);
+  const [isControlsMinimized, setIsControlsMinimized] = useState(false);
   const controlsRef = useRef(null);
   const cameraRef = useRef(null);
 
@@ -312,100 +314,149 @@ export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale
         </div>
       )}
 
-      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 border border-gray-200">
-        <div className="flex flex-col gap-2">
-          <div className="text-xs font-semibold text-gray-700 text-center mb-1">Camera Controls</div>
-
-          <div className="grid grid-cols-3 gap-1">
-            <div></div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => panCamera('up')}
-              title="Pan Up"
-            >
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-            <div></div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => panCamera('left')}
-              title="Pan Left"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => panCamera('down')}
-              title="Pan Down"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => panCamera('right')}
-              title="Pan Right"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="border-t border-gray-200 pt-2 mt-1">
-            <div className="text-xs text-gray-600 text-center mb-1">Rotate</div>
-            <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 flex-1"
-                onClick={() => rotateCamera('left')}
-                title="Rotate Left"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 flex-1"
-                onClick={() => rotateCamera('right')}
-                title="Rotate Right"
-              >
-                <RotateCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-2 mt-1">
-            <div className="text-xs text-gray-600 text-center mb-1">Zoom</div>
-            <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 flex-1"
-                onClick={() => zoomCamera('in')}
-                title="Zoom In"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 flex-1"
-                onClick={() => zoomCamera('out')}
-                title="Zoom Out"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 transition-all duration-300">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+          <div className="text-xs font-semibold text-gray-700">Legend</div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setIsLegendMinimized(!isLegendMinimized)}
+            title={isLegendMinimized ? "Expand Legend" : "Minimize Legend"}
+          >
+            {isLegendMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
+          </Button>
         </div>
+        {!isLegendMinimized && (
+          <div className="p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded" />
+              <span className="text-xs text-gray-700">For Sale (External)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500 rounded-full" />
+              <span className="text-xs text-gray-700">For Sale (Internal)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded" />
+              <span className="text-xs text-gray-700">For Rent (External)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded-full" />
+              <span className="text-xs text-gray-700">For Rent (Internal)</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 transition-all duration-300">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+          <div className="text-xs font-semibold text-gray-700">Camera Controls</div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setIsControlsMinimized(!isControlsMinimized)}
+            title={isControlsMinimized ? "Expand Controls" : "Minimize Controls"}
+          >
+            {isControlsMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
+          </Button>
+        </div>
+        {!isControlsMinimized && (
+          <div className="p-2">
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-3 gap-1">
+                <div></div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => panCamera('up')}
+                  title="Pan Up"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+                <div></div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => panCamera('left')}
+                  title="Pan Left"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => panCamera('down')}
+                  title="Pan Down"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => panCamera('right')}
+                  title="Pan Right"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="border-t border-gray-200 pt-2 mt-1">
+                <div className="text-xs text-gray-600 text-center mb-1">Rotate</div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 flex-1"
+                    onClick={() => rotateCamera('left')}
+                    title="Rotate Left"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 flex-1"
+                    onClick={() => rotateCamera('right')}
+                    title="Rotate Right"
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 pt-2 mt-1">
+                <div className="text-xs text-gray-600 text-center mb-1">Zoom</div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 flex-1"
+                    onClick={() => zoomCamera('in')}
+                    title="Zoom In"
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 flex-1"
+                    onClick={() => zoomCamera('out')}
+                    title="Zoom Out"
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
