@@ -91,7 +91,7 @@ export default function UnitDetailPage() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl">{t('unit.units')} {unit.unitNumber}</CardTitle>
+                  <CardTitle className="text-2xl">{unit.unitNumber}</CardTitle>
                   <CardDescription className="text-base mt-1">
                     {property.name} - {t('unit.floor')} {unit.floor}
                   </CardDescription>
