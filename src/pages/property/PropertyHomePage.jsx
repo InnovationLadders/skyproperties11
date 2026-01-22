@@ -108,7 +108,7 @@ export const PropertyHomePage = () => {
                     onHotspotClick={handleHotspotClick}
                     scale={property.model3DScale || 1}
                   />
-                  <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200">
+                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border border-gray-200">
                     <h4 className="text-xs font-semibold mb-2 text-gray-700">{t('property.legend')}</h4>
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">

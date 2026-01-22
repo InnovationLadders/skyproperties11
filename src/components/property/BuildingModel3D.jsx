@@ -312,7 +312,7 @@ export const BuildingModel3D = ({ modelUrl, hotspots = [], onHotspotClick, scale
         </div>
       )}
 
-      <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 border border-gray-200">
+      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 border border-gray-200">
         <div className="flex flex-col gap-2">
           <div className="text-xs font-semibold text-gray-700 text-center mb-1">Camera Controls</div>
 
