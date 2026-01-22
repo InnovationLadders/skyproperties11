@@ -7,6 +7,7 @@ import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw,
 
 const Hotspot = ({ position, type, onClick, label }) => {
   const [hovered, setHovered] = useState(false);
+  const boxRef = useRef();
 
   const getColor = () => {
     if (type === 'saleExternal') return '#22c55e';
@@ -23,35 +24,48 @@ const Hotspot = ({ position, type, onClick, label }) => {
   return (
     <group position={position}>
       {getShape() === 'box' ? (
-        <Box
-          args={[1.5, 1.5, 1.5]}
-          onClick={onClick}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
-        >
-          <meshStandardMaterial
-            color={getColor()}
-            emissive={getColor()}
-            emissiveIntensity={hovered ? 0.5 : 0.2}
-            transparent
-            opacity={0.8}
-          />
-        </Box>
+        <>
+          <mesh
+            ref={boxRef}
+            onClick={onClick}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+          >
+            <boxGeometry args={[1.5, 1.5, 1.5]} />
+            <meshStandardMaterial
+              color={getColor()}
+              emissive={getColor()}
+              emissiveIntensity={hovered ? 0.5 : 0.2}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+          <lineSegments>
+            <edgesGeometry args={[new THREE.BoxGeometry(1.5, 1.5, 1.5)]} />
+            <lineBasicMaterial color="#000000" linewidth={2} />
+          </lineSegments>
+        </>
       ) : (
-        <mesh
-          onClick={onClick}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
-        >
-          <sphereGeometry args={[1.0, 16, 16]} />
-          <meshStandardMaterial
-            color={getColor()}
-            emissive={getColor()}
-            emissiveIntensity={hovered ? 0.5 : 0.2}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
+        <>
+          <mesh>
+            <sphereGeometry args={[1.05, 16, 16]} />
+            <meshBasicMaterial color="#000000" transparent opacity={1} />
+          </mesh>
+          <mesh
+            onClick={onClick}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+          >
+            <sphereGeometry args={[1.0, 16, 16]} />
+            <meshStandardMaterial
+              color={getColor()}
+              emissive={getColor()}
+              emissiveIntensity={hovered ? 0.5 : 0.2}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        </>
       )}
     </group>
   );
