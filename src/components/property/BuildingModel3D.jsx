@@ -1,11 +1,11 @@
 import { useRef, useState, Suspense, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Box, useGLTF } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Box, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Button } from '../ui/Button';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, RotateCw, ZoomIn, ZoomOut, Loader2, Building2 } from 'lucide-react';
 
-const Hotspot = ({ position, type, onClick, label }) => {
+const Hotspot = ({ position, type, onClick, label, unit }) => {
   const [hovered, setHovered] = useState(false);
   const boxRef = useRef();
 
@@ -67,6 +67,19 @@ const Hotspot = ({ position, type, onClick, label }) => {
           </mesh>
         </>
       )}
+      {hovered && unit && (
+        <Html
+          position={[0, 2, 0]}
+          center
+          distanceFactor={10}
+          style={{ pointerEvents: 'none' }}
+        >
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 border border-gray-200">
+            <div className="text-sm font-semibold text-gray-900">{unit.unitNumber}</div>
+            <div className="text-xs text-gray-600">Floor {unit.floor}</div>
+          </div>
+        </Html>
+      )}
     </group>
   );
 };
@@ -90,6 +103,7 @@ const LoadedModel = ({ modelUrl, hotspots, onHotspotClick, scale = 1, onLoaded }
           position={hotspot.position}
           type={hotspot.type}
           label={hotspot.label}
+          unit={hotspot.unit}
           onClick={() => onHotspotClick(hotspot)}
         />
       ))}
@@ -113,6 +127,7 @@ const PlaceholderBuilding = ({ hotspots, onHotspotClick }) => {
           position={hotspot.position}
           type={hotspot.type}
           label={hotspot.label}
+          unit={hotspot.unit}
           onClick={() => onHotspotClick(hotspot)}
         />
       ))}
