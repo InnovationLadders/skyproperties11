@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { BuildingModel3D } from '../../components/property/BuildingModel3D';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { Building2, MapPin, DollarSign, Ruler } from 'lucide-react';
+import { Input } from '../../components/ui/Input';
+import { Building2, MapPin, DollarSign, Ruler, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PropertyHomePage = () => {
@@ -15,6 +16,8 @@ export const PropertyHomePage = () => {
   const [property, setProperty] = useState(null);
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('floor');
 
   useEffect(() => {
     fetchPropertyData();
@@ -55,6 +58,36 @@ export const PropertyHomePage = () => {
       label: unit.unitNumber,
       unit: unit,
     }));
+
+  const filteredAndSortedUnits = useMemo(() => {
+    let filtered = [...units];
+
+    if (searchTerm) {
+      filtered = filtered.filter((unit) =>
+        unit.unitNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'floor':
+          return (a.floor || 0) - (b.floor || 0);
+        case 'price':
+          return (a.price || 0) - (b.price || 0);
+        case 'size':
+          return (a.size || 0) - (b.size || 0);
+        case 'unitNumber':
+          return (a.unitNumber || '').localeCompare(b.unitNumber || '', undefined, {
+            numeric: true,
+            sensitivity: 'base'
+          });
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [units, searchTerm, sortBy]);
 
   const handleHotspotClick = (hotspot) => {
     navigate(`/property/${propertyId}/unit/${hotspot.unit.id}`);
@@ -116,12 +149,47 @@ export const PropertyHomePage = () => {
               <CardHeader>
                 <CardTitle>{t('property.availableUnits')}</CardTitle>
                 <CardDescription>
-                  {units.length} {t('property.unitsTotal')}, {units.filter(u => u.status === 'available').length} {t('property.available')}
+                  {searchTerm || sortBy !== 'floor'
+                    ? `${t('property.showing')} ${filteredAndSortedUnits.length} ${t('property.of')} ${units.length} ${t('property.unitsTotal')}`
+                    : `${units.length} ${t('property.unitsTotal')}, ${units.filter(u => u.status === 'available').length} ${t('property.available')}`
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {units.map((unit) => (
+                <div className="mb-6 flex gap-4 flex-wrap">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      type="text"
+                      placeholder={t('property.searchUnits')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 rounded-md border border-input bg-background text-sm min-w-[180px]"
+                  >
+                    <option value="floor">{t('property.sortByFloor')}</option>
+                    <option value="price">{t('property.sortByPrice')}</option>
+                    <option value="size">{t('property.sortBySize')}</option>
+                    <option value="unitNumber">{t('property.sortByUnitNumber')}</option>
+                  </select>
+                </div>
+
+                {filteredAndSortedUnits.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">{t('property.noUnitsFound')}</h3>
+                    <p className="text-muted-foreground">
+                      {t('property.tryAdjustingSearch')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredAndSortedUnits.map((unit) => (
                     <motion.div
                       key={unit.id}
                       whileHover={{ scale: 1.02 }}
@@ -201,8 +269,9 @@ export const PropertyHomePage = () => {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
