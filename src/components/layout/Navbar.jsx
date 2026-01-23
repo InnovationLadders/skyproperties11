@@ -7,6 +7,7 @@ import { Avatar } from '../ui/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { USER_ROLES } from '../../utils/constants';
 import { NotificationBell } from '../notifications/NotificationBell';
+import logo from '../../assets/logo1.png';
 
 export const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -57,9 +58,11 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">SP</span>
-              </div>
+              <img
+                src={logo}
+                alt="SkyProperty Logo"
+                className="h-10 w-auto"
+              />
               <span className="text-xl font-bold text-gray-900 hidden sm:block">
                 SkyProperty
               </span>

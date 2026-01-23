@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import logo from '../../assets/logo1.png';
 
 export const Footer = () => {
   const { t, i18n } = useTranslation();
@@ -37,7 +38,11 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Building2 className="h-8 w-8 text-blue-400" />
+              <img
+                src={logo}
+                alt="SkyProperty Logo"
+                className="h-8 w-auto"
+              />
               <h3 className="text-xl font-bold text-white">
                 {t('footer.companyName')}
               </h3>
