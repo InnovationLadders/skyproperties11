@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, DollarSign, Map as MapIcon, List, Search } from 'lucide-react';
+import { Building2, MapPin, Map as MapIcon, List, Search } from 'lucide-react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Button } from '../components/ui/Button';
@@ -301,7 +301,7 @@ export const LandingPage = () => {
 
       <section className="py-16 px-4 bg-muted">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -329,21 +329,6 @@ export const LandingPage = () => {
               <h3 className="text-xl font-semibold mb-2">{t('landing.smartMarketplace')}</h3>
               <p className="text-muted-foreground">
                 {t('landing.smartMarketplaceDesc')}
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{t('landing.securePayments')}</h3>
-              <p className="text-muted-foreground">
-                {t('landing.securePaymentsDesc')}
               </p>
             </motion.div>
           </div>
