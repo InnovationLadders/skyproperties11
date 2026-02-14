@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Video, Star, Trash2, Edit2, GripVertical } from 'lucide-react';
+import { Image as ImageIcon, Video, Star, Trash2, Edit2, GripVertical, CheckSquare, Square } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { motion } from 'framer-motion';
 
 export const MediaGallery = ({
   media = [],
   onDelete,
+  onDeleteMultiple,
   onSetPrimary,
   onEditCaption,
   onReorder,
@@ -16,6 +17,8 @@ export const MediaGallery = ({
   const { t } = useTranslation();
   const [editingCaption, setEditingCaption] = useState(null);
   const [captionValue, setCaptionValue] = useState('');
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
 
   const sortedMedia = [...media].sort((a, b) => {
     if (a.isPrimary) return -1;
@@ -40,6 +43,43 @@ export const MediaGallery = ({
     setCaptionValue('');
   };
 
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    setSelectedItems([]);
+  };
+
+  const toggleItemSelection = (itemId) => {
+    setSelectedItems(prev => {
+      if (prev.includes(itemId)) {
+        return prev.filter(id => id !== itemId);
+      } else {
+        return [...prev, itemId];
+      }
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedItems(media.map(item => item.id));
+  };
+
+  const deselectAll = () => {
+    setSelectedItems([]);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedItems.length === 0) return;
+
+    const itemsToDelete = media.filter(item => selectedItems.includes(item.id));
+
+    if (window.confirm(t('media.deleteMultipleConfirm', { count: selectedItems.length }))) {
+      if (onDeleteMultiple) {
+        onDeleteMultiple(itemsToDelete);
+      }
+      setSelectedItems([]);
+      setSelectionMode(false);
+    }
+  };
+
   if (media.length === 0) {
     return (
       <div className="text-center py-12 bg-muted/30 rounded-lg">
@@ -55,7 +95,69 @@ export const MediaGallery = ({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="space-y-4">
+      {canEdit && media.length > 0 && (
+        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant={selectionMode ? "default" : "outline"}
+              onClick={toggleSelectionMode}
+            >
+              {selectionMode ? (
+                <>
+                  <CheckSquare className="h-4 w-4 mr-1" />
+                  {t('media.cancelSelection')}
+                </>
+              ) : (
+                <>
+                  <Square className="h-4 w-4 mr-1" />
+                  {t('media.selectMultiple')}
+                </>
+              )}
+            </Button>
+
+            {selectionMode && (
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={selectAll}
+                  disabled={selectedItems.length === media.length}
+                >
+                  {t('media.selectAll')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={deselectAll}
+                  disabled={selectedItems.length === 0}
+                >
+                  {t('media.deselectAll')}
+                </Button>
+              </>
+            )}
+          </div>
+
+          {selectionMode && selectedItems.length > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                {selectedItems.length} {t('media.selected')}
+              </span>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleDeleteSelected}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                {t('media.deleteSelected')}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {sortedMedia.map((item, index) => (
         <motion.div
           key={item.id}
@@ -65,8 +167,18 @@ export const MediaGallery = ({
           className="relative group"
         >
           <div
-            className="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer"
-            onClick={() => onMediaClick && onMediaClick(item)}
+            className={`aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer transition-all ${
+              selectionMode && selectedItems.includes(item.id)
+                ? 'ring-4 ring-primary ring-offset-2'
+                : ''
+            }`}
+            onClick={() => {
+              if (selectionMode) {
+                toggleItemSelection(item.id);
+              } else if (onMediaClick) {
+                onMediaClick(item);
+              }
+            }}
           >
             {item.type === 'image' ? (
               <img
@@ -97,6 +209,24 @@ export const MediaGallery = ({
               </div>
             )}
 
+            {selectionMode && (
+              <div className="absolute top-2 right-2 z-10">
+                <div
+                  className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
+                    selectedItems.includes(item.id)
+                      ? 'bg-primary text-white'
+                      : 'bg-white/80 text-gray-600'
+                  }`}
+                >
+                  {selectedItems.includes(item.id) ? (
+                    <CheckSquare className="h-4 w-4" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </div>
+              </div>
+            )}
+
             {item.isPrimary && (
               <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
                 <Star className="h-3 w-3 fill-current" />
@@ -104,7 +234,7 @@ export const MediaGallery = ({
               </div>
             )}
 
-            {canEdit && (
+            {canEdit && !selectionMode && (
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 {!item.isPrimary && onSetPrimary && (
                   <Button
@@ -209,6 +339,7 @@ export const MediaGallery = ({
           </div>
         </motion.div>
       ))}
+      </div>
     </div>
   );
 };

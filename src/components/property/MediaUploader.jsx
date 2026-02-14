@@ -1,11 +1,15 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Video, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Upload, X, Image as ImageIcon, Video, Loader2, AlertCircle, Play, CheckCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { uploadUnitMedia, addMediaToUnit } from '../../utils/mediaUpload';
 
 export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) => {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadQueue, setUploadQueue] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStats, setUploadStats] = useState({ completed: 0, failed: 0, total: 0 });
   const fileInputRef = useRef(null);
 
   const handleDragOver = (e) => {
@@ -36,11 +40,11 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
   };
 
   const handleFiles = (files) => {
-    const newUploads = files.map((file) => ({
-      id: `${Date.now()}_${file.name}`,
+    const newUploads = files.map((file, index) => ({
+      id: `${Date.now()}_${index}_${file.name}`,
       file,
       progress: 0,
-      status: 'pending',
+      status: 'queued',
       error: null,
       preview: null,
     }));
@@ -60,11 +64,17 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
     });
 
     setUploadQueue((prev) => [...prev, ...newUploads]);
-    startUploads(newUploads);
+    setUploadStats(prev => ({ ...prev, total: prev.total + newUploads.length }));
   };
 
   const startUploads = async (uploads) => {
+    setIsUploading(true);
+
     for (const upload of uploads) {
+      if (upload.status !== 'queued' && upload.status !== 'pending') {
+        continue;
+      }
+
       try {
         setUploadQueue((prev) =>
           prev.map((item) =>
@@ -93,6 +103,8 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
           )
         );
 
+        setUploadStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+
         if (onUploadComplete) {
           onUploadComplete(mediaData);
         }
@@ -109,8 +121,32 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
               : item
           )
         );
+        setUploadStats(prev => ({ ...prev, failed: prev.failed + 1 }));
       }
     }
+
+    setIsUploading(false);
+  };
+
+  const startAllUploads = () => {
+    const queuedItems = uploadQueue.filter(item => item.status === 'queued');
+    if (queuedItems.length > 0) {
+      startUploads(queuedItems);
+    }
+  };
+
+  const clearCompleted = () => {
+    setUploadQueue(prev => prev.filter(item =>
+      item.status !== 'completed' && item.status !== 'error'
+    ));
+    setUploadStats({ completed: 0, failed: 0, total: uploadQueue.filter(item =>
+      item.status === 'queued' || item.status === 'uploading'
+    ).length });
+  };
+
+  const clearAll = () => {
+    setUploadQueue([]);
+    setUploadStats({ completed: 0, failed: 0, total: 0 });
   };
 
   const removeFromQueue = (uploadId) => {
@@ -143,10 +179,10 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
       >
         <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
         <p className="text-sm font-medium mb-1">
-          {disabled ? 'Upload disabled' : 'Drop files here or click to browse'}
+          {disabled ? t('media.uploadDisabled') : t('media.dropFilesOrClick')}
         </p>
         <p className="text-xs text-muted-foreground">
-          Images (JPG, PNG, WebP, GIF) up to 10MB or Videos (MP4, WebM, MOV) up to 100MB
+          {t('media.uploadLimits')}
         </p>
         <input
           ref={fileInputRef}
@@ -158,6 +194,58 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
           disabled={disabled}
         />
       </div>
+
+      {uploadQueue.length > 0 && (
+        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="font-medium">
+              {uploadQueue.filter(item => item.status === 'queued').length} {t('media.filesInQueue')}
+            </span>
+            {uploadStats.completed > 0 && (
+              <span className="text-green-600 flex items-center gap-1">
+                <CheckCircle className="h-4 w-4" />
+                {uploadStats.completed} {t('media.completed')}
+              </span>
+            )}
+            {uploadStats.failed > 0 && (
+              <span className="text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-4 w-4" />
+                {uploadStats.failed} {t('media.failed')}
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {!isUploading && uploadQueue.some(item => item.status === 'queued') && (
+              <Button
+                size="sm"
+                onClick={startAllUploads}
+                disabled={disabled}
+              >
+                <Play className="h-4 w-4 mr-1" />
+                {t('media.startUpload')}
+              </Button>
+            )}
+            {uploadQueue.some(item => item.status === 'completed' || item.status === 'error') && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={clearCompleted}
+                disabled={isUploading}
+              >
+                {t('media.clearCompleted')}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={clearAll}
+              disabled={isUploading}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {uploadQueue.length > 0 && (
         <div className="space-y-2">
@@ -186,6 +274,12 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
                   {(upload.file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
 
+                {upload.status === 'queued' && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    {t('media.waitingToUpload')}
+                  </p>
+                )}
+
                 {upload.status === 'uploading' && (
                   <div className="mt-1">
                     <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -201,8 +295,9 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
                 )}
 
                 {upload.status === 'completed' && (
-                  <p className="text-xs text-green-600 mt-1">
-                    Upload completed
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    {t('media.uploadCompleted')}
                   </p>
                 )}
 
@@ -218,7 +313,7 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
                       onClick={() => retryUpload(upload)}
                       className="mt-1 h-6 text-xs"
                     >
-                      Retry
+                      {t('media.retry')}
                     </Button>
                   </div>
                 )}
@@ -226,7 +321,7 @@ export const MediaUploader = ({ unitId, userId, onUploadComplete, disabled }) =>
 
               {upload.status === 'uploading' ? (
                 <Loader2 className="h-5 w-5 text-primary animate-spin flex-shrink-0" />
-              ) : upload.status === 'error' || upload.status === 'pending' ? (
+              ) : upload.status === 'error' || upload.status === 'queued' ? (
                 <Button
                   variant="ghost"
                   size="icon"

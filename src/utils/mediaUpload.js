@@ -240,3 +240,48 @@ export const reorderMedia = async (unitId, mediaArray) => {
     throw error;
   }
 };
+
+export const deleteMultipleMedia = async (unitId, mediaItems) => {
+  const results = {
+    successful: [],
+    failed: [],
+  };
+
+  for (const mediaItem of mediaItems) {
+    try {
+      const storageRef = ref(storage, mediaItem.storagePath);
+      await deleteObject(storageRef);
+
+      if (mediaItem.thumbnailUrl && mediaItem.type === 'video') {
+        const thumbnailPath = mediaItem.storagePath.replace(/videos\//, 'thumbnails/').replace(/\.(mp4|webm|mov)$/, '.jpg');
+        const thumbnailRef = ref(storage, thumbnailPath);
+        try {
+          await deleteObject(thumbnailRef);
+        } catch (error) {
+          console.warn('Thumbnail deletion failed:', error);
+        }
+      }
+
+      results.successful.push(mediaItem);
+    } catch (error) {
+      console.error(`Error deleting media ${mediaItem.id}:`, error);
+      results.failed.push({ mediaItem, error: error.message });
+    }
+  }
+
+  if (results.successful.length > 0) {
+    try {
+      const unitRef = doc(db, 'units', unitId);
+      for (const mediaItem of results.successful) {
+        await updateDoc(unitRef, {
+          media: arrayRemove(mediaItem),
+        });
+      }
+    } catch (error) {
+      console.error('Error updating unit after deletion:', error);
+      throw error;
+    }
+  }
+
+  return results;
+};

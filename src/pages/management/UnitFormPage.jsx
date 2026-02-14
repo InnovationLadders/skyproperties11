@@ -15,7 +15,7 @@ import { MediaUploader } from '../../components/property/MediaUploader';
 import { MediaGallery } from '../../components/property/MediaGallery';
 import { MediaViewer } from '../../components/property/MediaViewer';
 import { useAuth } from '../../contexts/AuthContext';
-import { deleteUnitMedia, setPrimaryMedia, updateMediaMetadata } from '../../utils/mediaUpload';
+import { deleteUnitMedia, deleteMultipleMedia, setPrimaryMedia, updateMediaMetadata } from '../../utils/mediaUpload';
 import { getManagedPropertyIds, canCreateUnit, canEditUnit } from '../../utils/permissionsService';
 
 export const UnitFormPage = () => {
@@ -300,6 +300,25 @@ export const UnitFormPage = () => {
     } catch (error) {
       console.error('Error deleting media:', error);
       alert('Failed to delete media');
+    }
+  };
+
+  const handleDeleteMultipleMedia = async (mediaItems) => {
+    try {
+      const results = await deleteMultipleMedia(unitId, mediaItems);
+
+      const deletedIds = results.successful.map(item => item.id);
+      setFormData((prev) => ({
+        ...prev,
+        media: prev.media.filter((item) => !deletedIds.includes(item.id)),
+      }));
+
+      if (results.failed.length > 0) {
+        alert(t('media.someDeletesFailed', { count: results.failed.length }));
+      }
+    } catch (error) {
+      console.error('Error deleting multiple media:', error);
+      alert(t('media.deleteMultipleFailed'));
     }
   };
 
@@ -904,6 +923,7 @@ export const UnitFormPage = () => {
                           <MediaGallery
                             media={formData.media}
                             onDelete={handleDeleteMedia}
+                            onDeleteMultiple={handleDeleteMultipleMedia}
                             onSetPrimary={handleSetPrimaryMedia}
                             onEditCaption={handleEditCaption}
                             onMediaClick={handleMediaClick}
