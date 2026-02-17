@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ChevronLeft, ChevronRight, Play, Image as ImageIcon } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PlayButtonOverlay } from './PlayButtonOverlay';
 
 export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
   const { t } = useTranslation();
@@ -77,11 +78,7 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
                       alt={item.caption || `Video ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                        <Play className="h-6 w-6 text-gray-800 ml-0.5" fill="currentColor" />
-                      </div>
-                    </div>
+                    <PlayButtonOverlay className="group-hover:bg-black/40 transition-colors" />
                   </div>
                 )}
                 {item.isPrimary && (

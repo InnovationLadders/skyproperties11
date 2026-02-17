@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/Button';
 import { Building2, ArrowLeft, DollarSign, Ruler, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PlayButtonOverlay } from '../../components/property/PlayButtonOverlay';
 
 export default function UnitDetailPage() {
   const { t } = useTranslation();
@@ -148,11 +149,7 @@ export default function UnitDetailPage() {
                           alt="Video thumbnail"
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                            <Play className="h-8 w-8 text-gray-800 ml-1" fill="currentColor" />
-                          </div>
-                        </div>
+                        <PlayButtonOverlay size="large" />
                       </div>
                     )}
                   </div>

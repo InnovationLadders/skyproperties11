@@ -6,8 +6,10 @@ import { db } from '../../lib/firebase';
 import { BuildingModel3D } from '../../components/property/BuildingModel3D';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
-import { Building2, MapPin, DollarSign, Ruler, Search } from 'lucide-react';
+import { Building2, MapPin, DollarSign, Ruler, Search, Video } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getMediaDisplayUrl, isVideoMedia } from '../../utils/mediaHelpers';
+import { PlayButtonOverlay } from '../../components/property/PlayButtonOverlay';
 
 export const PropertyHomePage = () => {
   const { t } = useTranslation();
@@ -197,25 +199,43 @@ export const PropertyHomePage = () => {
                       onClick={() => navigate(`/property/${propertyId}/unit/${unit.id}`)}
                     >
                       {unit.media && unit.media.length > 0 ? (
-                        <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                          <img
-                            src={(unit.media.find(m => m.isPrimary) || unit.media[0]).url}
-                            alt={`Unit ${unit.unitNumber}`}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                          <div className="absolute top-2 right-2 flex gap-1">
-                            <span
-                              className={`text-xs px-2 py-1 rounded font-medium ${
-                                unit.listingType === 'sale'
-                                  ? 'bg-green-500 text-white'
-                                  : 'bg-blue-500 text-white'
-                              }`}
-                            >
-                              {unit.listingType === 'sale' ? t('property.forSale') : t('property.forRent')}
-                            </span>
-                          </div>
-                        </div>
+                        (() => {
+                          const primaryMedia = unit.media.find(m => m.isPrimary) || unit.media[0];
+                          const displayUrl = getMediaDisplayUrl(primaryMedia);
+                          const isVideo = isVideoMedia(primaryMedia);
+
+                          return (
+                            <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                              {displayUrl ? (
+                                <>
+                                  <img
+                                    src={displayUrl}
+                                    alt={`Unit ${unit.unitNumber}`}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                  {isVideo && <PlayButtonOverlay />}
+                                </>
+                              ) : isVideo ? (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                  <Video className="h-12 w-12 text-gray-400" />
+                                  <PlayButtonOverlay />
+                                </div>
+                              ) : null}
+                              <div className="absolute top-2 right-2 flex gap-1 z-10">
+                                <span
+                                  className={`text-xs px-2 py-1 rounded font-medium ${
+                                    unit.listingType === 'sale'
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-blue-500 text-white'
+                                  }`}
+                                >
+                                  {unit.listingType === 'sale' ? t('property.forSale') : t('property.forRent')}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()
                       ) : (
                         <div className="relative aspect-video bg-gray-100 flex items-center justify-center">
                           <Building2 className="h-12 w-12 text-muted-foreground" />

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Image as ImageIcon, Video, Star, Trash2, Edit2, GripVertical, CheckSquare, Square } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { motion } from 'framer-motion';
+import { PlayButtonOverlay } from './PlayButtonOverlay';
 
 export const MediaGallery = ({
   media = [],
@@ -190,22 +191,21 @@ export const MediaGallery = ({
             ) : (
               <div className="relative w-full h-full">
                 {item.thumbnailUrl ? (
-                  <img
-                    src={item.thumbnailUrl}
-                    alt={item.caption || 'Video thumbnail'}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                  <>
+                    <img
+                      src={item.thumbnailUrl}
+                      alt={item.caption || 'Video thumbnail'}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <PlayButtonOverlay />
+                  </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Video className="h-12 w-12 text-muted-foreground" />
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <Video className="h-12 w-12 text-gray-400" />
+                    <PlayButtonOverlay />
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                    <div className="w-0 h-0 border-l-8 border-l-gray-800 border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1"></div>
-                  </div>
-                </div>
               </div>
             )}
 
