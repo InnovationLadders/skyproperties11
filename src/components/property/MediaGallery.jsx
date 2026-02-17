@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Video, Star, Trash2, Edit2, GripVertical, CheckSquare, Square } from 'lucide-react';
+import { Image as ImageIcon, Video, Star, Trash2, Edit2, GripVertical, CheckSquare, Square, Upload } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { motion } from 'framer-motion';
 import { PlayButtonOverlay } from './PlayButtonOverlay';
@@ -13,6 +13,7 @@ export const MediaGallery = ({
   onEditCaption,
   onReorder,
   onMediaClick,
+  onUploadThumbnail,
   canEdit = false,
 }) => {
   const { t } = useTranslation();
@@ -247,6 +248,20 @@ export const MediaGallery = ({
                     className="h-8"
                   >
                     <Star className="h-3 w-3" />
+                  </Button>
+                )}
+                {item.type === 'video' && onUploadThumbnail && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUploadThumbnail(item);
+                    }}
+                    className="h-8"
+                    title={t('media.uploadThumbnail')}
+                  >
+                    <Upload className="h-3 w-3" />
                   </Button>
                 )}
                 {onEditCaption && (

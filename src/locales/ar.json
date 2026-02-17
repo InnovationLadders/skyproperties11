@@ -652,7 +652,8 @@
     "selected": "محدد",
     "deleteSelected": "حذف المحدد",
     "someDeletesFailed": "فشل حذف {{count}} عنصر",
-    "deleteMultipleFailed": "فشل حذف العناصر المتعددة"
+    "deleteMultipleFailed": "فشل حذف العناصر المتعددة",
+    "uploadThumbnail": "تحميل صورة مصغرة"
   },
   "billing": {
     "bills": "الفواتير",
