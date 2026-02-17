@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Image as ImageIcon, Video } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,11 +73,26 @@ export const PropertyMediaGallery = ({ media = [], propertyName = '' }) => {
                   />
                 ) : (
                   <div className="relative w-full h-full">
-                    <img
-                      src={item.thumbnailUrl || item.url}
-                      alt={item.caption || `Video ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    {item.thumbnailUrl ? (
+                      <>
+                        <img
+                          src={item.thumbnailUrl}
+                          alt={item.caption || `Video ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-full h-full hidden items-center justify-center bg-gray-200">
+                          <Video className="h-12 w-12 text-gray-400" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Video className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
                     <PlayButtonOverlay className="group-hover:bg-black/40 transition-colors" />
                   </div>
                 )}
