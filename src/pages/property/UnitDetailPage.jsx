@@ -8,7 +8,7 @@ import { MediaViewer } from '../../components/property/MediaViewer';
 import { Virtual360Viewer } from '../../components/property/Virtual360Viewer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { Building2, ArrowLeft, DollarSign, Ruler, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { Building2, ArrowLeft, DollarSign, Ruler, ChevronLeft, ChevronRight, Play, Video } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PlayButtonOverlay } from '../../components/property/PlayButtonOverlay';
 
@@ -144,12 +144,21 @@ export default function UnitDetailPage() {
                       />
                     ) : (
                       <div className="relative w-full h-full">
-                        <img
-                          src={unit.media[currentMediaIndex].thumbnailUrl}
-                          alt="Video thumbnail"
-                          className="w-full h-full object-cover"
-                        />
-                        <PlayButtonOverlay size="large" />
+                        {unit.media[currentMediaIndex].thumbnailUrl ? (
+                          <>
+                            <img
+                              src={unit.media[currentMediaIndex].thumbnailUrl}
+                              alt="Video thumbnail"
+                              className="w-full h-full object-cover"
+                            />
+                            <PlayButtonOverlay size="large" />
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <Video className="h-24 w-24 text-gray-400" />
+                            <PlayButtonOverlay size="large" />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

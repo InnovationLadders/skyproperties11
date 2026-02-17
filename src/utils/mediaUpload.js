@@ -285,3 +285,74 @@ export const deleteMultipleMedia = async (unitId, mediaItems) => {
 
   return results;
 };
+
+export const uploadCustomThumbnail = async (unitId, mediaId, thumbnailFile, onProgress) => {
+  const ALLOWED_THUMBNAIL_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_THUMBNAIL_SIZE = 5 * 1024 * 1024;
+
+  if (!ALLOWED_THUMBNAIL_TYPES.includes(thumbnailFile.type)) {
+    throw new Error('Invalid thumbnail file type. Please upload JPG, PNG, or WebP images.');
+  }
+
+  if (thumbnailFile.size > MAX_THUMBNAIL_SIZE) {
+    throw new Error('Thumbnail file size exceeds 5MB limit.');
+  }
+
+  const timestamp = Date.now();
+  const sanitizedName = sanitizeFilename(thumbnailFile.name);
+  const thumbnailPath = `units/${unitId}/thumbnails/custom_${mediaId}_${timestamp}_${sanitizedName}`;
+
+  const storageRef = ref(storage, thumbnailPath);
+  const uploadTask = uploadBytesResumable(storageRef, thumbnailFile);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        if (onProgress) {
+          onProgress(progress);
+        }
+      },
+      (error) => {
+        reject(error);
+      },
+      async () => {
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve({
+            thumbnailUrl: downloadURL,
+            customThumbnailPath: thumbnailPath,
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    );
+  });
+};
+
+export const updateMediaThumbnail = async (unitId, oldMediaData, newThumbnailUrl, customThumbnailPath) => {
+  try {
+    if (oldMediaData.customThumbnailPath) {
+      try {
+        const oldThumbnailRef = ref(storage, oldMediaData.customThumbnailPath);
+        await deleteObject(oldThumbnailRef);
+      } catch (error) {
+        console.warn('Failed to delete old custom thumbnail:', error);
+      }
+    }
+
+    const updatedMedia = {
+      ...oldMediaData,
+      thumbnailUrl: newThumbnailUrl,
+      customThumbnailPath,
+    };
+
+    await updateMediaMetadata(unitId, oldMediaData, updatedMedia);
+    return updatedMedia;
+  } catch (error) {
+    console.error('Error updating media thumbnail:', error);
+    throw error;
+  }
+};

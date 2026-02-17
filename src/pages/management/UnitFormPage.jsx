@@ -15,7 +15,8 @@ import { MediaUploader } from '../../components/property/MediaUploader';
 import { MediaGallery } from '../../components/property/MediaGallery';
 import { MediaViewer } from '../../components/property/MediaViewer';
 import { useAuth } from '../../contexts/AuthContext';
-import { deleteUnitMedia, deleteMultipleMedia, setPrimaryMedia, updateMediaMetadata } from '../../utils/mediaUpload';
+import { deleteUnitMedia, deleteMultipleMedia, setPrimaryMedia, updateMediaMetadata, uploadCustomThumbnail, updateMediaThumbnail } from '../../utils/mediaUpload';
+import { ThumbnailUploader } from '../../components/property/ThumbnailUploader';
 import { getManagedPropertyIds, canCreateUnit, canEditUnit } from '../../utils/permissionsService';
 
 export const UnitFormPage = () => {
@@ -71,6 +72,9 @@ export const UnitFormPage = () => {
   const [showMediaViewer, setShowMediaViewer] = useState(false);
   const [mediaViewerIndex, setMediaViewerIndex] = useState(0);
   const [managedPropertyIds, setManagedPropertyIds] = useState([]);
+  const [showThumbnailUploader, setShowThumbnailUploader] = useState(false);
+  const [uploadingThumbnailFor, setUploadingThumbnailFor] = useState(null);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
 
   useEffect(() => {
     initializeForm();
@@ -352,6 +356,51 @@ export const UnitFormPage = () => {
       console.error('Error updating caption:', error);
       alert('Failed to update caption');
     }
+  };
+
+  const handleUploadThumbnail = (mediaItem) => {
+    setUploadingThumbnailFor(mediaItem);
+    setShowThumbnailUploader(true);
+  };
+
+  const handleThumbnailUpload = async (thumbnailFile) => {
+    if (!uploadingThumbnailFor) return;
+
+    try {
+      setThumbnailUploading(true);
+      const { thumbnailUrl, customThumbnailPath } = await uploadCustomThumbnail(
+        unitId,
+        uploadingThumbnailFor.id,
+        thumbnailFile
+      );
+
+      const updatedMedia = await updateMediaThumbnail(
+        unitId,
+        uploadingThumbnailFor,
+        thumbnailUrl,
+        customThumbnailPath
+      );
+
+      setFormData((prev) => ({
+        ...prev,
+        media: prev.media.map((item) =>
+          item.id === uploadingThumbnailFor.id ? updatedMedia : item
+        ),
+      }));
+
+      setShowThumbnailUploader(false);
+      setUploadingThumbnailFor(null);
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error);
+      alert('Failed to upload thumbnail: ' + error.message);
+    } finally {
+      setThumbnailUploading(false);
+    }
+  };
+
+  const handleCancelThumbnailUpload = () => {
+    setShowThumbnailUploader(false);
+    setUploadingThumbnailFor(null);
   };
 
   const handleMediaClick = (mediaItem) => {
@@ -926,6 +975,7 @@ export const UnitFormPage = () => {
                             onDeleteMultiple={handleDeleteMultipleMedia}
                             onSetPrimary={handleSetPrimaryMedia}
                             onEditCaption={handleEditCaption}
+                            onUploadThumbnail={handleUploadThumbnail}
                             onMediaClick={handleMediaClick}
                             canEdit={true}
                           />
@@ -1096,6 +1146,21 @@ export const UnitFormPage = () => {
           isOpen={showMediaViewer}
           onClose={() => setShowMediaViewer(false)}
         />
+
+        {showThumbnailUploader && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-background rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">
+                {t('media.uploadThumbnail')}
+              </h3>
+              <ThumbnailUploader
+                onUpload={handleThumbnailUpload}
+                onCancel={handleCancelThumbnailUpload}
+                isUploading={thumbnailUploading}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
