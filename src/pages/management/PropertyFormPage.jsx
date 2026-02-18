@@ -827,12 +827,18 @@ export const PropertyFormPage = () => {
         </Card>
 
         {showThumbnailUploader && (
-          <ThumbnailUploader
-            onUpload={handleThumbnailUpload}
-            onCancel={handleCancelThumbnailUpload}
-            uploading={thumbnailUploading}
-            progress={thumbnailProgress}
-          />
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-background rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">
+                {t('media.uploadThumbnail')}
+              </h3>
+              <ThumbnailUploader
+                onUpload={handleThumbnailUpload}
+                onCancel={handleCancelThumbnailUpload}
+                isUploading={thumbnailUploading}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>
