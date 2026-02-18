@@ -9,6 +9,9 @@ import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { CoordinatePicker } from '../../components/property/CoordinatePicker';
+import { MediaGallery } from '../../components/property/MediaGallery';
+import { ThumbnailUploader } from '../../components/property/ThumbnailUploader';
+import { uploadCustomPropertyThumbnail, updatePropertyMediaThumbnail, generateVideoThumbnail } from '../../utils/propertyMediaUpload';
 import { ArrowLeft, Save, Upload, MapPin, Plus, X, Image, Video } from 'lucide-react';
 
 export const PropertyFormPage = () => {
@@ -45,6 +48,10 @@ export const PropertyFormPage = () => {
   const [newMediaFile, setNewMediaFile] = useState(null);
   const [newMediaUrl, setNewMediaUrl] = useState('');
   const [newMediaCaption, setNewMediaCaption] = useState('');
+  const [showThumbnailUploader, setShowThumbnailUploader] = useState(false);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(null);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailProgress, setThumbnailProgress] = useState(0);
 
   useEffect(() => {
     if (isEditMode) {
@@ -139,9 +146,11 @@ export const PropertyFormPage = () => {
 
   const handleAddMedia = async () => {
     if (newMediaType === 'videoLink' && newMediaUrl.trim()) {
+      const mediaId = `video_url_${Date.now()}`;
       setFormData(prev => ({
         ...prev,
         mediaGallery: [...(prev.mediaGallery || []), {
+          id: mediaId,
           type: 'video',
           url: newMediaUrl.trim(),
           caption: newMediaCaption.trim(),
@@ -153,12 +162,26 @@ export const PropertyFormPage = () => {
       setNewMediaCaption('');
     } else if (newMediaFile) {
       const tempUrl = URL.createObjectURL(newMediaFile);
+      const mediaId = `${Date.now()}_${newMediaFile.name}`;
+
+      let thumbnailUrl = null;
+      if (newMediaType === 'video') {
+        try {
+          const thumbnailBlob = await generateVideoThumbnail(newMediaFile);
+          thumbnailUrl = URL.createObjectURL(thumbnailBlob);
+        } catch (error) {
+          console.error('Failed to generate video thumbnail:', error);
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
         mediaGallery: [...(prev.mediaGallery || []), {
+          id: mediaId,
           type: newMediaType === 'image' ? 'image' : 'video',
           url: tempUrl,
           caption: newMediaCaption.trim(),
+          thumbnailUrl,
           isLocal: true,
           file: newMediaFile,
           isPrimary: (prev.mediaGallery || []).length === 0
@@ -184,6 +207,61 @@ export const PropertyFormPage = () => {
         isPrimary: i === index
       }))
     }));
+  };
+
+  const handleUploadThumbnail = (index) => {
+    setSelectedMediaIndex(index);
+    setShowThumbnailUploader(true);
+  };
+
+  const handleThumbnailUpload = async (file) => {
+    if (!isEditMode || !propertyId) {
+      alert('Please save the property first before uploading custom thumbnails.');
+      return;
+    }
+
+    const mediaItem = formData.mediaGallery[selectedMediaIndex];
+    if (!mediaItem) return;
+
+    setThumbnailUploading(true);
+    setThumbnailProgress(0);
+
+    try {
+      const { thumbnailUrl, customThumbnailPath } = await uploadCustomPropertyThumbnail(
+        propertyId,
+        mediaItem.id,
+        file,
+        (progress) => setThumbnailProgress(progress)
+      );
+
+      const updatedMediaGallery = await updatePropertyMediaThumbnail(
+        propertyId,
+        formData.mediaGallery,
+        selectedMediaIndex,
+        thumbnailUrl,
+        customThumbnailPath
+      );
+
+      setFormData(prev => ({
+        ...prev,
+        mediaGallery: updatedMediaGallery
+      }));
+
+      setShowThumbnailUploader(false);
+      setSelectedMediaIndex(null);
+    } catch (error) {
+      console.error('Error uploading thumbnail:', error);
+      alert(error.message || 'Failed to upload thumbnail');
+    } finally {
+      setThumbnailUploading(false);
+      setThumbnailProgress(0);
+    }
+  };
+
+  const handleCancelThumbnailUpload = () => {
+    setShowThumbnailUploader(false);
+    setSelectedMediaIndex(null);
+    setThumbnailProgress(0);
   };
 
   const handleSubmit = async (e) => {
@@ -218,11 +296,27 @@ export const PropertyFormPage = () => {
       const uploadedMediaGallery = await Promise.all(
         (formData.mediaGallery || []).map(async (item) => {
           if (item.isLocal && item.file) {
-            const mediaRef = ref(storage, `properties/media/${Date.now()}_${item.file.name}`);
+            const timestamp = Date.now();
+            const mediaRef = ref(storage, `properties/media/${timestamp}_${item.file.name}`);
             await uploadBytes(mediaRef, item.file);
             const url = await getDownloadURL(mediaRef);
-            const { file, ...rest } = item;
-            return { ...rest, url, isLocal: false };
+
+            let uploadedThumbnailUrl = item.thumbnailUrl;
+
+            if (item.type === 'video' && item.thumbnailUrl && item.thumbnailUrl.startsWith('blob:')) {
+              try {
+                const thumbnailBlob = await fetch(item.thumbnailUrl).then(r => r.blob());
+                const thumbnailRef = ref(storage, `properties/thumbnails/${timestamp}_${item.file.name}_thumb.jpg`);
+                await uploadBytes(thumbnailRef, thumbnailBlob);
+                uploadedThumbnailUrl = await getDownloadURL(thumbnailRef);
+              } catch (error) {
+                console.error('Failed to upload auto-generated thumbnail:', error);
+                uploadedThumbnailUrl = null;
+              }
+            }
+
+            const { file, isLocal, ...rest } = item;
+            return { ...rest, url, thumbnailUrl: uploadedThumbnailUrl, isLocal: false };
           }
           return item;
         })
@@ -689,57 +783,22 @@ export const PropertyFormPage = () => {
                 </div>
 
                 {formData.mediaGallery && formData.mediaGallery.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {formData.mediaGallery.map((item, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-video rounded-lg overflow-hidden border border-border">
-                          {item.type === 'image' ? (
-                            <img
-                              src={item.url}
-                              alt={item.caption || `Media ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <Video className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          {item.isPrimary && (
-                            <span className="bg-primary text-white text-xs px-2 py-1 rounded">
-                              {t('property.primary')}
-                            </span>
-                          )}
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => handleRemoveMedia(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        {!item.isPrimary && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 w-full"
-                            onClick={() => handleSetPrimaryMedia(index)}
-                          >
-                            {t('property.setPrimary')}
-                          </Button>
-                        )}
-                        {item.caption && (
-                          <p className="text-xs text-muted-foreground mt-1 truncate">
-                            {item.caption}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <MediaGallery
+                    media={formData.mediaGallery}
+                    onSetPrimary={(item) => {
+                      const index = formData.mediaGallery.findIndex(m => m.id === item.id);
+                      if (index !== -1) handleSetPrimaryMedia(index);
+                    }}
+                    onDelete={(item) => {
+                      const index = formData.mediaGallery.findIndex(m => m.id === item.id);
+                      if (index !== -1) handleRemoveMedia(index);
+                    }}
+                    onUploadThumbnail={(item) => {
+                      const index = formData.mediaGallery.findIndex(m => m.id === item.id);
+                      if (index !== -1) handleUploadThumbnail(index);
+                    }}
+                    canEdit={true}
+                  />
                 )}
               </div>
 
@@ -766,6 +825,15 @@ export const PropertyFormPage = () => {
             </form>
           </CardContent>
         </Card>
+
+        {showThumbnailUploader && (
+          <ThumbnailUploader
+            onUpload={handleThumbnailUpload}
+            onCancel={handleCancelThumbnailUpload}
+            uploading={thumbnailUploading}
+            progress={thumbnailProgress}
+          />
+        )}
       </div>
     </div>
   );
