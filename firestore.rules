@@ -100,6 +100,16 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
+    match /foreignServices/{languageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /saudiRegulations/{languageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
