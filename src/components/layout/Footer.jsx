@@ -29,6 +29,7 @@ export const Footer = () => {
     { label: t('footer.termsOfService'), path: '/terms-of-service' },
     { label: t('footer.intellectualProperty'), path: '/intellectual-property' },
     { label: t('footer.saudiRegulations'), path: '/saudi-regulations' },
+    { label: t('foreignServices.title'), path: '/foreign-services' },
     { label: t('footer.submitComplaint'), path: '/submit-complaint' },
   ];
 

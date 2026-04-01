@@ -50,6 +50,8 @@ import TermsOfServicePage from './pages/legal/TermsOfServicePage';
 import { IntellectualPropertyPage } from './pages/legal/IntellectualPropertyPage';
 import SaudiRegulationsPage from './pages/legal/SaudiRegulationsPage';
 import SaudiRegulationsAdminPage from './pages/admin/SaudiRegulationsAdminPage';
+import ForeignServicesPage from './pages/legal/ForeignServicesPage';
+import ForeignServicesAdminPage from './pages/admin/ForeignServicesAdminPage';
 import { SubmitComplaintPage } from './pages/complaints/SubmitComplaintPage';
 import { MyComplaintsPage } from './pages/complaints/MyComplaintsPage';
 import { ManageComplaintsPage } from './pages/management/ManageComplaintsPage';
@@ -85,6 +87,7 @@ function App() {
               <Route path="/terms-of-service" element={<TermsOfServicePage />} />
               <Route path="/intellectual-property" element={<IntellectualPropertyPage />} />
               <Route path="/saudi-regulations" element={<SaudiRegulationsPage />} />
+              <Route path="/foreign-services" element={<ForeignServicesPage />} />
               <Route path="/submit-complaint" element={<SubmitComplaintPage />} />
 
               <Route
@@ -466,6 +469,15 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
                     <SaudiRegulationsAdminPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/foreign-services"
+                element={
+                  <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+                    <ForeignServicesAdminPage />
                   </ProtectedRoute>
                 }
               />

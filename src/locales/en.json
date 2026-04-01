@@ -1861,5 +1861,37 @@
       "submitFailed": "Failed to submit complaint. Please try again.",
       "loadFailed": "Failed to load complaints. Please check your connection and try again."
     }
+  },
+  "foreignServices": {
+    "title": "Foreign Services",
+    "subtitle": "Comprehensive services for international investors and residents",
+    "editContent": "Edit Content",
+    "contactUs": "Contact Us",
+    "contactUsDescription": "For more information or inquiries about these services, please contact us:",
+    "loading": "Loading...",
+    "errorLoading": "Error loading content",
+    "section1": "Premium Residency Services",
+    "section2": "Legal & Compliance Services",
+    "section3": "Specialized Real Estate Concierge",
+    "section4": "Post-Purchase & Relocation Services",
+    "adminTitle": "Manage Foreign Services Content",
+    "adminDescription": "Edit and manage the foreign services page content in both languages",
+    "language": "Language",
+    "english": "English",
+    "arabic": "Arabic",
+    "pageTitle": "Page Title",
+    "pageSubtitle": "Page Subtitle",
+    "sectionTitle": "Section Title",
+    "sectionContent": "Section Content",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "publishContent": "Publish Content",
+    "publishing": "Publishing...",
+    "saveSuccess": "Content saved successfully",
+    "saveFailed": "Failed to save content",
+    "publishSuccess": "Content published successfully",
+    "publishFailed": "Failed to publish content",
+    "lastUpdated": "Last Updated",
+    "updatedBy": "Updated By"
   }
 }

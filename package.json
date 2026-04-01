@@ -21,6 +21,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@react-three/drei": "^9.105.0",
     "@react-three/fiber": "^8.16.8",
+    "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@vitejs/plugin-react": "^5.1.0",
     "autoprefixer": "^10.4.21",
