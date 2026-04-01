@@ -6,7 +6,7 @@ import logo from '../../assets/logo1.png';
 
 export const Footer = () => {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const isRTL = i18n.language === 'ar';
 
   const quickLinks = [
@@ -14,7 +14,7 @@ export const Footer = () => {
     { label: t('footer.publicDirectory'), path: '/public/directory' },
   ];
 
-  if (user) {
+  if (currentUser) {
     quickLinks.push(
       { label: t('dashboard.dashboard'), path: '/dashboard' },
       { label: t('property.properties'), path: '/properties' },
