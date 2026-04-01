@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Loader as Loader2, CreditCard as Edit, Mail } from 'lucide-react';
-import { MainLayout } from '../../components/layout/MainLayout';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ContactRequestModal } from '../../components/property/ContactRequestModal';
@@ -46,31 +45,27 @@ export default function ForeignServicesPage() {
 
   if (loading) {
     return (
-      <MainLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
-      </MainLayout>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
     );
   }
 
   if (error || !content) {
     return (
-      <MainLayout>
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <Card className="p-8 text-center">
-            <p className="text-red-600">{t('foreignServices.errorLoading')}</p>
-            <Button onClick={fetchContent} className="mt-4">
-              {t('common.retry')}
-            </Button>
-          </Card>
-        </div>
-      </MainLayout>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <Card className="p-8 text-center">
+          <p className="text-red-600">{t('foreignServices.errorLoading')}</p>
+          <Button onClick={fetchContent} className="mt-4">
+            {t('common.retry')}
+          </Button>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
+    <>
       <div className="max-w-5xl mx-auto px-4 py-12">
         <div className="mb-8 flex justify-between items-start">
           <div>
@@ -179,6 +174,6 @@ export default function ForeignServicesPage() {
         property={{ id: null, name: 'Foreign Services Inquiry' }}
         unit={null}
       />
-    </MainLayout>
+    </>
   );
 }
