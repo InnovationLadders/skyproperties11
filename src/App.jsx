@@ -51,6 +51,7 @@ import { IntellectualPropertyPage } from './pages/legal/IntellectualPropertyPage
 import SaudiRegulationsPage from './pages/legal/SaudiRegulationsPage';
 import SaudiRegulationsAdminPage from './pages/admin/SaudiRegulationsAdminPage';
 import ForeignServicesPage from './pages/legal/ForeignServicesPage';
+import WhyInvestPage from './pages/legal/WhyInvestPage';
 import ForeignServicesAdminPage from './pages/admin/ForeignServicesAdminPage';
 import { SubmitComplaintPage } from './pages/complaints/SubmitComplaintPage';
 import { MyComplaintsPage } from './pages/complaints/MyComplaintsPage';
@@ -88,6 +89,7 @@ function App() {
               <Route path="/intellectual-property" element={<IntellectualPropertyPage />} />
               <Route path="/saudi-regulations" element={<SaudiRegulationsPage />} />
               <Route path="/foreign-services" element={<ForeignServicesPage />} />
+              <Route path="/why-invest-in-saudi" element={<WhyInvestPage />} />
               <Route path="/submit-complaint" element={<SubmitComplaintPage />} />
 
               <Route

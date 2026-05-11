@@ -1862,6 +1862,53 @@
       "loadFailed": "Failed to load complaints. Please check your connection and try again."
     }
   },
+  "whyInvest": {
+    "title": "Why Invest in Saudi Arabia?",
+    "subtitle": "Luxury Property Investment Opportunities in Jeddah",
+    "preparedFor": "Prepared for High-Net-Worth Investors",
+    "presentedBy": "Presented by Sky Property",
+    "executiveSummaryTitle": "Executive Summary",
+    "executiveSummaryText": "Jeddah is rapidly emerging as one of the Middle East's most attractive luxury real estate markets. Positioned on the Red Sea coast and empowered by Saudi Arabia's Vision 2030 transformation strategy, the city is experiencing unprecedented growth in tourism, infrastructure, international investment, and premium lifestyle developments. For High-Net-Worth Individuals (HNWIs), Jeddah offers a rare combination of lifestyle prestige, capital appreciation potential, strategic geographic positioning, and expanding global visibility.",
+    "executiveSummaryText2": "Sky Property specializes in marketing and managing premium residential and investment-grade luxury properties in Jeddah. Through curated access to waterfront villas, high-end apartments, branded residences, and exclusive developments, the platform connects investors with carefully selected opportunities tailored for long-term value creation.",
+    "whyJeddahTitle": "Why Invest in Jeddah?",
+    "whyJeddahItems": [
+      "Strategic gateway to Makkah and the Red Sea.",
+      "Rapid urban transformation under Saudi Vision 2030.",
+      "Strong government support for foreign investment.",
+      "Growing tourism and hospitality ecosystem.",
+      "Limited supply of premium waterfront assets.",
+      "Increasing demand for luxury residences and serviced apartments.",
+      "World-class infrastructure including airports, ports, and mega projects."
+    ],
+    "image1Caption": "Three famous tower buildings at the seafront of Jeddah",
+    "luxuryMarketTitle": "Luxury Market Dynamics",
+    "luxuryMarketText": "Jeddah's luxury property market is evolving from a traditionally local market into an internationally recognized investment destination. Premium developments along the Corniche, North Jeddah, Al Shati, Obhur, and waterfront districts are attracting investors seeking exclusive lifestyle assets with strong appreciation potential.",
+    "luxuryMarketText2": "The increasing arrival of international brands, luxury hospitality operators, and high-profile developments is reinforcing investor confidence. Demand is particularly strong for branded residences, managed apartments, and waterfront villas with modern amenities.",
+    "image2Caption": "The luxury Park Hayat Hotel with Jeddah Fountain at the background, the tallest fountain in the world.",
+    "activitiesTitle": "Jeddah's Activities Never Stop Year-Around",
+    "activitiesCaption": "Jeddah's activities never stop year-around",
+    "hnwiTitle": "Advantages for HNWI Investors",
+    "hnwiItems": [
+      { "title": "Capital Appreciation", "text": "Premium real estate values in strategic districts continue to rise as infrastructure and tourism expand." },
+      { "title": "Premium Residency", "text": "Investors can now enjoy the full advantage of Saudi Premium Residency when buying properties more than 4 Million Saudi Riyals." },
+      { "title": "Lifestyle & Prestige", "text": "Jeddah combines luxury coastal living with international business accessibility." },
+      { "title": "Portfolio Diversification", "text": "Saudi Arabia offers exposure to one of the fastest-transforming economies in the world." },
+      { "title": "Generational Wealth", "text": "Luxury real estate in prime districts represents a long-term wealth preservation asset." },
+      { "title": "Growing Rental Demand", "text": "Executive tenants, expatriates, tourists, and business travelers support premium rental demand." }
+    ],
+    "image3Caption": "Jeddah residents enjoy high quality of indoor and outdoor activities",
+    "aboutTitle": "About Sky Property KSA",
+    "aboutText": "Sky Property KSA is a specialized luxury real estate platform focused on the marketing, management, and presentation of high-end properties in Jeddah and across Saudi Arabia. The platform delivers a personalized investment experience tailored for sophisticated buyers and institutional-level investors.",
+    "aboutText2": "Services include luxury property sourcing, portfolio advisory, premium marketing, property management coordination, and investor support for local and international clients.",
+    "image4Caption": "World's tallest tower is being erected in Jeddah",
+    "outlookTitle": "Investment Outlook",
+    "outlookText": "Jeddah is entering a defining decade of transformation. Investors who secure premium assets early are positioned to benefit from rising international exposure, expanding tourism, and increasing demand for world-class residential experiences.",
+    "outlookText2": "For discerning investors seeking a combination of prestige, growth potential, and long-term strategic value, Jeddah's luxury real estate market presents a compelling opportunity.",
+    "website": "Website",
+    "location": "Location",
+    "locationValue": "Jeddah, Saudi Arabia",
+    "navLink": "Why Invest?"
+  },
   "foreignServices": {
     "title": "Foreign Services",
     "subtitle": "Comprehensive services for international investors and residents",

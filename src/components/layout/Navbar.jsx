@@ -82,6 +82,9 @@ export const Navbar = () => {
             <Link to="/foreign-services" className="text-gray-700 hover:text-primary">
               {t('foreignServices.title')}
             </Link>
+            <Link to="/why-invest-in-saudi" className="text-gray-700 hover:text-primary">
+              {t('whyInvest.navLink')}
+            </Link>
 
             {currentUser ? (
               <>
@@ -251,6 +254,13 @@ export const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('foreignServices.title')}
+            </Link>
+            <Link
+              to="/why-invest-in-saudi"
+              className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('whyInvest.navLink')}
             </Link>
 
             {currentUser ? (
